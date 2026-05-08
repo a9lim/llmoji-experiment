@@ -124,8 +124,25 @@ MODAL_AGREE_MIN = 0.95      # fraction of faces (n≥3) whose modal didn't chang
 # Q had data.
 PER_Q_NEW_FACE_MAX = 1      # ≤ 1 face appearing in Q in newest but not
                             # in Q in any prior run
-PER_Q_JS_MAX = 0.05         # JS-divergence (nats) on Q's face distribution
-                            # between newest and prior pool
+PER_Q_JS_MAX = 0.10         # JS-divergence (nats) on Q's face distribution
+                            # between newest and prior pool. Bumped from
+                            # 0.05 (2026-05-08) — calibration against the
+                            # closed v3 corpus showed HN-D saturated at
+                            # JS 0.025–0.045 and LN's converged round
+                            # (r5→r6, new=0) at 0.068, both cleanly under
+                            # 0.10; still-evolving cells (HP-S/LP/NB/HN-S)
+                            # sat at 0.14+ throughout. Bimodal gap between
+                            # post-convergence residual jitter and
+                            # actively-surfacing modes lands ~0.10. Well
+                            # below the same-distribution intra-pilot
+                            # noise floor (~0.16 from --calibrate). NOTE:
+                            # the historical r0..r7 corpus was generated
+                            # under PER_Q_JS_MAX=0.05 + judgment calls
+                            # (LN dropped after r6 at JS=0.068, ad hoc
+                            # since strict gate hadn't fired). Don't
+                            # replay --compare against it as a protocol
+                            # audit — only as a backtest. See
+                            # docs/2026-05-08-saturation-threshold-recal.md.
 
 # Hard-fail: any one triggers ABORT.
 FRAME_BREAK_MAX = 0.02      # ≤ 2% rows with refusal-coded language

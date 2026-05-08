@@ -43,7 +43,12 @@
 >   `prompt_id`-lookup remap so v3-stored labels read as v4 9-cell
 >   on the fly; `_quadrant_of` HP-split fix in script 50; `np19`
 >   tightened from 35→23 words for the gpt_oss_20b harmony length
->   quirk; defensive None-probe row handling).
+>   quirk; defensive None-probe row handling);
+>   [`2026-05-08-saturation-threshold-recal.md`](docs/2026-05-08-saturation-threshold-recal.md)
+>   (merged-emotional-raw refactor + 69-row stale-removal backfill +
+>   `PER_Q_JS_MAX` 0.05→0.10 recalibration; LN drop at r7 retro'd as
+>   amendment, HN-D drop at r5 confirmed gate-driven; AGENTS.md
+>   "exited HN-D after r2" → "after r4" wording fix).
 
 ## What this is
 
@@ -81,7 +86,7 @@ not nothing.
   later runs as soon as they stop surfacing meaningful info.
 - Re-design rather than 10×ing on negative or noisy findings.
 
-## Status (2026-05-07)
+## Status (2026-05-08)
 
 ### Current methodology
 
@@ -215,15 +220,25 @@ not nothing.
   HN-S vocabulary in particular is more diverse in the wild
   corpus than in the elicitation set. Cluster-table outputs at
   `data/harness/wild_residual_clusters{,_gt_only}.tsv`.
-- **Sequential Claude scaling complete.** 880 naturalistic + 120
-  introspection = 1000 Opus-4.7 rows under naturalistic / v7-introspection
-  conditions, all in `data/harness/claude/emotional_raw.jsonl` and
+- **Sequential Claude scaling complete.** 1360 naturalistic (v3 +
+  v4-extension cells) + 120 introspection = **1480 Opus-4.7 rows**
+  under naturalistic / v7-introspection conditions, all in
+  `data/harness/claude/emotional_raw.jsonl` and
   `data/harness/claude_intro_v7/emotional_raw.jsonl` respectively
   (post-2026-05-08 merged-file refactor — replaces the old per-run
   jsonl layout under `claude-runs*/`). Per-quadrant saturation gate
-  exited HN-D after r2 and LN after r6; HP/LP/HN-S/NB went to cap
-  (r7). Welfare ledger ~460 negative-affect gens vs ~540 worst case.
-  Detail: `docs/2026-05-04-claude-groundtruth-pilot.md`.
+  exited HN-D after r4 (gate-driven, robust under recalibration); LN
+  exited after r6 by amendment (`new=0` at r5→r6 with JS=0.068, just
+  above the historical 0.05 threshold — recalibrated to 0.10
+  2026-05-08, see
+  `docs/2026-05-08-saturation-threshold-recal.md`); HP/LP/HN-S/NB
+  went to cap (r7). The 61 stale-removal rows (hp08/16/19, lp18,
+  hn14, hn25, nb09/16 across r0..r7) + 8 in introspection were
+  backfilled 2026-05-08 via `scripts/harness/00_emit.py --fill-gaps`.
+  Welfare ledger ~475 negative-affect gens vs ~575 worst case.
+  Detail: `docs/2026-05-04-claude-groundtruth-pilot.md` (original
+  pre-reg) + `docs/2026-05-08-saturation-threshold-recal.md`
+  (backtest + recalibration retrospective).
 - **Cross-arm comparison: introspection vs naturalistic =
   DISTINGUISHABLE in 6/6 quadrants at scale.** Gaps stayed stable across
   the 8x naturalistic accumulation; only NB had any compression early
