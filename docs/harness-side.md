@@ -92,7 +92,8 @@ to cap. HP-D/NP/HB v4-extension cells also ran to cap.
 
 The Anthropic judge shows each canonical face out of context and asks
 for likelihoods over the current 9-cell taxonomy. It emits likelihoods
-only: no `top_pick`, no `reason`, no explicit `temperature=0`.
+only: no `top_pick`, no `reason`. The script requests `temperature=0`
+when the target model still accepts that parameter.
 
 ```bash
 ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/50_face_likelihood.py

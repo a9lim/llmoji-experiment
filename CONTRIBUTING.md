@@ -38,9 +38,10 @@ for the contributor-side privacy model.
 ## Add A Local Model
 
 The current local lineup is `gemma`, `qwen`, `ministral`,
-`gpt_oss_20b`, and `granite`, plus `gemma_intro_v7_primed` as a
-condition. New models should follow the current layer-stack pipeline,
-not the old single-layer `preferred_layer` workflow.
+`gpt_oss_20b`, and `granite`. `gemma_intro_v7_primed` is a historical
+priming condition, not a current face-likelihood encoder unless its
+summary is regenerated. New models should follow the current layer-stack
+pipeline, not the old single-layer `preferred_layer` workflow.
 
 1. Register the model in `llmoji_study/config.py`.
 2. Run the hidden-state smoke test:

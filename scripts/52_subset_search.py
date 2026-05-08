@@ -120,7 +120,7 @@ def _gt_distribution_claude(faces: list[str],
 
 
 def _encoder_dist(s: pd.DataFrame, face: str) -> list[float]:
-    """Pull the 6-element softmax distribution for `face` from encoder
+    """Pull the quadrant softmax distribution for `face` from encoder
     summary `s`. Falls back to uniform if any softmax_<q> is missing."""
     raw = {q: float(s.loc[face, f"softmax_{q}"] or 0.0) for q in QUADRANTS}
     return normalize(raw, QUADRANTS)
@@ -214,7 +214,7 @@ def main() -> None:
         for f in gt_faces:
             d = _encoder_dist(s, f)
             enc_dist[e][f] = d
-            enc_pred[e][f] = QUADRANTS[max(range(6), key=lambda i: d[i])]
+            enc_pred[e][f] = QUADRANTS[max(range(len(QUADRANTS)), key=lambda i: d[i])]
 
     # Per-encoder solo metrics: mean JSD vs GT (face-uniform AND emit-
     # weighted), accuracy, κ.
@@ -242,14 +242,16 @@ def main() -> None:
             preds: list[str] = []
             for f in gt_faces:
                 # Ensemble distribution = mean of subset's softmax distributions.
-                edist = [0.0] * 6
+                edist = [0.0] * len(QUADRANTS)
                 for e in combo:
                     d = enc_dist[e][f]
-                    for i in range(6):
+                    for i in range(len(QUADRANTS)):
                         edist[i] += d[i]
                 edist = [x / len(combo) for x in edist]
                 jsds.append(js(edist, gt_dists[f]))
-                preds.append(QUADRANTS[max(range(6), key=lambda i: edist[i])])
+                preds.append(
+                    QUADRANTS[max(range(len(QUADRANTS)), key=lambda i: edist[i])]
+                )
             mean_jsd = sum(jsds) / n_gt  # face-uniform mean
             mean_jsd_weighted = sum(
                 j * gt_weights[f] for j, f in zip(jsds, gt_faces)

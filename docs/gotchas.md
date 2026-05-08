@@ -82,6 +82,12 @@ Compare distributions with JSD similarity. Argmax accuracy, top-pick
 agreement, and majority vote are historical unless a question explicitly
 asks for modal labels.
 
+### Do Not Hard-Code Six Cells
+
+The live registry is 9 cells. Any ensemble, JSD, or softmax loop should
+iterate `QUADRANT_ORDER_SPLIT` or `len(QUADRANTS)`, not `range(6)`.
+Hard-coded six-cell loops silently drop `LN`, `NB`, and `HB`.
+
 ### Top-k Pooling Is Contextual
 
 Top-k pooling can help when per-prompt likelihood signal is uneven, but

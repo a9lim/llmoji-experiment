@@ -1,9 +1,9 @@
 # Ensemble per-face distributions
 
-**Encoders:** gemma, ministral, opus  (sources: {'gemma': 'full', 'ministral': 'full', 'opus': 'full'})
+**Encoders:** gemma, opus  (sources: {'gemma': 'full', 'opus': 'full'})
 **Faces predicted:** 770
-**Faces with GT (for evaluation):** 243
-**GT mode:** pooled v3+Claude+wild (total ≥ 3)
+**Faces with GT (for evaluation):** 70
+**GT mode:** Claude empirical (total ≥ 3)
 
 ## Methodology
 
@@ -11,24 +11,24 @@ For each face the ensemble emits a per-quadrant probability distribution (mean o
 
 ## Headline
 
-- **Face-uniform mean similarity:** 0.669  (each face counts equally; characterizes Claude's *vocabulary*)
-- **Emit-weighted mean similarity:** 0.847  (faces weighted by how often Claude emits them; characterizes Claude's *emission distribution* — closer to deployment-relevance)
-  - n_faces evaluated: 243
-  - mean JSD: 0.2297 (face-uniform), 0.1061 (emit-weighted) nats
+- **Face-uniform mean similarity:** 0.717  (each face counts equally; characterizes Claude's *vocabulary*)
+- **Emit-weighted mean similarity:** 0.786  (faces weighted by how often Claude emits them; characterizes Claude's *emission distribution* — closer to deployment-relevance)
+  - n_faces evaluated: 70
+  - mean JSD: 0.1958 (face-uniform), 0.1481 (emit-weighted) nats
 
 ## Per-GT-modal-quadrant breakdown
 
 | GT modal | n | similarity (face-uniform) | similarity (emit-weighted) |
 |---|---:|---:|---:|
-| HP-D | 23 | 0.633 | 0.794 |
-| HP-S | 32 | 0.629 | 0.883 |
-| LP | 42 | 0.693 | 0.836 |
-| NP | 28 | 0.662 | 0.834 |
-| HN-D | 17 | 0.647 | 0.869 |
-| HN-S | 33 | 0.608 | 0.713 |
-| LN | 30 | 0.672 | 0.837 |
-| NB | 23 | 0.789 | 0.868 |
-| HB | 15 | 0.719 | 0.872 |
+| HP-D | 5 | 0.669 | 0.862 |
+| HP-S | 11 | 0.705 | 0.730 |
+| LP | 16 | 0.709 | 0.753 |
+| NP | 7 | 0.644 | 0.789 |
+| HN-D | 4 | 0.863 | 0.893 |
+| HN-S | 8 | 0.617 | 0.601 |
+| LN | 6 | 0.793 | 0.787 |
+| NB | 7 | 0.764 | 0.765 |
+| HB | 6 | 0.796 | 0.817 |
 
 ## Output schema (per-face TSV)
 
@@ -42,8 +42,8 @@ Each row carries:
 
 ## Supplementary metrics (argmax-shaped reading)
 
-- Hard accuracy (argmax matches GT modal): 43.6% (106/243)
-- Cohen's κ on argmax: 0.363
+- Hard accuracy (argmax matches GT modal): 55.7% (39/70)
+- Cohen's κ on argmax: 0.497
 
 These characterize a *deployed plugin that emits a single quadrant call*. They lose information at GT-tie boundaries and aren't the headline.
 

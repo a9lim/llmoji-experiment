@@ -82,6 +82,14 @@ Early face_likelihood results used argmax accuracy, majority votes, and
 top-k variants. The soft-everywhere JSD pivot replaced those numbers.
 Old ensemble rankings should not be cited.
 
+## Early 9-Cell Subset Search Bug
+
+One 2026-05-08 subset-search pass claimed to use the v4 9-cell registry
+but still averaged only the first six softmax cells internally. That
+truncated `LN`, `NB`, and `HB` during ensemble scoring. The active
+summary artifacts were regenerated after replacing the hard-coded
+`range(6)` loops with `len(QUADRANT_ORDER_SPLIT)`.
+
 ## Eriskii-Parity Harness Pipeline
 
 The harness side used to embed Haiku prose descriptions with MiniLM and

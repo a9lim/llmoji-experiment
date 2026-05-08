@@ -31,12 +31,12 @@ Per-face deliverable is always the full distribution over the current
 
 | subset | best ensemble | face-uniform | emit-weighted |
 |---|---|---:|---:|
-| pooled-GT floor 3 (`n=54`) | `{gemma, gemma_v7primed, ministral, opus}` | 0.832 | 0.904 |
-| strict Claude-GT (`n=40`) | `{gemma_v7primed, opus}` | 0.792 | 0.820 |
+| pooled-GT overlap floor 3 (`n=102`) | `{gemma, ministral, opus}` | 0.733 | 0.881 |
+| strict Claude-GT overlap (`n=50`) | `{gemma, opus}` | 0.708 | 0.781 |
 
-This is why primed gemma came back into the headline. Hard argmax made
-it look worse on diffuse faces; JSD shows it matches Claude's actual
-emission distribution better on high-volume faces.
+These are the corrected 9-cell overlap-search numbers from the current
+full summary artifacts. Older notes that cite `gemma_v7primed` are
+historical unless a fresh primed face-likelihood summary is regenerated.
 
 ## Code Surface
 

@@ -337,7 +337,8 @@ def main() -> None:
     lines.append("")
     lines.append("Each row carries:")
     lines.append("")
-    lines.append("- `ensemble_p_<q>` for q in {HP, LP, HN-D, HN-S, LN, NB} — "
+    q_list = ", ".join(QUADRANTS)
+    lines.append(f"- `ensemble_p_<q>` for q in {{{q_list}}} — "
                  "**the headline output**, the full ensemble distribution.")
     lines.append("- `gt_p_<q>` (when GT exists) — Claude's empirical "
                  "distribution for the same face.")

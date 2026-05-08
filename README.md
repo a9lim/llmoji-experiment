@@ -17,9 +17,10 @@ Public writeup:
 ## Current Shape
 
 - **Local hidden-state work**: five open-weight models (`gemma`, `qwen`,
-  `ministral`, `gpt_oss_20b`, `granite`) plus a `gemma` v7-primed
-  condition. Active representation is the layer-stack concat of every
-  probe layer's `h_first`, not the old single `preferred_layer` read.
+  `ministral`, `gpt_oss_20b`, `granite`) plus a historical `gemma`
+  v7-primed condition. Active representation is the layer-stack concat
+  of every probe layer's `h_first`, not the old single
+  `preferred_layer` read.
 - **Face likelihood**: local LM-head encoders and Anthropic
   introspection encoders all emit per-face quadrant distributions.
   Evaluation is soft-everywhere: Jensen-Shannon similarity to Claude-GT,
@@ -39,16 +40,18 @@ Public writeup:
 
 ## Headline Findings
 
-- Best deployment ensemble as of 2026-05-08:
-  `{gemma, gemma_v7primed, ministral, opus}` at **0.904 emit-weighted**
-  and **0.832 face-uniform** similarity on the pooled-GT floor-3 subset
-  (`n=54` faces).
-- On the stricter Claude-only GT subset (`n=40`), the best compact pair
-  is `{gemma_v7primed, opus}` at **0.820 emit-weighted** and **0.792
-  face-uniform**.
-- Opus introspection is the top solo encoder on the broader pooled-GT
-  subset. The gain over Haiku is concentrated in low-arousal and neutral
-  cells, especially `NB` and `LN`.
+- Current all-encoder-overlap search: `{gemma, ministral, opus}` is best
+  on pooled-GT floor-3 (`n=102`) at **0.881 emit-weighted** and **0.733
+  face-uniform** similarity.
+- On strict Claude-GT overlap (`n=50`), `{gemma, opus}` is best at
+  **0.781 emit-weighted** and **0.708 face-uniform**.
+- Emitted lookup tables cover the broader 770-face union. The current
+  pooled table (`{gemma, ministral, opus}`) scores **0.847
+  emit-weighted** and **0.669 face-uniform** over 243 GT-scored faces;
+  the strict Claude table (`{gemma, opus}`) scores **0.786
+  emit-weighted** and **0.717 face-uniform** over 70 GT-scored faces.
+- Opus introspection is the top solo encoder in both current searches.
+  The gain over Haiku is largest on low-arousal and neutral cells.
 - Local hidden states recover a shared affect geometry across model
   families. The exact PCA axes differ, but quadrant centroids preserve
   the same Russell/PAD structure.

@@ -20,50 +20,63 @@ summarized in [`previous-experiments.md`](previous-experiments.md).
 
 ## Best Face-Likelihood Ensembles
 
-Pooled-GT is the deployment-shaped denominator: v3 local emits,
-Claude-GT, introspection, and wild contributor faces, with floor 3
-emits anywhere.
+The exhaustive subset search is run on the all-encoder overlap, so every
+candidate ensemble is scored on the same faces. The emitted lookup-table
+reports then score the winning subset over the broader 770-face union.
 
 | subset | best ensemble | face-uniform | emit-weighted |
 |---|---|---:|---:|
-| pooled-GT, floor 3 (`n=54`) | `{gemma, gemma_v7primed, ministral, opus}` | 0.832 | 0.904 |
-| strict Claude-GT (`n=40`) | `{gemma_v7primed, opus}` | 0.792 | 0.820 |
+| pooled-GT overlap, floor 3 (`n=102`) | `{gemma, ministral, opus}` | 0.733 | 0.881 |
+| strict Claude-GT overlap (`n=50`) | `{gemma, opus}` | 0.708 | 0.781 |
 
-The old `{gemma_v7primed, haiku}` and early `{gemma_v7primed, opus}`
-headlines are superseded on the broader deployment view. The strict
-pair survives as the cheaper drop-in when the caller only cares about
-faces Claude itself emitted at least 3 times.
+The old `{gemma_v7primed, haiku}` and `{gemma_v7primed, opus}`
+headlines are superseded by the current artifact set: no current
+face-likelihood summary exists for `gemma_v7primed`, and the active
+9-cell subset search uses the discovered full summaries on disk.
+
+Broader emitted lookup tables:
+
+| table | ensemble | evaluated faces | face-uniform | emit-weighted |
+|---|---|---:|---:|---:|
+| pooled union | `{gemma, ministral, opus}` | 243 | 0.669 | 0.847 |
+| strict Claude-GT union | `{gemma, opus}` | 70 | 0.717 | 0.786 |
 
 ### Solo Encoders
 
-Strict Claude-GT (`n=40`, 9 encoders, no JP rinna variants):
+Strict Claude-GT overlap (`n=50`, 10 encoders):
 
 | encoder | face-uniform | emit-weighted |
 |---|---:|---:|
-| gemma_v7primed | 0.790 | 0.798 |
-| gemma | 0.754 | 0.742 |
-| opus | 0.736 | 0.781 |
-| haiku | 0.675 | 0.702 |
-| gpt_oss_20b | 0.588 | 0.643 |
-| bol | 0.549 | 0.455 |
-| ministral | 0.537 | 0.623 |
-| granite | 0.520 | 0.575 |
-| qwen | 0.494 | 0.546 |
+| opus | 0.684 | 0.761 |
+| gemma | 0.639 | 0.687 |
+| gpt_oss_20b | 0.550 | 0.609 |
+| haiku | 0.525 | 0.585 |
+| granite | 0.500 | 0.553 |
+| ministral | 0.494 | 0.581 |
+| bol | 0.464 | 0.454 |
+| rinna_bilingual_4b_jpfull | 0.461 | 0.512 |
+| qwen | 0.457 | 0.534 |
+| rinna_jp_3_6b_jpfull | 0.452 | 0.533 |
 
-Pooled-GT (`n=54`) flips the top solo encoder to Opus:
+Pooled-GT overlap (`n=102`) also puts Opus first:
 
 | encoder | face-uniform | emit-weighted |
 |---|---:|---:|
-| opus | 0.784 | 0.859 |
-| gemma_v7primed | 0.769 | 0.792 |
-| gemma | 0.763 | 0.787 |
-| haiku | 0.715 | 0.815 |
-| gpt_oss_20b | 0.700 | 0.800 |
-| ministral | 0.669 | 0.780 |
+| opus | 0.699 | 0.845 |
+| gpt_oss_20b | 0.659 | 0.796 |
+| ministral | 0.637 | 0.769 |
+| gemma | 0.623 | 0.712 |
+| qwen | 0.597 | 0.727 |
+| haiku | 0.563 | 0.718 |
+| rinna_bilingual_4b_jpfull | 0.553 | 0.687 |
+| rinna_jp_3_6b_jpfull | 0.548 | 0.685 |
+| granite | 0.528 | 0.645 |
+| bol | 0.407 | 0.419 |
 
 Interpretation: pure Opus introspection scales better than expected,
-especially on broader wild-face vocabulary. Gemma v7 priming remains
-the strongest LM-head encoder on the strict subset.
+especially on broader wild-face vocabulary. Gemma remains the best
+local LM-head encoder on the strict overlap subset by face-uniform
+similarity.
 
 ## Claude-GT Collection
 
@@ -131,9 +144,9 @@ Use v7 with gemma only unless a new pilot says otherwise. It degrades
 qwen badly: lower emit rate, vocabulary collapse, and opposite-valence
 collisions.
 
-Under soft-everywhere evaluation, v7 priming helps. The old hard-argmax
-read made primed gemma look worse because it punished diffuse
-distributional matches.
+In the local priming pilot, v7 improved gemma face-state coupling. It
+is not part of the current face-likelihood ensemble artifacts unless a
+fresh `gemma_v7primed` summary is regenerated.
 
 ## Harness BoL And Use/Read/Act
 
@@ -149,12 +162,13 @@ Three channels:
 
 Structural findings:
 
-- Opus and Haiku read each other closely (`0.906` cross-similarity on
-  the shared subset).
+- Opus and Haiku read each other closely, but less tightly after the
+  v4 9-cell expansion: `0.797` face-uniform and `0.774` emit-weighted
+  cross-similarity on the shared 50-face subset.
 - GT vs introspection improves under emit-weighting, while GT vs BoL
   worsens under emit-weighting.
 - The `110` agreement pattern (Opus and Haiku read GT, BoL differs)
-  covers 27.4% of emit volume on the shared `n=40` subset.
+  covers 28.8% of emit volume on the shared `n=50` subset.
 - BoL appears positivity-biased on negative-affect contexts. Treat it as
   diagnostic, not as direct deployment-state ground truth.
 

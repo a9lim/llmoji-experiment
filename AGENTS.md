@@ -47,11 +47,13 @@ Still-current dated docs:
 - **Evaluation**: soft-everywhere JSD similarity to Claude-GT. Report
   both face-uniform and emit-weighted similarity. Avoid argmax accuracy
   unless the question explicitly asks for a modal label.
-- **Best deployment ensemble**: `{gemma, gemma_v7primed, ministral,
-  opus}` at 0.904 emit-weighted / 0.832 face-uniform on pooled-GT
-  floor-3 (`n=54`).
-- **Strict Claude-only pair**: `{gemma_v7primed, opus}` at 0.820
-  emit-weighted / 0.792 face-uniform on `n=40`.
+- **Best current overlap ensemble**: `{gemma, ministral, opus}` at
+  0.881 emit-weighted / 0.733 face-uniform on pooled-GT floor-3
+  (`n=102` all-encoder overlap).
+- **Strict Claude-only pair**: `{gemma, opus}` at 0.781 emit-weighted /
+  0.708 face-uniform on `n=50` all-encoder overlap. The emitted
+  770-face lookup table scores 0.786 emit-weighted / 0.717 face-uniform
+  over 70 strict Claude-GT faces.
 - **Claude-GT layout**: naturalistic rows are merged in
   `data/harness/claude/emotional_raw.jsonl`; introspection rows in
   `data/harness/claude_intro_v7/emotional_raw.jsonl`. Each row has
@@ -144,8 +146,10 @@ LLMOJI_MODEL=gemma .venv/bin/python scripts/local/00_emit.py
 .venv/bin/python scripts/40_face_union.py
 .venv/bin/python scripts/local/50_face_likelihood.py --model gemma
 .venv/bin/python scripts/52_subset_search.py --prefer-full --top-k 25
+.venv/bin/python scripts/52_subset_search.py --prefer-full --top-k 25 --claude-gt --claude-gt-floor 3
 .venv/bin/python scripts/53_topk_pooling.py --prefer-full
-.venv/bin/python scripts/54_ensemble_predict.py --models gemma,ministral,qwen
+.venv/bin/python scripts/54_ensemble_predict.py --models gemma,ministral,opus
+.venv/bin/python scripts/54_ensemble_predict.py --models gemma,opus --claude-gt --claude-gt-floor 3
 ```
 
 Core harness chain:

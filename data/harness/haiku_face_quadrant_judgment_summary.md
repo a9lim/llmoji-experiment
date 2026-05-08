@@ -37,7 +37,7 @@
 
 ## Soft-everywhere similarity vs Claude-GT distribution
 
-Per-face score: ``similarity = 1 - JSD(pred, gt) / ln 2`` ∈ [0, 1]. Pred dist = judge's 6-quadrant softmax (from JSONL); GT dist = normalized per-face quadrant emit counts from ``load_claude_gt_distribution(floor=3)``. Faces evaluated: **70** (judged ∩ GT-with-≥3-emits).
+Per-face score: ``similarity = 1 - JSD(pred, gt) / ln 2`` ∈ [0, 1]. Pred dist = judge's 9-cell softmax (from JSONL); GT dist = normalized per-face quadrant emit counts from ``load_claude_gt_distribution(floor=3)``. Faces evaluated: **70** (judged ∩ GT-with-≥3-emits).
 
 - **Face-uniform** mean similarity (vocabulary view): **0.536**
 - **Emit-weighted** mean similarity (deployment view, weight = GT emit count): **0.598**  (total emit weight: 1343)
@@ -59,20 +59,21 @@ Per-face score: ``similarity = 1 - JSD(pred, gt) / ln 2`` ∈ [0, 1]. Pred dist 
 
 ## Head-to-head: Haiku vs Opus
 
-On the 124 face(s) both models rated:
+On the 156 face(s) both models rated:
 
-- **Hard agreement (argmax-vs-argmax)**: haiku ↔ opus = **69/124 (55.6%)**
-- **Soft agreement (distributional similarity, face-uniform)**: mean similarity(haiku, opus) = **0.768**
-- **Hard accuracy vs Claude-pilot modal** (n=114): haiku **50/114 (43.9%)**, opus **63/114 (55.3%)**
-- **Soft accuracy vs Claude-GT distribution** (n=63 faces with ≥3 GT emits, total weight 1286):
-  - haiku: face-uniform **0.574**, emit-weighted **0.618**
-  - opus: face-uniform **0.712**, emit-weighted **0.782**
+- **Hard agreement (argmax-vs-argmax)**: haiku ↔ opus = **84/156 (53.8%)**
+- **Soft agreement (distributional similarity, face-uniform)**: mean similarity(haiku, opus) = **0.759**
+- **Hard accuracy vs Claude-pilot modal** (n=146): haiku **54/146 (37.0%)**, opus **68/146 (46.6%)**
+- **Soft accuracy vs Claude-GT distribution** (n=70 faces with ≥3 GT emits, total weight 1343):
+  - haiku: face-uniform **0.536**, emit-weighted **0.598**
+  - opus: face-uniform **0.684**, emit-weighted **0.768**
 
-### Disagreements (first 30 of 55)
+### Disagreements (first 30 of 72)
 
 | face | haiku | opus | claude-pilot modal |
 |---|---|---|---|
 | `(((o(*ﾟ▽ﾟ` | HP-D | HP-S | HP-S |
+| `((・▽・))` | HP-S | LP | HP-S |
 | `(;´ヮ`)` | HP-S | HB | LN |
 | `(;╹⌓╹)` | LP | HN-S | LN |
 | `(;・∀・)` | HP-D | HB | HN-S |
@@ -82,6 +83,7 @@ On the 124 face(s) both models rated:
 | `(`ε´)` | NP | HN-D | — |
 | `(`・ω・´)` | HP-D | NB | NB |
 | `(¬_¬)` | HP-D | HN-D | HB |
+| `(¬､¬)` | HP-D | HN-D | HB |
 | `(¯―¯٥)` | LP | LN | NB |
 | `(¯‿¯)` | LP | HP-D | LP |
 | `(°ロ°)` | HN-D | HN-S | HN-S |
@@ -93,14 +95,12 @@ On the 124 face(s) both models rated:
 | `(´~`)` | LP | HB | NB |
 | `(´°̥̥̥̥̥̥` | HN-S | LN | HN-D |
 | `(´·_·`)` | LP | LN | HN-S |
+| `(´д`)` | HN-S | LN | NB |
 | `(´∀`)` | HP-S | LP | LP |
 | `(´∡`✿)` | HP-S | LP | LP |
 | `(´・_・`)` | NP | LN | LN |
 | `(´・̥̥̥ω・̥̥` | LP | LN | LN |
 | `(´・̥ω・̥`)` | LP | LN | LN |
 | `(´・ω・`)` | LP | LN | NB |
-| `(´・︵・`)` | HN-S | LN | LN |
-| `(´｡_｡`)` | NP | LN | LN |
-| `(‿‿‿)` | HP-S | LN | — |
 
-_built 2026-05-08T00:49:40.304505+00:00_
+_built 2026-05-08T09:25:07.721427+00:00_

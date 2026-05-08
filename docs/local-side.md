@@ -13,7 +13,7 @@ Current lineup:
 | `ministral` | `mistralai/Ministral-3-14B-Reasoning-2512` | smaller reasoning model |
 | `gpt_oss_20b` | `openai/gpt-oss-20b` | OpenAI-lineage MoE |
 | `granite` | `ibm-granite/granite-4.1-30b` | IBM enterprise-tuned model |
-| `gemma_intro_v7_primed` | gemma + v7 preamble | primed condition |
+| `gemma_intro_v7_primed` | gemma + v7 preamble | historical primed condition |
 
 ## Prompt Registry
 
@@ -24,8 +24,10 @@ Current taxonomy is v4: `HP-D`, `HP-S`, `LP`, `NP`, `HN-D`, `HN-S`,
 
 The v3 six-cell base still matters because most local hidden-state
 numbers were collected there: HP, LP, HN-D, HN-S, LN, NB, 20 prompts
-each, 8 seeds per model. v4 adds HP-D, NP, and HB plus the
-`gemma_intro_v7_primed` condition.
+each, 8 seeds per model. v4 adds HP-D, NP, and HB. The old
+`gemma_intro_v7_primed` condition is useful for the priming result but
+does not have a current face-likelihood summary in the active ensemble
+search.
 
 ## Capture
 
@@ -127,8 +129,11 @@ Cross-encoder search:
 .venv/bin/python scripts/54_ensemble_predict.py --models gemma,ministral,qwen
 ```
 
-Current headline: `{gemma, gemma_v7primed, ministral, opus}` is the
-best deployment ensemble on pooled-GT floor-3.
+Current overlap-search headline: `{gemma, ministral, opus}` is the best
+pooled-GT floor-3 ensemble on the all-encoder overlap (`n=102`), at
+0.733 face-uniform and 0.881 emit-weighted similarity. The emitted
+770-face lookup table for the same trio scores 0.669 face-uniform and
+0.847 emit-weighted over 243 GT-scored faces.
 
 ## Introspection V7
 

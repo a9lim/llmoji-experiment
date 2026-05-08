@@ -19,13 +19,14 @@ The names matter. These are not interchangeable measurements.
 
 ## Headline
 
-On the shared face subset:
+On the current shared face subset (`50` faces, `1138` GT emissions):
 
-- Opus and Haiku read each other closely: cross-similarity **0.906**.
+- Opus and Haiku read each other closely: **0.797** face-uniform and
+  **0.774** emit-weighted cross-similarity.
 - GT vs introspection goes up under emit-weighting.
 - GT vs BoL goes down under emit-weighting.
 - The `110` pattern (Opus and Haiku agree with GT, BoL diverges) covers
-  **27.4%** of emit volume.
+  **28.8%** of emit volume.
 
 This means cold symbolic interpretation and actual Claude use are closer
 on high-volume faces than BoL is.

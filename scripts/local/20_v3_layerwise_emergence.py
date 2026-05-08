@@ -43,10 +43,9 @@ from llmoji_study.emotional_analysis import (
     _use_cjk_font,
     load_emotional_features_all_layers,
 )
-# In split mode (rule 3 redesign), iterate the 6-element ordering so
-# HN-D and HN-S each get a centroid + scatter; non-split data shows up
-# under aggregate HN, which falls through the split iterator harmlessly
-# (the loader's split_hn=True ensures we ARE in split mode here).
+# In split mode, iterate the current split ordering so dominance-split
+# cells each get a centroid + scatter; non-split historical data falls
+# through harmlessly after loader remapping.
 QUADRANT_ORDER = QUADRANT_ORDER_SPLIT
 
 

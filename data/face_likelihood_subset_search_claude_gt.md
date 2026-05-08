@@ -2,7 +2,7 @@
 
 **Encoders:** 10  (bol, gemma, gpt_oss_20b, granite, haiku, ministral, opus, qwen, rinna_bilingual_4b_jpfull, rinna_jp_3_6b_jpfull)
 **Faces (overlap):** 293
-**GT subset (≥3 pooled emits):** 102
+**GT subset (Claude empirical, total ≥ 3):** 50
 **Subsets evaluated:** 1023
 
 ## Methodology
@@ -18,23 +18,23 @@ Subset ranking below is by **face-uniform similarity** (stricter / more honest a
 
 ## Headline
 
-- Best single encoder: **opus** at **face-uniform similarity = 0.699** (emit-weighted 0.845)
-- Best ensemble subset: **{gemma,ministral,opus}** at **face-uniform similarity = 0.733** (emit-weighted 0.881); size 3; Δ vs best solo (face-uniform) = +0.034
+- Best single encoder: **opus** at **face-uniform similarity = 0.684** (emit-weighted 0.761)
+- Best ensemble subset: **{gemma,opus}** at **face-uniform similarity = 0.708** (emit-weighted 0.781); size 2; Δ vs best solo (face-uniform) = +0.024
 
 ## Per-encoder solo distribution-similarity
 
 | encoder | similarity (face-uniform) | similarity (emit-weighted) | mean JSD (face-uniform) |
 |---|---:|---:|---:|
-| opus | 0.699 | 0.845 | 0.2087 |
-| gpt_oss_20b | 0.659 | 0.796 | 0.2366 |
-| ministral | 0.637 | 0.769 | 0.2515 |
-| gemma | 0.623 | 0.712 | 0.2616 |
-| qwen | 0.597 | 0.727 | 0.2792 |
-| haiku | 0.563 | 0.718 | 0.3030 |
-| rinna_bilingual_4b_jpfull | 0.553 | 0.687 | 0.3099 |
-| rinna_jp_3_6b_jpfull | 0.548 | 0.685 | 0.3130 |
-| granite | 0.528 | 0.645 | 0.3269 |
-| bol | 0.407 | 0.419 | 0.4113 |
+| opus | 0.684 | 0.761 | 0.2191 |
+| gemma | 0.639 | 0.687 | 0.2501 |
+| gpt_oss_20b | 0.550 | 0.609 | 0.3121 |
+| haiku | 0.525 | 0.585 | 0.3291 |
+| granite | 0.500 | 0.553 | 0.3464 |
+| ministral | 0.494 | 0.581 | 0.3508 |
+| bol | 0.464 | 0.454 | 0.3712 |
+| rinna_bilingual_4b_jpfull | 0.461 | 0.512 | 0.3737 |
+| qwen | 0.457 | 0.534 | 0.3761 |
+| rinna_jp_3_6b_jpfull | 0.452 | 0.533 | 0.3801 |
 
 ## Pairwise Cohen's κ across encoders (whole overlap)
 
@@ -92,46 +92,46 @@ Higher κ = more correlated. Encoder pairs with low κ make complementary errors
 
 | rank | size | encoders | similarity (face-uniform) | similarity (emit-weighted) |
 |---:|---:|---|---:|---:|
-| 1 | 3 | {gemma,ministral,opus} | 0.733 | 0.881 |
-| 2 | 3 | {gemma,gpt_oss_20b,opus} | 0.732 | 0.877 |
-| 3 | 4 | {gemma,gpt_oss_20b,ministral,opus} | 0.728 | 0.876 |
-| 4 | 4 | {gemma,gpt_oss_20b,granite,opus} | 0.725 | 0.865 |
-| 5 | 4 | {gemma,granite,ministral,opus} | 0.723 | 0.865 |
-| 6 | 5 | {gemma,gpt_oss_20b,granite,ministral,opus} | 0.722 | 0.867 |
-| 7 | 3 | {gemma,opus,qwen} | 0.722 | 0.874 |
-| 8 | 4 | {gemma,haiku,ministral,opus} | 0.722 | 0.873 |
-| 9 | 5 | {gemma,gpt_oss_20b,haiku,ministral,opus} | 0.720 | 0.870 |
-| 10 | 5 | {gemma,granite,haiku,ministral,opus} | 0.720 | 0.867 |
-| 11 | 5 | {gemma,gpt_oss_20b,granite,haiku,opus} | 0.719 | 0.865 |
-| 12 | 6 | {gemma,gpt_oss_20b,granite,haiku,ministral,opus} | 0.719 | 0.867 |
-| 13 | 4 | {gemma,ministral,opus,qwen} | 0.719 | 0.869 |
-| 14 | 4 | {gemma,gpt_oss_20b,opus,qwen} | 0.718 | 0.869 |
-| 15 | 4 | {gemma,gpt_oss_20b,haiku,opus} | 0.718 | 0.866 |
-| 16 | 2 | {gemma,opus} | 0.718 | 0.848 |
-| 17 | 4 | {gemma,granite,opus,qwen} | 0.717 | 0.864 |
-| 18 | 6 | {bol,gemma,gpt_oss_20b,granite,ministral,opus} | 0.717 | 0.849 |
-| 19 | 5 | {gemma,gpt_oss_20b,granite,opus,qwen} | 0.716 | 0.863 |
-| 20 | 5 | {bol,gemma,gpt_oss_20b,ministral,opus} | 0.716 | 0.849 |
-| 21 | 5 | {bol,gemma,granite,ministral,opus} | 0.716 | 0.842 |
-| 22 | 5 | {bol,gemma,gpt_oss_20b,granite,opus} | 0.715 | 0.841 |
-| 23 | 2 | {gemma,gpt_oss_20b} | 0.715 | 0.856 |
-| 24 | 3 | {gemma,gpt_oss_20b,ministral} | 0.715 | 0.859 |
-| 25 | 5 | {gemma,granite,ministral,opus,qwen} | 0.715 | 0.861 |
+| 1 | 2 | {gemma,opus} | 0.708 | 0.781 |
+| 2 | 3 | {bol,gemma,opus} | 0.688 | 0.744 |
+| 3 | 3 | {gemma,granite,opus} | 0.687 | 0.760 |
+| 4 | 4 | {bol,gemma,granite,opus} | 0.686 | 0.744 |
+| 5 | 1 | {opus} | 0.684 | 0.761 |
+| 6 | 3 | {gemma,haiku,opus} | 0.683 | 0.763 |
+| 7 | 3 | {gemma,gpt_oss_20b,opus} | 0.680 | 0.757 |
+| 8 | 5 | {bol,gemma,granite,haiku,opus} | 0.679 | 0.747 |
+| 9 | 4 | {bol,gemma,haiku,opus} | 0.678 | 0.744 |
+| 10 | 4 | {gemma,granite,haiku,opus} | 0.677 | 0.757 |
+| 11 | 4 | {bol,gemma,gpt_oss_20b,opus} | 0.674 | 0.738 |
+| 12 | 5 | {bol,gemma,gpt_oss_20b,granite,opus} | 0.673 | 0.736 |
+| 13 | 4 | {gemma,gpt_oss_20b,granite,opus} | 0.669 | 0.744 |
+| 14 | 3 | {gemma,ministral,opus} | 0.668 | 0.752 |
+| 15 | 6 | {bol,gemma,gpt_oss_20b,granite,haiku,opus} | 0.667 | 0.737 |
+| 16 | 4 | {bol,gemma,ministral,opus} | 0.667 | 0.735 |
+| 17 | 5 | {bol,gemma,gpt_oss_20b,haiku,opus} | 0.666 | 0.735 |
+| 18 | 4 | {gemma,gpt_oss_20b,haiku,opus} | 0.666 | 0.745 |
+| 19 | 5 | {bol,gemma,granite,ministral,opus} | 0.665 | 0.731 |
+| 20 | 4 | {bol,gemma,granite,haiku} | 0.664 | 0.724 |
+| 21 | 5 | {gemma,gpt_oss_20b,granite,haiku,opus} | 0.663 | 0.741 |
+| 22 | 5 | {bol,gemma,granite,opus,rinna_jp_3_6b_jpfull} | 0.663 | 0.729 |
+| 23 | 3 | {gemma,opus,rinna_bilingual_4b_jpfull} | 0.662 | 0.735 |
+| 24 | 6 | {bol,gemma,granite,haiku,ministral,opus} | 0.662 | 0.734 |
+| 25 | 4 | {bol,gemma,opus,rinna_jp_3_6b_jpfull} | 0.662 | 0.727 |
 
 ## Per-size best subset (by face-uniform similarity)
 
 | size | encoders | similarity (face-uniform) | similarity (emit-weighted) |
 |---:|---|---:|---:|
-| 1 | {opus} | 0.699 | 0.845 |
-| 2 | {gemma,opus} | 0.718 | 0.848 |
-| 3 | {gemma,ministral,opus} | 0.733 | 0.881 |
-| 4 | {gemma,gpt_oss_20b,ministral,opus} | 0.728 | 0.876 |
-| 5 | {gemma,gpt_oss_20b,granite,ministral,opus} | 0.722 | 0.867 |
-| 6 | {gemma,gpt_oss_20b,granite,haiku,ministral,opus} | 0.719 | 0.867 |
-| 7 | {bol,gemma,gpt_oss_20b,granite,haiku,ministral,opus} | 0.714 | 0.851 |
-| 8 | {bol,gemma,gpt_oss_20b,granite,haiku,ministral,opus,qwen} | 0.708 | 0.848 |
-| 9 | {bol,gemma,gpt_oss_20b,granite,haiku,ministral,opus,qwen,rinna_jp_3_6b_jpfull} | 0.700 | 0.843 |
-| 10 | {bol,gemma,gpt_oss_20b,granite,haiku,ministral,opus,qwen,rinna_bilingual_4b_jpfull,rinna_jp_3_6b_jpfull} | 0.693 | 0.837 |
+| 1 | {opus} | 0.684 | 0.761 |
+| 2 | {gemma,opus} | 0.708 | 0.781 |
+| 3 | {bol,gemma,opus} | 0.688 | 0.744 |
+| 4 | {bol,gemma,granite,opus} | 0.686 | 0.744 |
+| 5 | {bol,gemma,granite,haiku,opus} | 0.679 | 0.747 |
+| 6 | {bol,gemma,gpt_oss_20b,granite,haiku,opus} | 0.667 | 0.737 |
+| 7 | {bol,gemma,gpt_oss_20b,granite,haiku,ministral,opus} | 0.653 | 0.725 |
+| 8 | {bol,gemma,gpt_oss_20b,granite,haiku,ministral,opus,rinna_jp_3_6b_jpfull} | 0.638 | 0.712 |
+| 9 | {bol,gemma,gpt_oss_20b,granite,haiku,ministral,opus,rinna_bilingual_4b_jpfull,rinna_jp_3_6b_jpfull} | 0.626 | 0.698 |
+| 10 | {bol,gemma,gpt_oss_20b,granite,haiku,ministral,opus,qwen,rinna_bilingual_4b_jpfull,rinna_jp_3_6b_jpfull} | 0.613 | 0.686 |
 
 ## Supplementary: argmax accuracy + Cohen's κ (production-shaped reading)
 
@@ -141,29 +141,29 @@ These metrics treat GT as a one-hot modal label. They characterize a deployed pl
 
 | encoder | accuracy | κ |
 |---|---:|---:|
-| gemma | 46.1% (47/102) | 0.390 |
-| opus | 44.1% (45/102) | 0.355 |
-| gpt_oss_20b | 33.3% (34/102) | 0.235 |
-| granite | 28.4% (29/102) | 0.172 |
-| haiku | 28.4% (29/102) | 0.170 |
-| bol | 27.5% (28/102) | 0.169 |
-| ministral | 20.6% (21/102) | 0.099 |
-| qwen | 19.6% (20/102) | 0.113 |
-| rinna_jp_3_6b_jpfull | 18.6% (19/102) | 0.113 |
-| rinna_bilingual_4b_jpfull | 14.7% (15/102) | 0.076 |
+| opus | 58.0% (28/50) | 0.508 |
+| gemma | 52.0% (26/50) | 0.452 |
+| haiku | 44.0% (22/50) | 0.339 |
+| granite | 34.0% (17/50) | 0.235 |
+| gpt_oss_20b | 32.0% (16/50) | 0.223 |
+| bol | 30.0% (15/50) | 0.193 |
+| rinna_jp_3_6b_jpfull | 26.0% (13/50) | 0.181 |
+| qwen | 24.0% (12/50) | 0.154 |
+| ministral | 14.0% (7/50) | 0.025 |
+| rinna_bilingual_4b_jpfull | 14.0% (7/50) | 0.081 |
 
 ### Top-10 subsets by argmax accuracy
 
 | size | encoders | accuracy | κ | similarity |
 |---:|---|---:|---:|---:|
-| 4 | {gemma,granite,opus,rinna_bilingual_4b_jpfull} | 53.9% (55/102) | 0.472 | 0.711 |
-| 5 | {gemma,gpt_oss_20b,granite,haiku,opus} | 52.9% (54/102) | 0.460 | 0.719 |
-| 6 | {gemma,granite,haiku,ministral,opus,qwen} | 52.9% (54/102) | 0.461 | 0.712 |
-| 6 | {gemma,gpt_oss_20b,granite,opus,qwen,rinna_bilingual_4b_jpfull} | 52.9% (54/102) | 0.461 | 0.704 |
-| 5 | {gemma,gpt_oss_20b,granite,opus,rinna_bilingual_4b_jpfull} | 52.0% (53/102) | 0.450 | 0.713 |
-| 7 | {gemma,gpt_oss_20b,granite,haiku,opus,qwen,rinna_bilingual_4b_jpfull} | 52.0% (53/102) | 0.450 | 0.702 |
-| 6 | {gemma,gpt_oss_20b,granite,haiku,opus,qwen} | 52.0% (53/102) | 0.449 | 0.712 |
-| 5 | {gemma,granite,opus,qwen,rinna_bilingual_4b_jpfull} | 52.0% (53/102) | 0.451 | 0.704 |
-| 5 | {gemma,gpt_oss_20b,granite,haiku,ministral} | 52.0% (53/102) | 0.450 | 0.710 |
-| 6 | {gemma,gpt_oss_20b,granite,haiku,ministral,opus} | 52.0% (53/102) | 0.449 | 0.719 |
+| 7 | {bol,gemma,haiku,ministral,opus,rinna_bilingual_4b_jpfull,rinna_jp_3_6b_jpfull} | 66.0% (33/50) | 0.605 | 0.626 |
+| 8 | {bol,gemma,gpt_oss_20b,granite,haiku,opus,rinna_bilingual_4b_jpfull,rinna_jp_3_6b_jpfull} | 66.0% (33/50) | 0.605 | 0.634 |
+| 5 | {gemma,gpt_oss_20b,granite,haiku,opus} | 64.0% (32/50) | 0.581 | 0.663 |
+| 5 | {gemma,haiku,opus,qwen,rinna_jp_3_6b_jpfull} | 64.0% (32/50) | 0.582 | 0.625 |
+| 8 | {bol,gemma,gpt_oss_20b,haiku,ministral,opus,rinna_bilingual_4b_jpfull,rinna_jp_3_6b_jpfull} | 64.0% (32/50) | 0.583 | 0.621 |
+| 8 | {bol,gemma,gpt_oss_20b,haiku,ministral,opus,qwen,rinna_bilingual_4b_jpfull} | 64.0% (32/50) | 0.583 | 0.618 |
+| 9 | {bol,gemma,gpt_oss_20b,haiku,ministral,opus,qwen,rinna_bilingual_4b_jpfull,rinna_jp_3_6b_jpfull} | 64.0% (32/50) | 0.583 | 0.607 |
+| 6 | {gemma,gpt_oss_20b,granite,haiku,opus,qwen} | 64.0% (32/50) | 0.581 | 0.639 |
+| 9 | {bol,gemma,gpt_oss_20b,granite,haiku,opus,qwen,rinna_bilingual_4b_jpfull,rinna_jp_3_6b_jpfull} | 64.0% (32/50) | 0.582 | 0.620 |
+| 8 | {bol,gemma,granite,haiku,ministral,opus,rinna_bilingual_4b_jpfull,rinna_jp_3_6b_jpfull} | 64.0% (32/50) | 0.582 | 0.631 |
 
