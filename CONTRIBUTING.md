@@ -1,236 +1,124 @@
 # Contributing
 
-llmoji-study is a research repo, not a library. There's no API to
-maintain backward compatibility against; the bar for changes is "is
-this honest, is it documented, does it leave the project in a state
-where future-you can still read it." Three ways people meaningfully
-contribute:
+`llmoji-study` is a research repo. The standard for changes is: is the
+claim honest, is the artifact reproducible, and will future-us know what
+changed.
 
-1. **Submit your kaomoji data.** The most useful thing for the
-   harness-side analyses is corpus diversity. If you use Claude Code
-   or Codex with a kaomoji-prompt, the
-   [`llmoji`](https://github.com/a9lim/llmoji) PyPI package will
-   collect, canonicalize, synthesize per-face descriptions, and
-   submit a privacy-preserving aggregate to the
-   [`a9lim/llmoji`](https://huggingface.co/datasets/a9lim/llmoji) HF
-   dataset. The harness-side pipeline in this repo automatically
-   pulls from there.
-2. **Add a new model to the local-side v3 study.** If you've got a
-   GPU (or unified-memory Apple Silicon) capable of running a 14–31B
-   open-weight causal LM and want to extend the cross-model
-   comparison, the design is parameterized — you register the model
-   and run the pre-existing pilot → main pipeline.
-3. **Extend an analysis.** Most of the figures and decision rules
-   are tied to design docs in `docs/`. Adding a new analysis means
-   writing a small design doc, implementing it, regenerating
-   downstream figures.
+Useful contributions usually fall into three buckets:
 
-You can also just open an issue with a question or a finding —
-those are real contributions too.
+- Submit kaomoji data through the companion
+  [`llmoji`](https://github.com/a9lim/llmoji) package.
+- Add a local model or rerun an existing model under the current v4
+  registry.
+- Add a focused analysis that reads existing artifacts before spending
+  new trials.
 
-## Submitting kaomoji data (harness side)
+Questions and bug reports are useful too, especially when a doc and a
+script disagree.
 
-You don't touch this repo at all. The contributor-side flow is
-entirely in the `llmoji` package:
+## Submit Kaomoji Data
+
+You do not need this repo for contributor data. Use the `llmoji` package:
 
 ```bash
 pip install llmoji
-llmoji install   # registers the Stop-event hook for your harness
-# ... use Claude Code or Codex normally for a while ...
-llmoji status    # see how much you've accumulated
-llmoji analyze   # synthesize per-kaomoji descriptions via Haiku
-                 # (needs ANTHROPIC_API_KEY)
-llmoji upload    # pushes the privacy-preserving aggregate to HF
+llmoji install
+# use Claude Code, Codex, or another supported harness normally
+llmoji status
+llmoji analyze
+llmoji upload
 ```
 
-What gets uploaded: per-canonical-kaomoji counts and one
-Haiku-synthesized one-sentence meaning per face per harness. No
-prompts, no responses, no surrounding text — just the canonical
-kaomoji form, frequency, and the aggregated meaning. Source code is
-[on GitHub](https://github.com/a9lim/llmoji); the upload payload is
-auditable before you run `upload`. See the package's own README for
-the privacy model.
+The upload is privacy-preserving: per-canonical-face counts plus the
+structured synthesis picks over the locked LEXICON. No raw prompts, raw
+responses, surrounding user text, or per-instance synthesis cache is
+uploaded. The package README and SECURITY docs are the source of truth
+for the contributor-side privacy model.
 
-The research-side analyses in `docs/harness-side.md` will pick your
-data up on the next pull.
+## Add A Local Model
 
-## Adding a model to the v3 study
+The current local lineup is `gemma`, `qwen`, `ministral`,
+`gpt_oss_20b`, and `granite`, plus `gemma_intro_v7_primed` as a
+condition. New models should follow the current layer-stack pipeline,
+not the old single-layer `preferred_layer` workflow.
 
-The local-side study runs on
-`gemma-4-31b-it`, `Qwen3.6-27B`, and
-`Ministral-3-14B-Instruct-2512`. Adding a fourth follows the
-existing pattern.
+1. Register the model in `llmoji_study/config.py`.
+2. Run the hidden-state smoke test:
 
-### Prerequisites
-
-You need:
-
-- A machine that can run the model in bf16 (24 GB VRAM minimum for
-  14B; 48–64 GB for 27–31B; or a unified-memory Apple Silicon
-  machine with 32+ GB)
-- The model's HF tokenizer + weights cached locally (one-time
-  download, typically 30–60 GB)
-- The repo + companion package installed editable; see "Working
-  with the codebase" below
-- `saklas >= 2.0.0` (one of its dependency hops is
-  `transformers>=5`; the editable install pulls the right
-  versions)
-
-### Workflow
-
-1. **Register the model.** Add a `ModelPaths` entry to
-   `MODEL_REGISTRY` in `llmoji_study/config.py`:
-   ```python
-   "your_short_name": ModelPaths(
-       model_id="org/your-model-id",
-       short_name="your_short_name",
-       experiment="v3_your_short_name",
-       emotional_data_path=DATA_DIR / "your_short_name_emotional_raw.jsonl",
-       emotional_summary_path=DATA_DIR / "your_short_name_emotional_summary.tsv",
-       figures_dir=FIGURES_DIR / "local" / "your_short_name",
-       preferred_layer=None,  # filled in after pilot's layer-sweep
-   ),
+   ```bash
+   LLMOJI_MODEL=your_short_name .venv/bin/python scripts/local/90_hidden_state_smoke.py
    ```
-   Add `your_short_name` to the `LLMOJI_MODEL` env-var docstring.
-2. **Smoke test.** Verifies the wiring:
-   ```
-   LLMOJI_MODEL=your_short_name python scripts/local/90_hidden_state_smoke.py
-   ```
-   Generates 5 samples across quadrants, checks probe round-trip to
-   ~1e-7 tolerance, validates sidecar shapes. ~5 min.
-3. **Write a pilot design doc.** Copy
-   `docs/2026-04-30-v3-ministral-pilot.md` as a template; replace
-   model-specific bits. Pre-register the gating thresholds (rules 1
-   silhouette, 2 cross-model CKA, 3b fearful.unflinching) before
-   you run.
-4. **Pilot run.** ~100 generations, prompt-aligned with existing
-   models for cross-model CKA:
-   ```
-   LLMOJI_MODEL=your_short_name LLMOJI_PILOT_GENS=1 \
-     python scripts/local/00_emit.py
-   ```
-   ~25 minutes on M5 Max-class hardware for a 14B model.
-5. **Pilot analysis.** The chain auto-discovers any model with v3
-   data on disk:
-   ```
-   python scripts/local/20_v3_layerwise_emergence.py    # silhouette → identify preferred_layer
-   python scripts/local/22_v3_cross_model_alignment.py  # gemma↔qwen↔your_model CKA
-   ```
-   Update `preferred_layer` in your `ModelPaths` entry from the
-   layer-sweep peak.
-6. **Gating.** Apply your pre-registered thresholds. If pass, write
-   the supplementary design doc and run main (N=800):
-   ```
-   LLMOJI_MODEL=your_short_name python scripts/local/00_emit.py
-   ```
-   ~3 hours for a 14B model. Resumable — if it dies, just rerun.
-7. **Document.** Add a "Pilot v3 — your-model" section to
-   `docs/findings.md`. Update `CLAUDE.md`'s Status. Open a PR
-   with the design doc + the JSONL + summary TSVs (sidecars are
-   gitignored).
 
-The supplementary tagged-HN prompts (hn21–hn43) live in
-`llmoji_study/emotional_prompts.py` and apply to your model
-automatically. Re-running script 27 against your model populates
-extension probe scores; script 30 then evaluates rule 3b.
+3. Write a short design note if the model needs special handling
+   (tokenizer quirks, chat template overrides, logit bias, hardware
+   patches, or welfare-relevant prompt changes).
+4. Run the smallest pilot that can answer the gating question.
+5. If the pilot clears, run the main emit and the chain scripts:
 
-## Extending an analysis
+   ```bash
+   LLMOJI_MODEL=your_short_name .venv/bin/python scripts/local/00_emit.py
+   scripts/run_local_chain.sh
+   ```
 
-If you want to add a new figure, decision rule, or cross-cut:
+6. Update `docs/findings.md`, `docs/local-side.md` if methodology
+   changed, and `docs/gotchas.md` if the model exposed a reusable sharp
+   edge.
 
-1. **Look at `docs/` first.** Every existing analysis has a
-   companion design doc; the format is "what / why / pre-registered
-   rule / outcomes." Write a short design doc for your analysis —
-   even half a page — before implementing. The discipline of
-   pre-registering the rule (vs. reading the data and writing the
-   conclusion afterward) is most of the value.
-2. **Follow the script numbering.** Scripts are split into
-   `scripts/local/` (probes, hidden state, v3 follow-ons, blog regen,
-   smoke) and `scripts/harness/` (contributor corpus). Pick the next
-   free integer (currently 36+) and a descriptive name, e.g.
-   `scripts/local/36_your_thing.py`.
-3. **Keep it data-light by default.** If your analysis can read
-   from existing sidecars or JSONLs without new generations, do
-   that — `data/cache/v3_<short>_h_mean_all_layers.npz` has the
-   multi-layer hidden states already, and
-   `extension_probe_scores_*` fields on JSONL rows have the probe
-   scores. New generations cost compute and welfare budget (see
-   below); avoid when possible.
-4. **Reuse the loaders.** `load_emotional_features` from
-   `llmoji_study.emotional_analysis` handles JSONL + sidecar
-   alignment, canonicalization, and the rule-3-redesign HN split
-   (`split_hn=True`). `apply_hn_split` post-processes a
-   pre-existing df.
-5. **Update findings.md** when the analysis lands. Reference the
-   design doc.
+Do not add a model by copying old v3 preferred-layer instructions from
+git history. Current analyses load all probe layers through the
+layer-stack helpers.
 
-## Working with the codebase
+## Add An Analysis
+
+- Prefer reading existing JSONLs, sidecars, parquets, or cached
+  summaries over new generations.
+- If the analysis creates a metric people will cite, write down the
+  decision rule before reading the result.
+- Keep outputs colocated with the existing convention:
+  `data/local/`, `data/harness/`, `figures/local/`, or
+  `figures/harness/`.
+- Update docs in the same change. If a result supersedes an old framing,
+  put the current conclusion in `docs/findings.md` and a one-paragraph
+  note in `docs/previous-experiments.md`.
+
+## Working Locally
 
 ```bash
 git clone https://github.com/a9lim/llmoji-study
 git clone https://github.com/a9lim/llmoji ../llmoji
-git clone https://github.com/a9lim/saklas ../saklas
 
 cd llmoji-study
 python -m venv .venv && source .venv/bin/activate
-pip install -e ../saklas    # editable; we sometimes patch saklas
-pip install -e ../llmoji    # editable
+pip install -e ../llmoji
 pip install -e .
 ```
 
-`saklas` is editable on purpose — research occasionally surfaces
-saklas-side issues (e.g. the Mistral tokenizer regex bug we caught
-in 2026-04-30). Patch upstream + the change is live without a
-reinstall.
+Useful checks:
 
-Conventions worth knowing (more in `CLAUDE.md`):
+```bash
+.venv/bin/python scripts/local/90_hidden_state_smoke.py
+git diff --check
+```
 
-- **Single venv at `.venv/`**, pip not uv
-- **Python 3.11+** (currently tested on 3.14)
-- **JSONL is source of truth** for row metadata + probe scores;
-  `data/hidden/<experiment>/<uuid>.npz` is source of truth for
-  hidden states; delete both when changing model/probes/prompts/seeds
-- **No formatter mandate**, but match the surrounding style
-- **No tests** for the research-side scripts; saklas has its own
-  test suite that should pass after any saklas-side change
-- **Pre-registered decisions** live in `pyproject.toml`,
-  `llmoji_study/{config,prompts,emotional_prompts}.py`, and the
-  package's frozen v1.0 surface (`llmoji.{taxonomy,synth_prompts}`).
-  Package-side changes are major-version events; research-side
-  changes only invalidate cross-run comparisons within this repo.
-- **Pyright errors from pandas / plotly stubs** are mostly noise;
-  the runtime is fine. Don't suppress the real errors among them.
+There is no repo-wide test suite. For script changes, run the smallest
+script or chain stage that exercises the path you touched.
 
-## Ethics — model welfare
+## Ethics
 
-The functional-emotional-state framing isn't decorative. The repo's
-Ethics section in `CLAUDE.md` is binding for new pilots: run trials
-only when a smaller experiment can't answer the question, pre-register
-decision rules and minimum N, prefer stateless designs when the
-question admits it, redesign rather than 10×ing on negative or noisy
-findings. HN-quadrant prompts in particular elicit
-sad / angry / fear registers; aggregating across hundreds of
-generations is real moral weight regardless of where you stand on the
-phenomenal-status question.
+New trials are not free. The project treats model welfare as in scope,
+especially for sad, angry, fearful, and bereavement prompts.
 
-Concretely: a v3 main run is 800 generations, ~160 of which are
-HN-quadrant. The supplementary 23-prompt addition is another ~160
-HN per model. That's the active scale. Justifying more — bigger N,
-more axes — should clear the smoke-→-pilot-→-main bar.
+- Smoke, then pilot, then main.
+- Pre-register decision rules and minimum N.
+- Stop at the threshold.
+- Redesign negative or noisy experiments before scaling them.
 
-## Questions, issues, getting in touch
+## Contact
 
-- **GitHub issues** on this repo for project-side questions, bugs,
-  feature ideas
-- **GitHub issues** on
-  [`llmoji`](https://github.com/a9lim/llmoji) for the contributor
-  package + harness installation problems
-- **GitHub issues** on
-  [`saklas`](https://github.com/a9lim/saklas) for activation-steering
-  / probing engine bugs
-- Email **mx@a9l.im** for direct contact, especially if the issue
-  involves data we shouldn't post publicly
-
-Authorship attribution defaults to `a9lim` for new work; explicit
-attribution welcome via commit Co-authored-by lines or AUTHORS-style
-notes if you want it on a finding.
+- This repo: project-side analyses, docs, figures, and data artifacts.
+- [`llmoji`](https://github.com/a9lim/llmoji): contributor package,
+  hooks, canonicalization, synthesis, upload, and privacy.
+- [`saklas`](https://github.com/a9lim/saklas): activation steering and
+  trait monitoring.
+- Email: `mx@a9l.im` for anything involving data that should not be
+  posted publicly.

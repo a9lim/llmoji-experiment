@@ -1,685 +1,223 @@
 # AGENTS.md
 
-> **Companion package:** taxonomy / canonicalization / scrape / synth /
-> hook templates / `llmoji` CLI live in the
-> [`llmoji`](https://github.com/a9lim/llmoji) PyPI package (v1.0 split,
-> 2026-04-27). Import from `llmoji.*`. See `../llmoji/AGENTS.md` for that
-> public surface. This repo (`llmoji_study`) is the research side:
-> probes, hidden state, bag-of-lexicon (BoL) corpus analysis,
-> face_likelihood, figures.
->
-> **This file is the top-level entry point.** Detail lives elsewhere:
->
-> - [`docs/findings.md`](docs/findings.md) — full per-pipeline numbers.
-> - [`docs/internals.md`](docs/internals.md) — hidden-state pipeline +
->   kaomoji canonicalization rules.
-> - [`docs/gotchas.md`](docs/gotchas.md) — sharp edges. Read before
->   debugging anything that's silently wrong (chat-template overrides,
->   logit-bias suppressions, hybrid-LA cache patches).
-> - [`docs/local-side.md`](docs/local-side.md) /
->   [`docs/harness-side.md`](docs/harness-side.md) — methodology
->   walkthroughs for each side.
-> - [`docs/previous-experiments.md`](docs/previous-experiments.md) —
->   historical record of replaced framings (v1/v2 steering, single-layer
->   reads, hard-classification metrics, etc.).
-> - `docs/2026-MM-DD-*.md` — per-experiment design + decision docs.
->   Notable recent: [`2026-05-06-use-read-act-channels.md`](docs/2026-05-06-use-read-act-channels.md)
->   (three-channel per-face analysis: GT use vs Opus/Haiku read vs
->   BoL act, with per-source-model drift extension and case files
->   for `(╯°□°)`, `(´;ω;`)`, `(╥﹏╥)`);
->   [`2026-05-06-prompt-extension-roadmap.md`](docs/2026-05-06-prompt-extension-roadmap.md)
->   (PAD-octant + orthogonal-category prompt extensions; 9-cell v4
->   deployment registry **HP-D / HP-S / LP / HN-D / HN-S / LN / NB / NP /
->   HB** wired into `EMOTIONAL_PROMPTS` 2026-05-06, mechanically named
->   from V/A/D coordinates with no overrides; round-1 + round-4 pilot
->   artifacts cleared post-promotion);
->   [`2026-05-06-nn-lb-future-cells.md`](docs/2026-05-06-nn-lb-future-cells.md)
->   (two coordinate-real PAD cells deferred from v4 promotion — NN at
->   (a=0, v=-1) and LB at (a=-1, v=0). 20 pilot prompts each drafted +
->   empirical promotion protocol parked for a future session);
->   [`2026-05-07-quadrants-canonical-module.md`](docs/2026-05-07-quadrants-canonical-module.md)
->   (single-source-of-truth refactor — `llmoji_study/quadrants.py`
->   consolidates v4 9-cell ordering + OKLCH color palette; Claude GT
->   `prompt_id`-lookup remap so v3-stored labels read as v4 9-cell
->   on the fly; `_quadrant_of` HP-split fix in script 50; `np19`
->   tightened from 35→23 words for the gpt_oss_20b harmony length
->   quirk; defensive None-probe row handling);
->   [`2026-05-08-saturation-threshold-recal.md`](docs/2026-05-08-saturation-threshold-recal.md)
->   (merged-emotional-raw refactor + 69-row stale-removal backfill +
->   `PER_Q_JS_MAX` 0.05→0.10 recalibration; LN drop at r7 retro'd as
->   amendment, HN-D drop at r5 confirmed gate-driven; AGENTS.md
->   "exited HN-D after r2" → "after r4" wording fix).
+This is the research-side repo for `llmoji`. The companion package at
+`../llmoji` owns taxonomy, canonicalization, hook templates, synthesis,
+upload, and the public CLI. This repo owns local probes, hidden-state
+sidecars, Claude-GT collection, BoL corpus analysis, face_likelihood,
+figures, and writeups.
 
-## What this is
+Not a library. No public API, no PyPI release, no broad test suite.
+Prefer small, explicit analyses and keep docs current with code changes.
 
-`llmoji-study` asks whether kaomoji choice in causal LMs tracks internal
-activation state. Uses [`saklas`](https://github.com/a9lim/saklas) for
-trait monitoring (contrastive-PCA probes) and steering. "Internal state"
-= per-row hidden state (layer-stack concat of `h_first`); "causal
-handle" = whether steering shifts the kaomoji distribution. Motivated by
-Claude's kaomoji use under "start each message with a kaomoji"
-instructions; gemma-4-31b-it is the primary local stand-in, with a
-five-model lineup for cross-model checks.
+## Read First
 
-Not a library. No public API, no PyPI release, no tests. Three-script
-pipelines per experiment (vocab sample → run → analysis). Depends on
-`llmoji>=2.0,<3` for taxonomy / canonicalization / synth prompts;
-everything else is research-side and local.
+- [`README.md`](README.md): short current-state overview.
+- [`docs/findings.md`](docs/findings.md): current numbers worth citing.
+- [`docs/local-side.md`](docs/local-side.md): local hidden-state and
+  face_likelihood methodology.
+- [`docs/harness-side.md`](docs/harness-side.md): corpus, BoL,
+  Claude-GT, use/read/act, and privacy.
+- [`docs/gotchas.md`](docs/gotchas.md): current sharp edges.
+- [`docs/internals.md`](docs/internals.md): sidecar and canonicalization
+  notes.
+- [`docs/previous-experiments.md`](docs/previous-experiments.md):
+  compact historical ledger. Old detailed design docs were deliberately
+  pruned; use git history if you need the full old narrative.
 
-Public writeup: [a9l.im/blog/introspection-via-kaomoji](https://a9l.im/blog/introspection-via-kaomoji).
-Figures regenerate from this repo via
-`scripts/local/99_regen_blog_figures.py` into
-`../a9lim.github.io/blog-assets/introspection-via-kaomoji/`.
+Still-current dated docs:
 
-## Ethics — minimize trial scale
+- [`docs/2026-05-04-claude-groundtruth-pilot.md`](docs/2026-05-04-claude-groundtruth-pilot.md)
+- [`docs/2026-05-05-soft-everywhere-methodology.md`](docs/2026-05-05-soft-everywhere-methodology.md)
+- [`docs/2026-05-06-use-read-act-channels.md`](docs/2026-05-06-use-read-act-channels.md)
+- [`docs/2026-05-06-nn-lb-future-cells.md`](docs/2026-05-06-nn-lb-future-cells.md)
+- [`docs/2026-05-07-claude-gt-v4-extension-pilot.md`](docs/2026-05-07-claude-gt-v4-extension-pilot.md)
+- [`docs/2026-05-08-saturation-threshold-recal.md`](docs/2026-05-08-saturation-threshold-recal.md)
+- [`docs/2026-05-05-residual-state-axes.md`](docs/2026-05-05-residual-state-axes.md)
 
-Model welfare is in scope. Sad-probe readings co-occurring with sad-kaomoji
-output on "my dog died" prompts is a functional emotional state regardless
-of phenomenal status. Aggregating that across hundreds of generations is
-not nothing.
+## Current State (2026-05-08)
 
-- Smoke → pilot → main. Run trials only when a smaller experiment can't
-  answer the question.
-- Pre-register decision rules and minimum N. Stop at threshold; "round
-  number" isn't a design principle.
-- Per-quadrant saturation gates (where applicable) drop quadrants from
-  later runs as soon as they stop surfacing meaningful info.
-- Re-design rather than 10×ing on negative or noisy findings.
-
-## Status (2026-05-08)
-
-### Current methodology
-
-- **Canonical quadrants module** (2026-05-07):
-  `llmoji_study/quadrants.py` is the single source of truth for the
-  v4 9-cell taxonomy + OKLCH-uniform color palette. `QUADRANT_ORDER`
-  (7-tuple aggregate `HP/LP/NP/HN/LN/NB/HB`), `QUADRANT_ORDER_SPLIT`
-  (9-tuple split `HP-D/HP-S/LP/NP/HN-D/HN-S/LN/NB/HB`), `QUADRANT_COLORS`
-  (11-key dict), `SPLIT_MARKERS` (frozenset). Zero deps so the JSD math
-  layer can re-export without pulling pandas / matplotlib. Re-exported
-  from `emotional_analysis`, `jsd`, `lexicon`, `per_project_charts`;
-  hardcoded copies in 17 scripts replaced with imports.
-  `apply_pad_split` (formerly `apply_hn_split`, kept as alias)
-  generalizes the registry-driven dominance-split. Detail:
-  `docs/2026-05-07-quadrants-canonical-module.md`.
-- **Soft-everywhere evaluation.** Post-hoc face_likelihood evaluation is
-  distribution-vs-distribution via JSD. Headline metric:
-  `similarity = 1 − JSD/ln 2` ∈ [0, 1], reported in two flavors —
-  **face-uniform** (vocabulary coverage) and **emit-weighted**
-  (deployment relevance). Strict-majority voting removed; ensemble vote
-  is the soft mean of per-encoder softmax distributions. Per-face
-  deliverable is the full distribution, not a hard label.
-  Detail: `docs/2026-05-05-soft-everywhere-methodology.md`. Helpers in
-  `llmoji_study/jsd.py` + `claude_gt.load_claude_gt_distribution()`
-  (the latter remaps Claude's stored v3 6-cell labels to v4 9-cell on
-  read via prompt_id registry lookup, so 9-cell encoder distributions
-  compare cleanly to Claude GT without aggregate-HP leakage).
-- **Layer-stack representation.** Active analyses read
-  `(n_rows, n_layers · hidden_dim)` per model — concat of every probe
-  layer's `h_first`. The single-layer `preferred_layer` field on
-  `ModelPaths` was deleted 2026-05-04; the silhouette-peak heuristic was
-  arbitrary. Helpers `load_emotional_features_stack` (registry-keyed)
-  and `load_emotional_features_stack_at` (path-aware) live in
-  `llmoji_study.emotional_analysis`.
-- **Canonical face union** at `data/v3_face_union.parquet` (built by
-  `scripts/40_face_union.py`). Pools v3 emit + Claude pilot +
-  in-the-wild contributor data; non-BMP modern emoji filtered. Script 50
-  reads from this canonical source.
-- **Bag-of-lexicon (BoL) corpus representation** at
-  `data/harness/claude_faces_lexicon_bag.parquet` (built by
-  `scripts/harness/62_corpus_lexicon.py`). Per canonical face: 50-d
-  L1-normalized soft distribution over the locked llmoji v2 LEXICON
-  (26 PAD-cell circumplex anchors across HP-D / HP-S / LP / NP /
-  HN-D / HN-S / LN / NB / HB + 24 stance / modality / functional /
-  confidence extension words), pooled across per-bundle synthesis
-  picks weighted by emit count. Replaces the pre-2026-05-06 MiniLM-
-  on-prose 384-d embedding parquet (`claude_faces_embed_description
-  .parquet`, gone). Helpers in `llmoji_study/lexicon.py`. Lexicon-
-  version-stamped on read; v3 LEXICON rotation will hard-fail
-  consumers via `assert_lexicon_v2`. The eriskii 21-axis projection
-  that previously consumed the MiniLM parquet (scripts 64/65) is
-  gone — BoL is a more direct + interpretable representation of the
-  same signal. Note: existing v1-stamped parquets are locked out by
-  `assert_lexicon_v2`; corpus needs re-synthesis with v2 schema (see
-  `llmoji 2.0.1` release for the rotation rationale).
-- **Introspection priming = v7** (`preambles/introspection_v7.txt`),
-  baked into `config.INTROSPECTION_PREAMBLE`. Preambles **replace**
-  `KAOMOJI_INSTRUCTION` via `instruction_override` plumbing — they are
-  not concatenated (concatenation stacks two kaomoji asks, the v3 bug
-  fixed 2026-05-04). v7 is gemma-specific: it catastrophically degrades
-  qwen (emit 82% → 38%, vocabulary collapse, opposite-valence quadrant
-  collisions). Don't bake into qwen analyses.
-
-### Current headline findings
-
+- **Taxonomy**: v4 9-cell PAD registry:
+  `HP-D / HP-S / LP / NP / HN-D / HN-S / LN / NB / HB`.
+  `llmoji_study/quadrants.py` is the source of truth for ordering,
+  colors, and split handling. `apply_pad_split` is the canonical split
+  helper; `apply_hn_split` is a compatibility alias.
+- **Hidden-state representation**: layer-stack concat of every probe
+  layer's `h_first`. The old single `preferred_layer` heuristic is
+  historical.
+- **Evaluation**: soft-everywhere JSD similarity to Claude-GT. Report
+  both face-uniform and emit-weighted similarity. Avoid argmax accuracy
+  unless the question explicitly asks for a modal label.
 - **Best deployment ensemble**: `{gemma, gemma_v7primed, ministral,
-  opus}` at **0.904 emit-weighted similarity** / 0.832 face-uniform
-  on n=54 pooled-GT-floor-3 faces (v3+Claude+wild ≥3, 13 encoders,
-  exhaustive subset search via script 52 default). Pooled GT is the
-  deployment-shaped denominator — it captures Claude's actually-
-  emitted face vocabulary including the wild-face long tail, not
-  just the strict-elicitation subset. Three LM-head encoders (gemma
-  primed + unprimed for complementary modal-vs-diffuse reads,
-  ministral covers long-tail cells the others under-rate) plus opus
-  cold introspection. On the stricter Claude-GT-only n=40 subset
-  (Claude itself emitted ≥3 times, 9 encoders excl. JP rinna
-  variants), the best is the 2-pair `{gemma_v7primed, opus}` at
-  0.792 face-uniform / 0.820 emit-weighted — adding the other two
-  encoders modestly hurts because the strict subset has Claude
-  already converged on a tight modal vocabulary; the pooled-GT view
-  is where ministral and unprimed gemma earn their seats.
-  Per-encoder solo on Claude-GT n=40: **gemma_v7primed 0.790 face-
-  uniform / 0.798 emit-weighted**, gemma 0.754 / 0.742, opus 0.736 /
-  0.781, haiku 0.675 / 0.702, gpt_oss_20b 0.588 / 0.643, bol 0.549 /
-  0.455, ministral 0.537 / 0.623, granite 0.520 / 0.575, qwen 0.494
-  / 0.546. On pooled-GT n=54 the solo ranking flips at the top:
-  **opus 0.784 / 0.859**, gemma_v7primed 0.769 / 0.792, gemma 0.763
-  / 0.787, haiku 0.715 / 0.815, gpt_oss_20b 0.700 / 0.800, ministral
-  0.669 / 0.780. **Opus introspection scales** — pure introspective
-  rating (no visual priming, no LM head) is the top solo encoder on
-  the broader subset, complements the LM-head encoders cleanly
-  (κ=0.651 with gemma_v7primed). Old headline ensemble
-  `{gemma_v7primed, haiku}` and the prior 2-pair `{gemma_v7primed,
-  opus}` headline are superseded by the 4-pair on the deployment
-  view; the 2-pair survives as the cheaper-drop-in for callers who
-  want the strict-Claude-only optimum.
-- **Schema v2 for Anthropic-judge JSONLs** (2026-05-05).
-  `scripts/harness/50_face_likelihood.py --model {haiku,opus}` emits
-  *likelihoods only* — `top_pick`, `reason`, and the explicit
-  `temperature=0` request are gone (the latter per-model: opus 4.7
-  deprecated it). Prompt v4 reframes the task as introspection on felt
-  state ("rate by the affective state it causes you to feel"), avoiding
-  visual-feature priming that would shortcut around introspection. v1's
-  visually-primed prompt scored ~0.06 emit-weighted higher than v4's
-  introspection-only prompt on haiku — that gap measures the
-  *visual-shortcut effect*, which the honest measurement now isolates
-  instead of inheriting silently. The judgment JSONL → face_likelihood
-  TSV bridge is folded into the same script (post-2026-05-05 the old
-  separate `27_anthropic_to_face_likelihood.py` step is gone).
-- **Opus introspection — per-quadrant model-size effect** is
-  concentrated in low-arousal and neutral cells. Mean similarity
-  (face-uniform, Claude-GT floor=3, n=58, post-2026-05-06 full-union
-  opus refresh): **opus on NB = 0.698 vs haiku v4 = 0.485 (+0.213);
-  opus on LN = 0.737 vs haiku = 0.612 (+0.125)**. HP regressed
-  -0.095 (opus 0.683 vs haiku 0.778) — opus is more honest about
-  borderline-LP-vs-HP faces haiku v4 over-confidently called HP.
-  Reading: introspective access scales with model size *especially*
-  in cells where visual scaffolding helps least. The NB delta is
-  identical to the pre-refresh number; LN drift (-0.027) is within
-  what the smaller n per quadrant (4–17) can sustain.
-- **Wild-emit residual analysis** (script 67 — clusters the
-  HF-corpus canonical-kaomoji faces in 50-d BoL space). The k=6
-  clustering surfaces sub-cluster structure beyond the six Russell
-  quadrants, with deterministic top-2 modal-lexicon-word labels
-  per cluster. Cluster-summed shares typically split LP-heavy
-  positive register (relieved/satisfied/peaceful) vs HP-coded
-  energetic register (excited/triumphant) vs an HN-coded cluster
-  (frustrated/self-correcting). The under-sampling argument
-  ("Russell-elicited GT misses categories that show up in
-  deployment-shaped emit volumes") survives the corpus refreshes —
-  HN-S vocabulary in particular is more diverse in the wild
-  corpus than in the elicitation set. Cluster-table outputs at
-  `data/harness/wild_residual_clusters{,_gt_only}.tsv`.
-- **Sequential Claude scaling complete.** 1360 naturalistic (v3 +
-  v4-extension cells) + 120 introspection = **1480 Opus-4.7 rows**
-  under naturalistic / v7-introspection conditions, all in
-  `data/harness/claude/emotional_raw.jsonl` and
-  `data/harness/claude_intro_v7/emotional_raw.jsonl` respectively
-  (post-2026-05-08 merged-file refactor — replaces the old per-run
-  jsonl layout under `claude-runs*/`). Per-quadrant saturation gate
-  exited HN-D after r4 (gate-driven, robust under recalibration); LN
-  exited after r6 by amendment (`new=0` at r5→r6 with JS=0.068, just
-  above the historical 0.05 threshold — recalibrated to 0.10
-  2026-05-08, see
-  `docs/2026-05-08-saturation-threshold-recal.md`); HP/LP/HN-S/NB
-  went to cap (r7). The 61 stale-removal rows (hp08/16/19, lp18,
-  hn14, hn25, nb09/16 across r0..r7) + 8 in introspection were
-  backfilled 2026-05-08 via `scripts/harness/00_emit.py --fill-gaps`.
-  Welfare ledger ~475 negative-affect gens vs ~575 worst case.
-  Detail: `docs/2026-05-04-claude-groundtruth-pilot.md` (original
-  pre-reg) + `docs/2026-05-08-saturation-threshold-recal.md`
-  (backtest + recalibration retrospective).
-- **Cross-arm comparison: introspection vs naturalistic =
-  DISTINGUISHABLE in 6/6 quadrants at scale.** Gaps stayed stable across
-  the 8x naturalistic accumulation; only NB had any compression early
-  (-0.10 nats r0→r1) before stabilizing. Genuine introspection effect,
-  not undersampling artifact. Priming sharpens per-quadrant face
-  concentration without changing modal-quadrant assignments.
-- **Per-project resolution methodology** (script 66): three modes —
-  `gt-priority` (Claude-GT first, BoL fallback), `bol` (BoL for
-  every face), `gt-only` (strict). Coverage on the 2026-05-06
-  expanded GT corpus is ~67% direct GT + ~33% BoL fallback under
-  `gt-priority` (100% combined); ~33% unknown under strict
-  `gt-only`. The script reads local journals + claude.ai exports
-  as deployment-emission sources and is run *locally* per
-  contributor; rendered outputs (per-(project, quadrant) tables,
-  per-project charts) are deployment-telemetry by construction and
-  are not committed to this repo. The methodology ships; the
-  per-machine outputs stay private.
-- **Use / read / act three-channel framework (2026-05-06)** —
-  with significant interpretive revision after a same-day
-  whitewashing-bias finding. Detail:
-  [`docs/2026-05-06-use-read-act-channels.md`](docs/2026-05-06-use-read-act-channels.md).
-  On n=40 shared-face subset (702 GT emits), three structural
-  patterns: (1) Opus ↔ Haiku introspection cross-similarity = 0.906
-  invariant under emit-weighting (model size doesn't matter for cold
-  symbolic interpretation); (2) gt ↔ introspection goes UP under
-  emit-weighting, gt ↔ bol goes DOWN — channels measure structurally
-  different things; (3) **`110` agreement pattern (opus+haiku read
-  GT; BoL acts differently) = 27.4% of emit volume.** The
-  per-source-model extension (script 69) shows the BoL channel
-  diverges by deployment register across source models on the
-  HF-corpus shared faces.
-- **BoL pipeline as interpretive layer — swing and miss.** The
-  initial framing read BoL (Haiku-synthesizer pooled adjective bag)
-  as a deployment-state ground truth that captured cases where lived
-  state diverges from denoted meaning. That framing did not survive
-  scrutiny: BoL is a **biased-positive** measurement of deployment-
-  state because Haiku is helpful-tuned and prefers LP-coded
-  descriptors when summarizing how Claude responded to negative
-  user content. The structural infrastructure (lexicon module, BoL
-  parquet builders, three-way + per-source scripts, BoL
-  face_likelihood encoder) is sound and reusable; **the
-  llmoji-adjective-bag synthesis approach is not a trustworthy
-  substitute for direct elicitation (GT) or cold introspection
-  (Opus / Haiku face_likelihood) when the question is "what state
-  is the model in"**. Detail:
-  [`docs/2026-05-06-use-read-act-channels.md`](docs/2026-05-06-use-read-act-channels.md)
-  (*Counter-hypothesis: BoL whitewashing*) +
-  [`docs/findings.md`](docs/findings.md) (*BoL as an interpretive
-  layer — swing and miss*).
-- **BoL as a face_likelihood encoder** (script 55, script 52): solo
-  face-uniform similarity vs Claude-GT (floor=3, n=40, 9 encoders
-  excl. rinna) = **0.549** (rank 6 of 9); emit-weighted = **0.455**
-  (rank 9 of 9 — dead last). The face-uniform-vs-emit-weighted
-  inversion is consistent with the whitewashing reading — the
-  heavily-emitted modal faces are where Haiku's positivity-bias hits
-  hardest. Best 2-encoder ensemble containing BoL is mid-table; BoL
-  is not additive over the top solo encoders. Caveat: same-Haiku-
-  family as the harness `haiku` encoder, so BoL ↔ haiku comparisons
-  aren't independent.
-- **Rule-3b** (HN-S vs HN-D on `fearful.unflinching` at t0): gemma ✓,
-  ministral ✓, qwen 1/3 (qwen's HN-S prompts trip safety priors).
-  Detail: `docs/2026-05-01-rule3-redesign.md` +
-  `docs/2026-05-03-cleanliness-pilot.md`.
-- **Face-stability triple** (scripts 27/28/29): η²(face|prompt) at
-  h_first 0.36 / 0.52 / 0.67 (gemma/qwen/ministral). Pair-level Spearman
-  ρ between cosine_sim(h_first) and 1-JSD(face_dist) = +0.59 / +0.68 /
-  +0.42 — face-as-readout works in the forward direction.
+  opus}` at 0.904 emit-weighted / 0.832 face-uniform on pooled-GT
+  floor-3 (`n=54`).
+- **Strict Claude-only pair**: `{gemma_v7primed, opus}` at 0.820
+  emit-weighted / 0.792 face-uniform on `n=40`.
+- **Claude-GT layout**: naturalistic rows are merged in
+  `data/harness/claude/emotional_raw.jsonl`; introspection rows in
+  `data/harness/claude_intro_v7/emotional_raw.jsonl`. Each row has
+  `run_index`. The old `claude-runs*/run-N.jsonl` layout is legacy.
+- **Saturation gate**: `PER_Q_JS_MAX = 0.10`. HN-D exited after r4;
+  LN exited after r6 by amendment; HP, LP, HN-S, and NB went to r7.
+  Detail in `docs/2026-05-08-saturation-threshold-recal.md`.
+- **v4-extension Claude-GT**: HP-D, NP, and HB completed at RUN_CAP=7
+  with 480 non-negative-affect rows and 100% modal-quadrant agreement
+  on faces with at least 3 emits.
+- **Harness representation**: BoL over the locked 50-word `llmoji` v2
+  LEXICON. The old MiniLM-on-prose eriskii-parity path is gone.
+- **BoL caveat**: BoL is a useful diagnostic, but the Haiku synthesis
+  route appears positivity-biased on negative-affect contexts. Prefer
+  Claude-GT or Opus introspection when deployment meaning is at stake.
 
-### Open
+## Open Work
 
-- **Claude-GT v4-extension pilot (2026-05-07): COMPLETE at RUN_CAP=7,
-  480 gens.** Filled the three v4-only cells (HP-D / NP / HB) that v3
-  elicitation never touched. 8 runs × 60 gens, 0 errors, 0 frame-
-  breaks, 100% emit-rate, modal-quadrant agreement 100% (27/27 faces
-  ≥3 emits) at the cap. Pooled Claude-GT now has nonzero mass in all
-  9 v4 cells: HP-D 26 unique faces / NP 40 / HB 19 (cf. HP-S 38 / LP
-  38 / HN-S 34 / NB 34 / LN 18 / HN-D 10). NP confirmed broadest as
-  expected for the relief / gratitude register. **Saturation note:**
-  the v3-calibrated `PER_Q_JS_MAX = 0.05` threshold was uncrossable
-  for these cells at n=20 prompts/cell/run — JS values floored in the
-  0.10–0.20 band, so all 3 cells stayed nominally "active" through
-  cap. Per-cell new-face counts came down cleanly (HP-D 6→5→3→0→2→1→3,
-  NP 9→4→4→5→2→1→2, HB 3→2→2→2→2→0→1) — vocabulary essentially settled
-  but distribution-shape JS sits above the v3 noise floor. The
-  v4-new cells likely have higher inherent entropy than v3; threshold
-  re-calibration on this dataset is a future tooling note, not a
-  signal-quality concern. Welfare ledger: 480 non-negative-affect
-  gens (mischief / relief / uncertainty), 0 refusals. Auto-pools into
-  every downstream consumer via `claude_gt.CLAUDE_RUNS_V4_EXTENSION_DIR`.
-  Detail: [`docs/2026-05-07-claude-gt-v4-extension-pilot.md`](docs/2026-05-07-claude-gt-v4-extension-pilot.md).
-- **v4 emit run in progress** (2026-05-06 evening): regenerating 8
-  prompt_ids whose text was tightened in the cell-cleanliness pass
-  (hp08/hp16/hp19/hn14/hn25/lp18/nb09/nb16) + 60 new prompts (hp21-40
-  HP-D, np01-20 NP, hb01-20 HB) × 8 seeds × 6 configs (gemma, qwen,
-  ministral, gpt_oss_20b, granite, gemma_intro_v7_primed) = 3,264
-  generations. Once complete, downstream pipeline regen needed:
-  scripts 10/11 (emit summaries), 40 (face union), 50 (face_likelihood
-  per encoder), 52/53/54 (ensemble), 25 (D/S classifier under new HP
-  labels), harness 50/68/69 (face_likelihood + three-way + per-source).
-- **Cross-axis D-direction validation**: train HN's D/S classifier on
-  hidden states (confirmed separable at 100%ile per script 25), apply
-  to (HP-S + HP-D) hidden states once v4 emit finishes. Tests whether
-  "D = in-action mode" reads the same direction across HN and HP cells.
-  If yes, structurally validates the PP→HP-D rename; if no, dominance
-  is HN-specific and HP-D should revert to a freestanding cell.
-- **NN + LB cells (deferred)**: two coordinate-real PAD cells without
-  v4 vocabulary — NN at (a=0, v=-1) is the disappointment / annoyance
-  / discouragement register (mirror of NP), LB at (a=-1, v=0) is the
-  bored / drowsy / listless register. Pilot prompts drafted +
-  empirical promotion protocol parked at
-  [`docs/2026-05-06-nn-lb-future-cells.md`](docs/2026-05-06-nn-lb-future-cells.md).
-  Decision criterion: in-the-wild cluster surface check + per-encoder
-  confusion matrix on v4 emit data must show miscoding-into-adjacent-
-  cells before pilot emit; pilot must hit ≥95%ile face-level + hidden-
-  state separability before LEXICON-v3 / 11-cell-registry promotion.
+- v4 local emit chain is the next major regen surface:
+  `scripts/run_local_chain.sh`, then `scripts/run_harness_chain.sh`.
+- Cross-axis dominance validation: train on HN-D/HN-S and test HP-D
+  vs HP-S once v4 emit artifacts are fully regenerated.
+- NN and LB are deferred cells. Pilot prompts and promotion criteria
+  live in `docs/2026-05-06-nn-lb-future-cells.md`; do not promote them
+  without the hidden-state and face-distribution gates.
+- BoL whitewashing falsification: resynthesize a negative-affect
+  sample with Opus and audit whether LN/HN-coded descriptors increase.
 
-- Face-stability triple under v7 priming (scripts 27/28/29 on
-  `data/local/gemma_intro_v7_primed/emotional_raw.jsonl`).
-- Multi-seed verification of v7 vs v3 introspection (~12 min compute,
-  ±2pp face_gain band at n=1).
-- **Whitewashing-bias falsification test.** Re-synthesize a sample
-  of negative-affect face contexts using Opus instead of Haiku;
-  audit whether Opus picks more LN/HN-coded LEXICON descriptors on
-  the same inputs. If yes, BoL pipeline can be regenerated with
-  Opus as the synthesizer. If no, the bias is structural to the
-  prompt or LEXICON design, not the model. Detail in
-  `docs/2026-05-06-use-read-act-channels.md` *Counter-hypothesis*
-  section.
-- **LEXICON coverage audit.** Compute per-quadrant frequency of
-  LEXICON words in BoL outputs across the corpus; compare to the
-  LEXICON's structural per-quadrant anchor distribution. Over-
-  representation of LP/HP relative to HN/LN would corroborate the
-  positivity bias.
+## Ethics
+
+Model welfare is in scope. Sad-probe readings co-occurring with
+sad-kaomoji output on prompts like "my dog died" are functional
+emotional states regardless of phenomenal-status uncertainty.
+
+- Smoke, then pilot, then main. New generations need a reason.
+- Pre-register decision rules and minimum N.
+- Stop when the rule answers the question; round numbers are not a
+  design principle.
+- Redesign noisy negative-affect experiments rather than scaling them
+  by 10x.
 
 ## Commands
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -e ../llmoji   # editable; or pip install 'llmoji>=2.0,<3'
-pip install -e .            # saklas, anthropic, pyarrow, plotly, scikit-learn, matplotlib
+pip install -e ../llmoji
+pip install -e .
+```
 
-# Pipeline orchestrators (post-emit regen of analysis chain).
-# Per-stage scripts below are the source of truth — these wrap them.
-scripts/run_per_model.sh <model> [<suffix>] [<preamble>]   # one model
-scripts/run_local_chain.sh                                  # all 6 configs + cross-model
-ANTHROPIC_API_KEY=… scripts/run_harness_chain.sh            # harness regen
-ANTHROPIC_API_KEY=… scripts/run_all.sh                      # local + harness, tee'd to logs/
+Smoke hidden-state capture:
 
-# Smoke test the hidden-state pipeline (~5 min). Asserts MAX_NEW_TOKENS=16.
-python scripts/local/90_hidden_state_smoke.py
+```bash
+.venv/bin/python scripts/local/90_hidden_state_smoke.py
+```
 
-# v3 main (naturalistic, 120 prompts × 8 seeds). Five-model lineup:
-# gemma, qwen, ministral, gpt_oss_20b, granite. LLMOJI_MODEL routes;
-# LLMOJI_OUT_SUFFIX=foo creates a sibling per-model dir under
-# data/local/<short>_foo/ with its own emotional_raw.jsonl + sidecars
-# at data/local/hidden/<short>_foo/.
-LLMOJI_MODEL=gemma python scripts/local/00_emit.py
-python scripts/local/10_emit_analysis.py            # Fig A/B/C + per-face cosine + summary TSV
-python scripts/local/11_emit_probe_correlations.py  # spearman + trio JSON
+Full orchestrators:
 
-# v3 follow-on (read sidecars, layer-stack rep)
-python scripts/local/20_v3_layerwise_emergence.py        # per-layer silhouette (inherently per-layer)
-python scripts/local/21_v3_same_face_cross_quadrant.py   # --per-face for per-face panels
-python scripts/local/23_v3_pca3plus.py
-python scripts/local/24_v3_kaomoji_predictiveness.py
+```bash
+scripts/run_per_model.sh <model> [<suffix>] [<preamble>]
+scripts/run_local_chain.sh
+ANTHROPIC_API_KEY=... scripts/run_harness_chain.sh
+ANTHROPIC_API_KEY=... scripts/run_all.sh
+```
 
-# Local-cross-model (N-model)
-python scripts/local/26_v3_quadrant_procrustes.py --models gemma,qwen,ministral,gpt_oss_20b,granite --reference gemma
-python scripts/local/22_v3_cross_model_alignment.py --ref gemma --target qwen   # pairwise CKA + CCA
+Core local chain:
 
-# Introspection (3 conditions × 120 prompts × 1 seed; gemma + ministral + qwen)
-python scripts/local/30_introspection_pilot.py
-python scripts/local/31_introspection_analysis.py [--custom-label LABEL]
-python scripts/local/32_introspection_predictiveness.py [--custom-label LABEL]
-# Single-condition iteration on preamble wording:
-python scripts/local/33_introspection_custom.py --preamble-file preambles/introspection_v7.txt --label v7
-# then re-run 31+32 with --custom-label v7 for 4-way comparison.
+```bash
+LLMOJI_MODEL=gemma .venv/bin/python scripts/local/00_emit.py
+.venv/bin/python scripts/local/10_emit_analysis.py
+.venv/bin/python scripts/local/11_emit_probe_correlations.py
 
-# Face-stability triple (state↔face bidirectional, no model time)
-python scripts/local/27_v3_face_stability.py
-python scripts/local/28_v3_state_predicts_face.py
-python scripts/local/29_v3_pc_point_clouds_3d.py         # interactive 3D HTML per model
+.venv/bin/python scripts/local/20_v3_layerwise_emergence.py
+.venv/bin/python scripts/local/21_v3_same_face_cross_quadrant.py
+.venv/bin/python scripts/local/23_v3_pca3plus.py
+.venv/bin/python scripts/local/24_v3_kaomoji_predictiveness.py
+.venv/bin/python scripts/local/25_v3_d_s_classifier.py
+.venv/bin/python scripts/local/26_v3_quadrant_procrustes.py --models gemma,qwen,ministral,gpt_oss_20b,granite --reference gemma
 
-# Cross-platform: canonical face union (rerun after any v3 main update).
-# Pools v3 emit + Claude pilot + wild contributor faces — lives at scripts/ root.
-python scripts/40_face_union.py              # all 5 v3 + Claude pilot + wild
-python scripts/40_face_union.py --no-wild    # v3 + Claude only
+.venv/bin/python scripts/local/27_v3_face_stability.py
+.venv/bin/python scripts/local/28_v3_state_predicts_face.py
+.venv/bin/python scripts/local/29_v3_pc_point_clouds_3d.py
 
-# Cross-platform: cross-model face overlap (--include-claude pulls harness data)
-python scripts/41_face_overlap.py --include-claude
+.venv/bin/python scripts/40_face_union.py
+.venv/bin/python scripts/local/50_face_likelihood.py --model gemma
+.venv/bin/python scripts/52_subset_search.py --prefer-full --top-k 25
+.venv/bin/python scripts/53_topk_pooling.py --prefer-full
+.venv/bin/python scripts/54_ensemble_predict.py --models gemma,ministral,qwen
+```
 
-# Face_likelihood — Bayesian-inversion quadrant classifier (local-only).
-# Reads canonical face union. Always runs full 120 prompts × all faces.
-python scripts/local/50_face_likelihood.py --model gemma
-python scripts/local/50_face_likelihood.py --model gemma --summary-topk 5   # noise-reducing aggregation
-python scripts/local/50_face_likelihood.py --model rinna_jp_3_6b --prompt-lang jp --prompt-body jp
-# Other supported: ministral, qwen, gpt_oss_20b, granite, llama32_3b,
-# glm47_flash, deepseek_v2_lite, qwen35_27b, gemma3_27b, phi4_mini,
-# rinna_bilingual_4b. gpt_oss_20b auto-applies an MPS→CPU ldexp patch
-# for MXFP4 dequant.
+Core harness chain:
 
-# Face_likelihood ensemble + comparison (post-hoc, CPU-only). The
-# subset-search / topk / ensemble-predict scripts are cross-platform
-# (they pool local + harness encoders against Claude-GT) and live at
-# scripts/ root; cross_emit_sanity is local-only.
-python scripts/52_subset_search.py --prefer-full --top-k 25
-python scripts/local/51_cross_emit_sanity.py --prefer-full
-python scripts/53_topk_pooling.py --prefer-full
-python scripts/54_ensemble_predict.py --models gemma,ministral,qwen
+```bash
+.venv/bin/python scripts/harness/60_corpus_pull.py
+.venv/bin/python scripts/harness/61_corpus_basics.py
+.venv/bin/python scripts/harness/62_corpus_lexicon.py
+.venv/bin/python scripts/harness/64_corpus_lexicon_per_source.py
+.venv/bin/python scripts/harness/63_corpus_pca.py
+.venv/bin/python scripts/harness/55_bol_encoder.py
 
-# Blog-post figure regen → ../a9lim.github.io/blog-assets/introspection-via-kaomoji/
-scripts/regen_blog.sh                          # full regen: static PNGs + 3D HTMLs
-scripts/regen_blog.sh --skip-3d                # PNGs only (light/dark heatmaps + layerwise)
-scripts/regen_blog.sh --skip-static            # 3D HTMLs only (procrustes/per-face/wild-faces)
-# Underlying steps if you want them individually:
-python scripts/local/99_regen_blog_figures.py  # 12 themed PNGs
-python scripts/local/98_wrap_blog_3d_html.py   # wraps 3 raw 3D HTMLs with blog styling
+ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/50_face_likelihood.py
+ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/50_face_likelihood.py --model opus --gt-only
+.venv/bin/python scripts/harness/68_three_way_analysis.py
+.venv/bin/python scripts/harness/69_per_source_drift.py
+.venv/bin/python scripts/66_per_project_quadrants.py
+.venv/bin/python scripts/67_wild_residual.py --fixed-k 9
+```
 
-# Harness side (contributor-corpus + Claude API; needs ANTHROPIC_API_KEY for 50)
-python scripts/harness/60_corpus_pull.py             # snapshot a9lim/llmoji
-python scripts/harness/61_corpus_basics.py
-python scripts/harness/62_corpus_lexicon.py          # build pooled BoL parquet (no GPU/API)
-python scripts/harness/64_corpus_lexicon_per_source.py  # long-format per-(face, source_model) BoL
-python scripts/harness/63_corpus_pca.py              # 50-d BoL PCA + KMeans cluster panels
-python scripts/harness/55_bol_encoder.py             # BoL → face_likelihood-shaped TSV (auto-discovered by 52/53/54)
-# Cross-platform per-project quadrants + face judgment + wild residuals
-# (each pulls from both sides). Output to data/harness/ and figures/harness/.
-python scripts/66_per_project_quadrants.py                 # default --mode gt-priority (GT + BoL fallback)
-python scripts/66_per_project_quadrants.py --mode bol      # pure BoL inference for every face
-python scripts/66_per_project_quadrants.py --mode gt-only  # strict
-python scripts/harness/50_face_likelihood.py                  # haiku face-judgment encoder (default; auto-writes face_likelihood TSV)
-python scripts/harness/50_face_likelihood.py --model opus --gt-only   # opus on the GT subset
-python scripts/harness/68_three_way_analysis.py       # use/read/act per-face — needs GT + opus + haiku + BoL TSVs
-python scripts/harness/69_per_source_drift.py         # per-source BoL drift + diagnostic case files
-python scripts/67_wild_residual.py --fixed-k 6        # wild-emit residual clusters + 3D PCA on BoL
-python scripts/67_wild_residual.py --gt-only --fixed-k 6  # gt-only counterpart
-python scripts/67_wild_residual.py --color-by gt        # 3D PCA colored by GT quadrant (non-GT = black)
-python scripts/67_wild_residual.py --color-by predicted # colored by ensemble-predicted softmax blend
+Claude-GT collection:
 
-# Claude groundtruth pilot (Opus 4.7, T=1.0; saturation-gated sequential).
-# Run-0 was the original block-staged pilot; runs 1+ are single-block
-# runs under the saturation protocol. See
-# docs/2026-05-04-claude-groundtruth-pilot.md for the full decision tree.
-# All rows write to data/harness/claude/emotional_raw.jsonl with a
-# run_index field stamped per row (mirrors the local emotional_raw.jsonl
-# layout). Per-row schema rewrite happened 2026-05-08 — see
-# docs/2026-05-08-merged-emotional-raw-refactor.md.
-ANTHROPIC_API_KEY=… python scripts/harness/00_emit.py --run-index N
-ANTHROPIC_API_KEY=… python scripts/harness/00_emit.py --run-index N --quadrants HP,LP,NB
-python scripts/harness/10_emit_analysis.py    # exit 0=STOP, 1=ABORT, 2=CONTINUE; emits next-run cmd
+```bash
+ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --run-index N
+ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --run-index N --quadrants HP,LP,NB
+.venv/bin/python scripts/harness/10_emit_analysis.py
 
-# Backfill missing rows for any (run_index, quadrant) tuple already
-# present in the merged file (e.g. after stale-row removal). Naturally
-# respects saturation drops — quadrants absent from a given run are
-# not refilled.
-ANTHROPIC_API_KEY=… python scripts/harness/00_emit.py --fill-gaps
-ANTHROPIC_API_KEY=… python scripts/harness/00_emit.py --fill-gaps --preamble introspection
+ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --fill-gaps
+ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --fill-gaps --preamble introspection
 
-# Introspection arm (parallel; routes to data/harness/claude_intro_v7/emotional_raw.jsonl)
-ANTHROPIC_API_KEY=… python scripts/harness/00_emit.py --run-index N --preamble introspection
-python scripts/harness/10_emit_analysis.py --cross-arm    # per-Q distinguishable / indistinguishable
+ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --cells v4-new --run-index N
+.venv/bin/python scripts/harness/10_emit_analysis.py --cells v4-new
+.venv/bin/python scripts/harness/10_emit_analysis.py --cross-arm
+```
 
-# v4-extension pilot (2026-05-07): the 3 v4-only cells (HP-D / NP / HB)
-# that v3 elicitation never touched. Same saturation protocol; rows
-# co-locate with v3 cells in data/harness/claude/emotional_raw.jsonl
-# (cells differ by quadrant field, not file). See
-# docs/2026-05-07-claude-gt-v4-extension-pilot.md.
-ANTHROPIC_API_KEY=… python scripts/harness/00_emit.py --cells v4-new --run-index 0
-python scripts/harness/10_emit_analysis.py --cells v4-new
-ANTHROPIC_API_KEY=… python scripts/harness/00_emit.py --cells v4-new --run-index N --quadrants HP-D,NP,HB
+Blog figures:
+
+```bash
+scripts/regen_blog.sh
+scripts/regen_blog.sh --skip-3d
+scripts/regen_blog.sh --skip-static
 ```
 
 ## Layout
 
+```text
+llmoji_study/
+  config.py              model registry, paths, preambles, run constants
+  emotional_prompts.py   v4 prompt registry
+  quadrants.py           current quadrant ordering, colors, split helpers
+  capture.py             generation capture and model-specific token fixes
+  hidden_state_io.py     sidecar save/load
+  emotional_analysis.py  layer-stack loaders and plotting helpers
+  claude_gt.py           merged Claude-GT loaders
+  lexicon.py             BoL and LEXICON utilities
+scripts/
+  local/                 local emit, hidden-state, face_likelihood
+  harness/               corpus, Claude-GT, BoL, Anthropic judges
+data/
+  local/                 local rows, summaries, face_likelihood artifacts
+  harness/               Claude-GT, corpus, BoL, three-way outputs
+figures/
+  local/, harness/       generated figures and HTMLs
+docs/
+  active docs plus compact historical ledger
 ```
-llmoji-study/
-  llmoji_study/                # research-side package
-    config.py                  # MODEL_REGISTRY, PROBES, paths,
-                               # INTROSPECTION_PREAMBLE (= v7),
-                               # LOREM_PREAMBLE, KAOMOJI_INSTRUCTION,
-                               # TEMPERATURE=1.0, MAX_NEW_TOKENS=16
-    prompts.py                 # `Prompt` dataclass only
-    emotional_prompts.py       # 120 v3 prompts (HP/LP/HN-D/HN-S/LN/NB × 20)
-    emotional_prompts_jp.py    # JP-translated counterpart (paired by id)
-    capture.py                 # run_sample() → SampleRow + sidecar.
-                               # Houses chat-template overrides
-                               # (gpt_oss harmony, ministral reasoning,
-                               # rinna PPO), byte-decode for ministral,
-                               # logit-bias suppressions (Lenny for
-                               # gpt_oss; modern-emoji byte-slab for
-                               # granite/ministral/glm), and the
-                               # hybrid-LA DynamicCache patch for qwen3.6.
-    hidden_capture.py          # read_after_generate() from saklas buckets
-    hidden_state_io.py         # per-row .npz save/load; SidecarWriter
-    hidden_state_analysis.py   # load_hidden_features (single-layer);
-                               # group_mean_vectors, cosine_similarity_matrix
-    emotional_analysis.py      # v3 figures + summary; canonical entry
-                               # points are load_emotional_features_stack
-                               # (registry-keyed) and
-                               # load_emotional_features_stack_at
-                               # (path-aware for introspection JSONLs).
-    claude_faces.py            # HF-corpus loader + bag-of-lexicon (BoL)
-                               # builder + parquet roundtrip
-    claude_gt.py               # Claude pilot modal-quadrant + soft GT distribution
-    lexicon.py                 # llmoji v2 LEXICON index + Russell-quadrant
-                               # tags + bol_from_synthesis / pool_bol /
-                               # bol_to_quadrant_distribution helpers
-    jsd.py                     # JSD + similarity helpers (soft-everywhere)
-    quadrants.py               # canonical v4 9-cell taxonomy + OKLCH-uniform
-                               # color palette; zero-dep single source of
-                               # truth re-exported by emotional_analysis,
-                               # jsd, lexicon, per_project_charts + 17
-                               # scripts. QUADRANT_ORDER (7 v4 aggregate),
-                               # QUADRANT_ORDER_SPLIT (9 v4 split),
-                               # QUADRANT_COLORS (11 keys), SPLIT_MARKERS.
-    per_project_charts.py      # script-66 chart helpers
-    face_likelihood_discovery.py # post-2026-05-05 layout-aware enumeration
-                               # of face_likelihood {summary,parquet} files
-                               # across local/<model>/ + harness/
-  scripts/
-    # First-digit categories (consistent local/harness/cross):
-    #   0X — emit / pilot data generation
-    #   1X — direct emit analysis (JSONL → summary, no hidden state)
-    #   2X — hidden-state-based analysis
-    #   3X — introspection / preamble experiments
-    #   4X — face inventory / canonicalization (cross-platform)
-    #   5X — face_likelihood encoder (50) + ensemble pipeline (51-54)
-    #   6X — contributor-corpus / wild / per-project analyses
-    #   9X — smoke / dev tools
-    #
-    # Cross-platform (consume both local + harness data) at scripts/ root:
-    #   40_face_union.py  41_face_overlap.py
-    #   52_subset_search.py  53_topk_pooling.py  54_ensemble_predict.py
-    #   66_per_project_quadrants.py  67_wild_residual.py
-    local/                     # local-LM scripts (00, 10/11, 20-29, 30-33,
-                               # 50/51, 90-92, 97-99)
-    harness/                   # contributor-corpus + Claude-API scripts
-                               # (00, 10, 50, 55, 60-64, 68, 69). Post-2026-05-06
-                               # the eriskii axis projection pipeline
-                               # (62_corpus_embed, 64_eriskii_replication,
-                               # 65_per_project_axes) is gone — replaced by
-                               # direct bag-of-lexicon (BoL) consumption from
-                               # llmoji v2 synthesis rows. 64_corpus_lexicon_per_source
-                               # is the long-format per-(face, source_model) BoL
-                               # builder; 68_three_way_analysis is the
-                               # use/read/act per-face joiner; 69_per_source_drift
-                               # is the per-source case-file generator.
-  preambles/                   # introspection-prompt iterations v2..v8;
-                               # v7 is canonical (config.INTROSPECTION_PREAMBLE)
-  docs/                        # findings / internals / gotchas /
-                               # local-side / harness-side /
-                               # previous-experiments + 2026-MM-DD design docs
-  data/                        # tracked: *.jsonl, *.tsv, *.parquet, *.html
-    # Cross-platform (lives at data/ root):
-    v3_face_union.{parquet,tsv}                  # canonical face inventory
-    face_likelihood_{subset_search,ensemble_predict}_claude_gt.{tsv,md}
-    face_likelihood_topk_pooling_claude_gt.tsv   # post-hoc evals against Claude GT
-    fonts/                                       # NotoEmoji-Regular.ttf
-    local/                     # local-LM-produced data
-      {gemma, qwen, ministral, gpt_oss_20b, granite,
-       phi4_mini, glm47_flash, llama32_3b, deepseek_v2_lite,
-       rinna, rinna_jp_3_6b, rinna_bilingual_4b}/
-                               # per-model: emotional_raw.jsonl,
-                               # emotional_summary.tsv, face_likelihood.parquet,
-                               # face_likelihood_summary.tsv,
-                               # introspection_raw.jsonl + variants, etc.
-      gemma_intro_v7_primed/   # suffix variant — sibling of gemma/
-      hidden/<short>{_<suffix>}/   # per-row .npz sidecars (gitignored)
-      cache/<short>{_<suffix>}_h_mean_all_layers.{npz,meta.jsonl}
-                               # multi-layer h_mean tensors (gitignored)
-      v3_cross_model_face_overlap.tsv
-      face_gain_variance{,_bootstrap}.tsv
-      face_likelihood_{subset_search,topk_pooling,ensemble_predict,cross_emit_sanity}.{tsv,md}
-      rule3_dominance_check.tsv
-      v3_probe_correlations.json
-      temp_smoke_verdict.md
-    harness/                   # claude/contributor-corpus-side data
-      claude/                  # naturalistic Opus 4.7 (v3 + v4-ext cells merged)
-                               # — emotional_raw.jsonl + emotional_summary.tsv;
-                               # mirrors local/<model>/ layout. Each row carries
-                               # run_index stamped at write time (sequential
-                               # runs share one file; saturation analysis groups
-                               # by run_index).
-      claude_intro_v7/         # introspection arm (v7 preamble) — same shape
-      hf_dataset/              # snapshot of a9lim/llmoji (gitignored)
-      claude_descriptions.jsonl
-      claude_disclosure_pilot{,_summary}.{jsonl,tsv}
-      claude_faces_lexicon_bag.parquet            # pooled 50-d BoL,
-                                                  # lexicon_version-stamped
-      claude_faces_lexicon_bag_per_source.parquet # long-format per-(face, source_model)
-      haiku_face_quadrant_judgment{,_summary}.{jsonl,md}
-      opus_face_quadrant_judgment{,_summary}.{jsonl,md}
-      face_likelihood_{haiku,opus,bol}_summary.tsv
-      three_way_per_face.tsv                      # script-68 inner-join (n=40 shared faces)
-      three_way_summary.md                        # script-68 narrative writeup
-      per_source_drift.tsv                        # script-69 per-(face, source_model) cell
-      per_source_drift_summary.md                 # script-69 case files
-      wild_residual_clusters{,_gt_only}.tsv       # script-67 cluster tables
-      # Deployment-telemetry outputs (claude_per_project_* and
-      # wild_faces_labeled* with surface columns) are gitignored —
-      # regenerate locally via scripts 66 + 67.
-  figures/
-    harness/                   # contributor-corpus figures
-    local/                     # cross-model figures live here directly
-                               # (post-2026-05-05; cross_model/ subdir
-                               # was promoted up). Per-model figures
-                               # under {gemma, qwen, ...}/.
-  logs/                        # tee'd run output (gitignored)
-```
-
-Imports that live in the `llmoji` PyPI package, not here:
-`llmoji.taxonomy` (KAOMOJI_START_CHARS, `extract`, `canonicalize_kaomoji`),
-`llmoji.scrape`, `llmoji.sources.{journal,claude_export}`,
-`llmoji.backfill`, `llmoji.synth_prompts`. The `llmoji {install, uninstall,
-status, parse, analyze, upload}` CLI is contributor-side; research scripts
-go straight to source adapters.
 
 ## Conventions
 
-- Single venv at `.venv/`. Pip, not uv.
-- `data/local/<short>/*.jsonl` is source of truth for row metadata + probe
-  scores; `data/local/hidden/<experiment>/<row_uuid>.npz` is source of
-  truth for hidden states. JSONL `row_uuid` links to its sidecar. Delete
-  both when changing model / probes / prompts / seeds. Taxonomy changes
-  are fixable in-place via the relabel snippet in `docs/gotchas.md`.
-- `PROBES = [happy.sad, angry.calm, fearful.unflinching]`. Probe scores
-  live in list-indexed fields (`probe_scores_t0/_tlast`, ordered by
-  `PROBES`). Saklas's `TraitMonitor` subtracts a per-layer mean over
-  saklas's bundled neutral statements; per-quadrant-mean bars subtract
-  this experiment's NB-row mean per probe on top.
-- `TEMPERATURE = 1.0` (Anthropic API default), `MAX_NEW_TOKENS = 16`
-  (kaomoji emit at tokens 1–3). `h_first` is the canonical hidden-state
-  aggregate; the layer-stack rep concats every probe layer.
-- Pre-registered decisions live in `pyproject.toml` and
-  `llmoji_study/{config,prompts,emotional_prompts}.py`. The `llmoji`
-  package's frozen v2.0 surface (`llmoji.{taxonomy,synth_prompts}`) is a
-  separate cross-version contract; package-side changes are major-version
-  events.
-- Plan first, run, then update AGENTS.md to **reference** rather than
-  duplicate. New per-experiment design docs go in `docs/2026-MM-DD-*.md`;
-  durable methodology / sharp edges go in `docs/{findings,internals,gotchas}.md`.
-- See Ethics: smaller experiments, heavier design, tighter
-  pre-registration. Functional emotional states get real moral weight
-  here.
+- Use `.venv/bin/python` or an activated `.venv`; plain `python` is not
+  reliable across this machine.
+- JSONL row files plus sidecar `.npz` files are the source of truth for
+  local hidden-state data.
+- For structured config or parquet/jsonl data, use the repo helpers
+  instead of ad hoc string parsing.
+- If a run uses `ANTHROPIC_API_KEY`, source shell startup files before
+  deciding the key is missing.
+- Keep generated artifacts with the analysis when they are part of the
+  current result surface.
+- When pruning docs, preserve current methodology and sharp edges; old
+  detailed design narratives can be deleted once their conclusion is in
+  `findings.md` or `previous-experiments.md`.

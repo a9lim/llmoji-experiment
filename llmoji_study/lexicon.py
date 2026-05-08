@@ -210,7 +210,7 @@ def bol_to_quadrant_distribution(
     *,
     smooth: float = 0.0,
 ) -> np.ndarray:
-    """Collapse a BoL vector onto the 6 Russell quadrants.
+    """Collapse a BoL vector onto the current quadrant cells.
 
     For each quadrant, sum the BoL mass on its anchor words; then
     L1-normalize across quadrants. Extension words don't contribute —
@@ -222,7 +222,7 @@ def bol_to_quadrant_distribution(
     distribution overstates confidence. Set to e.g. 0.05 to round
     edges; default 0 keeps the synthesizer's commit literal.
 
-    Returns a 6-d vector in the order of :data:`QUADRANTS`. Zero
+    Returns a vector in the order of :data:`QUADRANTS`. Zero
     vector iff the BoL has no circumplex mass.
     """
     bol = np.asarray(bol, dtype=float)

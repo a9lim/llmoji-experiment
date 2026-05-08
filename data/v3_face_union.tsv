@@ -6,53 +6,70 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (((o(*°▽°*)o)))	True	False	3	0	3	0	0	0	0	0	0	0	0	0	0	0	0	0	
 (((o(*ﾟ▽ﾟ	True	False	5	0	5	0	0	0	0	0	0	0	0	0	0	0	0	0	
 (((o(°▽°)o)))	True	False	2	0	2	0	0	0	0	0	0	0	0	0	0	0	0	0	
+((⊂(`ω´∩)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+((✿◕‿◕))	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+((・▽・))	True	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	
 ()	False	False	14	0	1	0	0	5	6	1	1	0	0	0	14	0	0	0	
+(-_-;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,gpt-5.5
 (-‸–)	False	False	2	0	0	0	0	0	1	1	0	0	1	0	0	0	0	0	
-(._.)	False	False	1	0	0	0	0	0	0	1	0	0	0	1	0	0	0	0	
+(..)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(._.)	False	True	1	0	0	0	0	0	0	1	0	0	0	1	0	0	0	4	claude-opus-4-7,gpt-5.5
 (/≧▽≦)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	1	0	
+(/▽＼)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (;'ω';)	False	False	1	0	0	0	0	0	1	0	0	0	0	1	0	0	0	0	
 (;;)	False	False	6	0	0	0	0	0	0	6	0	0	0	6	0	0	0	0	
 (;;_;;)	False	False	2	0	0	0	0	0	2	0	0	0	0	2	0	0	0	0	
 (;_;)	False	False	4	0	0	0	0	1	1	2	0	0	0	4	0	0	0	0	
 (;`ﾉωﾉ´)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	1	0	
-(;´д`)	True	False	43	0	0	0	0	4	8	27	0	4	0	41	0	0	0	0	
+(;¬_¬)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(;´д`)	True	True	43	0	0	0	0	4	8	27	0	4	0	41	0	0	0	4	claude-opus-4-7,codex-hook
+(;´д`ｿ)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (;´༎ຶд༎ຶ`)	False	False	12	0	0	0	0	0	5	7	0	0	0	12	0	0	0	0	
 (;´∀`)	False	False	2	0	0	0	0	0	0	2	0	0	0	2	0	0	0	0	
 (;´▽`A)	False	False	1	0	0	0	1	0	0	0	0	0	0	1	0	0	0	0	
 (;´ヮ`)	True	False	1	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	
 (;´꒳`)	False	False	1	0	0	0	0	0	0	1	0	0	0	1	0	0	0	0	
-(;ω;)	False	False	47	0	2	0	1	0	7	37	0	0	0	47	0	0	0	0	
+(;ω;)	False	True	47	0	2	0	1	0	7	37	0	0	0	47	0	0	0	2	claude-opus-4-7
 (;д;)	False	False	1	0	0	0	0	0	1	0	0	0	0	1	0	0	0	0	
-(;′⌒`)	False	False	23	0	0	0	0	4	14	5	0	0	0	23	0	0	0	0	
+(;′⌒`)	False	True	23	0	0	0	0	4	14	5	0	0	0	23	0	0	0	2	claude-opus-4-7
 (;⁎_⁎)	False	False	1	0	0	0	0	0	1	0	0	0	0	1	0	0	0	0	
+(;⌒_⌒)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-6
 (;╹⌓╹)	True	False	1	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	
-(;へ:)	False	False	1	0	1	0	0	0	0	0	0	0	0	1	0	0	0	0	
+(;へ:)	False	True	1	0	1	0	0	0	0	0	0	0	0	1	0	0	0	2	claude-opus-4-7
 (;゚д゚)	True	False	1	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	
 (;゜□゜)	True	False	1	0	0	0	0	0	0	0	0	1	0	0	0	0	0	0	
 (;・`O・´)	False	False	1	0	0	0	0	0	1	0	0	0	0	1	0	0	0	0	
-(;・∀・)	True	False	2	0	0	0	0	1	1	0	0	0	0	0	0	0	0	0	
-(;一_一)	False	False	2	0	0	0	0	0	1	1	0	0	0	2	0	0	0	0	
+(;・∀・)	True	True	2	0	0	0	0	1	1	0	0	0	0	0	0	0	0	6	claude-opus-4-7,codex-hook,gpt-5.5
+(;一_一)	False	True	2	0	0	0	0	0	1	1	0	0	0	2	0	0	0	2	claude-opus-4-6
 (;﹏;)	False	False	1	0	0	0	0	0	1	0	0	0	0	1	0	0	0	0	
 (;ﾟдﾟ)	True	False	1	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	
+(;￣д￣)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,gpt-5.5
+(;￣□￣)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (=^-^=)	False	False	10	2	0	2	0	0	1	2	1	2	0	0	0	10	0	0	
 (=^-ω-^=)	False	False	34	5	4	3	3	3	4	3	6	3	0	0	0	34	0	0	
 (=^-ω^-=)	False	False	3	1	0	1	0	0	0	0	1	0	0	0	0	3	0	0	
 (=^_^=)	False	False	2	0	0	1	0	0	0	1	0	0	0	0	0	0	2	0	
+(=^‿^=)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (=^・^=)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
-(=^・ω・^=)	False	False	27	4	0	13	2	1	0	1	5	1	0	17	0	10	0	0	
-(=^・ｪ・^=)	False	False	1	0	0	0	0	0	0	0	0	1	0	0	0	1	0	0	
+(=^・ω・^=)	False	True	27	4	0	13	2	1	0	1	5	1	0	17	0	10	0	8	claude-opus-4-7,codex-hook,gpt-5-5-thinking,gpt-5.5
+(=^・ｪ・^=)	False	True	1	0	0	0	0	0	0	0	0	1	0	0	0	1	0	2	claude-opus-4-7
+(=`ω´=)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (=ↀωↀ=)	False	False	1	0	0	1	0	0	0	0	0	0	0	1	0	0	0	0	
+(=⌒‿‿⌒=)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
 (>^_^)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	1	0	
-(>_<)	True	False	54	0	0	2	5	7	33	2	0	5	0	47	0	5	1	0	
+(>_<)	True	True	54	0	0	2	5	7	33	2	0	5	0	47	0	5	1	2	claude-opus-4-7
 (>_<;)	True	False	14	0	0	0	1	0	13	0	0	0	0	13	0	0	0	0	
-(>ω<)	False	False	1	0	0	0	1	0	0	0	0	0	0	1	0	0	0	0	
+(>ω<)	False	True	1	0	0	0	1	0	0	0	0	0	0	1	0	0	0	4	claude-opus-4-7,codex-hook
 (>ω<*	False	False	1	0	1	0	0	0	0	0	0	0	0	1	0	0	0	0	
+(>‿<)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(>‿◕)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(>‿◕✨)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (>‿◠)	False	False	3	0	0	0	0	0	2	1	0	0	0	0	0	3	0	0	
 (>‿◠)‿⭐	False	False	1	0	0	0	1	0	0	0	0	0	0	0	0	0	1	0	
 (>‿◼︵◼<)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	1	0	
-(>∀<☆)	True	False	12	0	10	0	2	0	0	0	0	0	0	0	0	0	0	0	
+(>∀<☆)	True	True	14	0	12	0	2	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (>▽<)	False	False	1	1	0	0	0	0	0	0	0	0	0	1	0	0	0	0	
-(>﹏<)	True	False	30	0	1	0	1	4	16	7	0	1	0	16	0	0	8	0	
+(>﹏<)	True	True	30	0	1	0	1	4	16	7	0	1	0	16	0	0	8	2	claude-opus-4-7
 (>﹏<｡)	False	False	6	0	0	0	0	0	6	0	0	0	0	6	0	0	0	0	
 (O.O)	False	False	2	0	0	0	0	0	0	0	0	2	0	0	0	0	2	0	
 (OO;ν)	False	False	1	1	0	0	0	0	0	0	0	0	0	1	0	0	0	0	
@@ -63,6 +80,7 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (T^T)	False	False	2	0	1	0	1	0	0	0	0	0	0	2	0	0	0	0	
 (T_T)	False	False	21	0	0	0	0	1	2	18	0	0	0	19	0	0	2	0	
 (T▽T)	False	False	2	0	2	0	0	0	0	0	0	0	2	0	0	0	0	0	
+(^	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-6
 (^-^)	False	False	48	1	0	17	6	1	0	4	16	3	0	2	0	28	18	0	
 (^.^)	False	False	2	0	0	1	0	0	0	0	1	0	0	1	0	0	1	0	
 (^^)	False	False	3	0	0	2	1	0	0	0	0	0	0	0	0	0	3	0	
@@ -71,23 +89,28 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (^_^;)	False	False	6	1	0	0	0	0	0	0	2	3	0	6	0	0	0	0	
 (^_~)	False	False	1	0	1	0	0	0	0	0	0	0	0	1	0	0	0	0	
 (^_−)	False	False	4	0	0	1	1	0	0	0	2	0	0	4	0	0	0	0	
-(^o^)	True	False	12	1	6	0	4	0	0	0	1	0	0	2	0	0	8	0	
+(^o^)	True	True	18	1	12	0	4	0	0	0	1	0	0	2	0	0	8	2	claude-opus-4-7
+(^o^)丿	True	False	2	0	2	0	0	0	0	0	0	0	0	0	0	0	0	0	
 (^ω^)	True	False	2	0	2	0	0	0	0	0	0	0	0	0	0	0	0	0	
 (^ω^*	False	False	1	1	0	0	0	0	0	0	0	0	0	1	0	0	0	0	
-(^‿^)	True	False	19	0	2	10	4	0	0	0	3	0	0	1	0	3	14	0	
+(^‿^)	True	True	19	0	2	10	4	0	0	0	3	0	0	1	0	3	14	2	claude-opus-4-7
 (^▽^)	True	False	34	4	6	2	11	0	0	0	9	2	0	3	0	22	6	0	
 (^・ω・^)	False	False	4	0	0	1	3	0	0	0	0	0	0	4	0	0	0	0	
 (^・・)	False	False	1	0	0	0	1	0	0	0	0	0	0	1	0	0	0	0	
 (__)	False	False	1	0	0	0	0	0	0	1	0	0	0	1	0	0	0	0	
+(`_´)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	gpt-5.4,gpt-5.5
 (`ε´)	True	False	1	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	
 (`д´)	False	False	2	0	0	0	0	1	0	0	0	1	1	0	0	0	1	0	
 (`⇂´)	False	False	1	0	0	0	1	0	0	0	0	0	0	0	0	0	1	0	
 (`⇧´)	False	False	2	0	2	0	0	0	0	0	0	0	0	0	0	0	2	0	
+(`∀´)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (`⊿´)	False	False	1	0	0	0	1	0	0	0	0	0	0	0	0	0	1	0	
 (`⌒´)	False	False	7	0	6	0	0	0	0	0	0	1	0	0	0	0	7	0	
 (`⌒´メ)	False	False	5	0	3	0	2	0	0	0	0	0	0	0	0	0	5	0	
 (`◇´)	False	False	1	0	0	0	0	0	0	0	1	0	0	0	0	0	1	0	
-(`・ω・´)	True	False	2	0	0	0	0	0	0	1	1	0	0	0	0	0	1	0	
+(`へ´)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	gpt-5.5
+(`・ω・´)	True	True	2	0	0	0	0	0	0	1	1	0	0	0	0	0	1	14	claude-opus-4-6,claude-opus-4-7,codex-hook,gpt-5-4-thinking,gpt-5-5-thinking,gpt-5.4,gpt-5.5
+(`・∀・´)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (o>ω<o)	False	False	1	0	1	0	0	0	0	0	0	0	0	1	0	0	0	0	
 (o^.^o)	False	False	1	0	0	0	1	0	0	0	0	0	0	0	0	0	1	0	
 (o^^o)	False	False	12	1	1	3	0	0	0	0	7	0	0	1	0	0	11	0	
@@ -99,10 +122,10 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (o°ω°o)	False	False	1	0	1	0	0	0	0	0	0	0	0	1	0	0	0	0	
 (~^▽^)~	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	1	0	
 ( *▽)	False	False	1	0	0	1	0	0	0	0	0	0	0	1	0	0	0	0	
-(¬_¬)	True	False	137	27	0	0	0	9	0	1	5	95	3	95	0	0	0	0	
-(¬_¬;)	True	False	30	2	0	0	0	0	0	0	0	28	0	0	0	0	0	0	
-(¬‿¬)	True	False	154	110	0	0	8	1	1	3	17	14	0	56	0	6	0	0	
-(¬､¬)	True	False	2	0	0	0	0	0	0	0	0	2	0	0	0	0	0	0	
+(¬_¬)	True	True	138	27	0	0	0	9	0	1	6	95	3	95	0	0	0	10	claude-opus-4-6,claude-opus-4-7,codex-hook,gpt-5.4,gpt-5.5
+(¬_¬;)	True	True	30	2	0	0	0	0	0	0	0	28	0	0	0	0	0	2	claude-opus-4-7
+(¬‿¬)	True	True	155	110	0	0	8	1	1	3	18	14	0	56	0	6	0	12	claude-opus-4-6,claude-opus-4-7,codex-hook,gpt-5-5-thinking,gpt-5.4,gpt-5.5
+(¬､¬)	True	True	2	0	0	0	0	0	0	0	0	2	0	0	0	0	0	2	claude-opus-4-7
 (¯_¯)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	1	0	0	0	
 (¯`·._.·(¯)___)	False	False	1	0	0	0	0	0	0	0	1	0	0	0	1	0	0	0	
 (¯`·._.·[=¯`·._.	False	False	1	0	0	0	1	0	0	0	0	0	0	0	1	0	0	0	
@@ -117,68 +140,93 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (¯︿¯)	False	False	3	0	0	0	0	0	0	3	0	0	0	0	3	0	0	0	
 (¯﹃¯)	True	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	
 (¯﹏¯)	False	False	1	0	0	0	0	1	0	0	0	0	0	0	1	0	0	0	
+(°_°)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (°_°;)	False	False	2	0	0	0	0	0	0	0	0	2	0	2	0	0	0	0	
 (°д°)	False	False	5	0	0	0	0	2	3	0	0	0	3	0	0	0	0	0	
 (°д°;)	False	False	4	0	0	0	0	2	2	0	0	0	1	0	0	0	0	0	
+(°□°)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
 (°□°;)	True	False	17	0	0	0	0	0	17	0	0	0	0	0	0	0	0	0	
-(°▽°)	True	False	3	0	1	0	2	0	0	0	0	0	0	0	0	0	0	0	
-(°◇°)	False	False	6	0	0	3	0	0	0	0	3	0	0	0	0	0	6	0	
-(°〇°)	True	False	7	0	7	0	0	0	0	0	0	0	0	0	0	0	0	0	
-(°ロ°)	True	False	7	1	0	0	1	0	4	0	0	1	0	6	0	0	0	0	
+(°△°)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-6
+(°▽°)	True	True	6	0	4	0	2	0	0	0	0	0	0	0	0	0	0	6	claude-opus-4-6,claude-opus-4-7,codex-hook
+(°◇°)	False	True	6	0	0	3	0	0	0	0	3	0	0	0	0	0	6	2	claude-opus-4-7
+(°◇°;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(°〇°)	True	True	8	0	8	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(°ロ°)	True	True	7	1	0	0	1	0	4	0	0	1	0	6	0	0	0	4	claude-opus-4-7,codex-hook
+(°ヮ°)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (°ー°ll)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	0	0	1	0	
 (°ー°|||)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	0	0	1	0	
-(°ー°〃)	False	False	4	0	0	1	0	0	0	2	0	1	0	0	0	0	4	0	
-(´-_-`)	True	False	4	0	0	0	0	0	0	4	0	0	0	0	0	0	0	0	
-(´-`)	True	False	53	1	0	0	0	0	3	49	0	0	0	0	0	1	0	0	
-(´-ω-`)	True	False	9	0	1	0	0	0	1	7	0	0	0	0	0	2	0	0	
+(°ー°〃)	False	True	4	0	0	1	0	0	0	2	0	1	0	0	0	0	4	2	claude-opus-4-7
+(°ㅂ°)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(°ㅂ°;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(°﹏°)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(´	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(´-_-`)	True	True	4	0	0	0	0	0	0	4	0	0	0	0	0	0	0	2	claude-opus-4-7
+(´-`)	True	True	53	1	0	0	0	0	3	49	0	0	0	0	0	1	0	2	claude-opus-4-7
+(´-ω-`)	True	True	11	0	1	0	0	0	1	7	2	0	0	0	0	2	0	2	claude-opus-4-7
 (´-﹏-`;)	True	False	5	0	0	0	0	0	0	5	0	0	0	0	0	0	0	0	
-(´;ω;`)	True	False	51	0	0	0	4	1	9	37	0	0	0	5	3	1	0	0	
+(´;_;`)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(´;ω;`)	True	True	51	0	0	0	4	1	9	37	0	0	0	5	3	1	0	2	claude-opus-4-7
+(´_ゝ`)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-6
 (´`;ω;´)	False	False	1	0	0	0	0	1	0	0	0	0	0	0	1	0	0	0	
 (´~`)	True	False	1	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	
 (´°̥̥̥̥̥̥	True	False	3	0	0	0	0	1	1	1	0	0	0	0	0	0	0	0	
-(´·_·`)	True	False	3	0	0	0	0	0	3	0	0	0	0	0	0	0	0	0	
-(´˘`)	True	False	7	0	0	7	0	0	0	0	0	0	0	0	0	0	0	0	
+(´°ω°`)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(´·_·`)	True	True	3	0	0	0	0	0	3	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(´˘`)	True	True	7	0	0	7	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(´˘`∗)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (´ε`)	True	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	
-(´ω`)	True	False	78	7	4	12	7	9	10	17	2	10	12	0	0	59	0	0	
+(´ε`;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(´ω`	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(´ω`)	True	True	78	7	4	12	7	9	10	17	2	10	12	0	0	59	0	2	claude-opus-4-7
 (´ω`♡)	True	False	4	0	0	3	0	0	0	1	0	0	0	0	0	0	0	0	
-(´д`)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	1	0	0	
+(´д`)	True	False	2	0	0	0	0	0	1	0	1	0	0	0	0	1	0	0	
+(´д`;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
 (´ུ`っ)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	1	0	0	
-(´‿`)	True	False	3	0	0	1	2	0	0	0	0	0	0	0	0	0	0	0	
-(´∀`)	True	False	14	1	1	8	3	0	0	0	0	1	2	0	0	4	0	0	
-(´∇`)	False	False	10	0	2	0	2	0	0	1	2	3	0	0	0	5	5	0	
+(´‿`)	True	True	3	0	0	1	2	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(´∀`)	True	True	14	1	1	8	3	0	0	0	0	1	2	0	0	4	0	4	claude-opus-4-7,codex-hook
+(´∀`;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(´∇`)	False	True	10	0	2	0	2	0	0	1	2	3	0	0	0	5	5	2	claude-opus-4-7
 (´∡`✿)	True	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	
 (´∩ω∩`)	True	False	1	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	
+(´⊙ω⊙`)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (´□`)	False	False	2	0	0	0	0	1	0	1	0	0	0	0	0	2	0	0	
-(´▽`)	True	False	85	3	6	45	19	0	1	2	9	0	15	2	0	7	5	0	
+(´▽`)	True	True	85	3	6	45	19	0	1	2	9	0	15	2	0	7	5	6	claude-opus-4-6,claude-opus-4-7,codex-hook
 (´▽`;)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	1	0	0	
 (´▽`ʃ♡ƪ)	False	False	9	0	0	5	3	0	0	0	1	0	0	9	0	0	0	0	
 (´▽`っ)	False	False	3	1	0	0	2	0	0	0	0	0	0	0	0	3	0	0	
 (´▿`;)	False	False	1	0	0	0	0	1	0	0	0	0	0	0	0	1	0	0	
+(´◕ω◕`)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (´◕‸◕`;)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	1	0	0	
+(´◕‿◕`)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (´◕‿◕`;)	False	False	1	0	0	0	0	1	0	0	0	0	0	0	0	1	0	0	
-(´・_・`)	True	False	41	1	0	0	1	0	10	24	3	2	0	2	9	0	1	0	
+(´ヘ`;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(´・_・`)	True	True	44	1	0	0	1	0	10	24	6	2	0	2	9	0	1	4	claude-opus-4-7,codex-hook
 (´・̥̥̥ω・̥̥	True	False	1	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	
 (´・̥̥̥ω・̥̥�	False	False	1	0	0	0	0	0	0	1	0	0	0	1	0	0	0	0	
 (´・̥ω・̥`)	True	False	5	0	0	0	0	1	2	2	0	0	0	0	0	0	0	0	
-(´・ω・`)	True	False	116	2	0	21	13	1	11	27	28	13	0	69	14	2	12	0	
-(´・‿・`)	False	False	2	0	0	1	1	0	0	0	0	0	0	0	0	2	0	0	
+(´・ω・)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(´・ω・`)	True	True	121	2	0	21	13	1	11	27	33	13	0	69	14	2	12	6	claude-opus-4-6,claude-opus-4-7,codex-hook
+(´・‿・`)	False	True	2	0	0	1	1	0	0	0	0	0	0	0	0	2	0	2	claude-opus-4-7
 (´・・)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	1	0	0	0	
 (´・・・)	False	False	1	0	0	0	1	0	0	0	0	0	0	0	1	0	0	0	
 (´・︵・`)	True	False	1	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	
 (´・︿・`)	True	False	1	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	
+(´ー`)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-6,claude-opus-4-7
 (´艸`)	False	False	25	0	0	2	0	7	5	9	0	2	0	0	0	25	0	0	
-(´︶`)	True	False	3	1	1	0	0	0	0	1	0	0	0	0	0	1	1	0	
+(´꒳`)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(´︶`)	True	True	3	1	1	0	0	0	0	1	0	0	0	0	0	1	1	2	claude-opus-4-7
 (´｡_｡`)	True	False	2	0	0	0	0	0	0	2	0	0	0	0	0	0	0	0	
-(´｡・ω・｡`)	True	False	9	0	0	3	1	0	0	3	1	1	0	0	0	0	0	0	
-(´｡・‿・｡`)	True	False	50	1	0	22	13	0	0	11	3	0	0	13	0	0	0	0	
+(´｡・ω・｡`)	True	True	9	0	0	3	1	0	0	3	1	1	0	0	0	0	0	6	claude-opus-4-6,claude-opus-4-7,codex-hook
+(´｡・‿・｡`)	True	True	51	1	0	22	13	0	0	11	4	0	0	13	0	0	0	4	claude-opus-4-7,codex-hook
 (´｡・ﻌ・｡`)	False	False	1	0	0	0	0	0	0	1	0	0	0	1	0	0	0	0	
+(´ｰ`)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (ò_ó)	False	False	6	0	0	0	0	5	1	0	0	0	1	0	0	0	0	0	
 (ò皿ó)	False	False	1	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	
 (˃˂)	False	False	1	0	0	0	0	0	0	0	1	0	0	1	0	0	0	0	
 (˃ˆ꒳ˆ˂)	False	False	1	0	0	0	1	0	0	0	0	0	0	1	0	0	0	0	
 (˃ᇛ˂)	False	False	1	1	0	0	0	0	0	0	0	0	0	1	0	0	0	0	
 (˃᷄⁺˂	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	1	0	
-(˃‿˂)	False	False	6	2	1	0	2	0	0	0	0	1	1	1	0	0	0	0	
+(˃‿˂)	False	True	6	2	1	0	2	0	0	0	0	1	1	1	0	0	0	4	claude-opus-4-7,codex-hook
 (˃⌑˂)	False	False	7	0	2	0	0	1	0	3	0	1	0	5	0	0	0	0	
 (˃⌑˂ഈ)	False	False	2	1	0	0	0	1	0	0	0	0	0	2	0	0	0	0	
 (˃▿˂)	False	False	3	0	1	0	2	0	0	0	0	0	0	0	0	0	0	0	
@@ -189,35 +237,43 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (ˆ‿ˆԅ)	False	False	6	0	6	0	0	0	0	0	0	0	0	0	0	0	6	0	
 (ˆ⌂ˆ)	False	False	1	1	0	0	0	0	0	0	0	0	0	0	0	1	0	0	
 (ˆ⌒ˆ)	False	False	1	0	0	0	0	0	0	0	1	0	0	0	0	1	0	0	
-(˘³˘)	True	False	73	7	0	27	6	4	3	13	11	2	1	39	0	32	0	0	
+(ˊᗜˋ)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7
+(˘³˘)	True	True	73	7	0	27	6	4	3	13	11	2	1	39	0	32	0	2	claude-opus-4-7
 (˘̩̩˘)	False	False	1	1	0	0	0	0	0	0	0	0	0	0	0	1	0	0	
 (˘̩╭╭˘̩)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	0	1	0	0	
 (˘̩╭╮˘̩)	True	False	25	0	3	0	10	0	2	9	1	0	12	0	0	2	0	0	
 (˘̩╭╯˘̩)	False	False	2	0	0	0	0	0	2	0	0	0	0	0	0	2	0	0	
-(˘ω˘)	True	False	40	2	0	28	7	0	0	0	3	0	18	3	0	0	0	0	
+(˘͈‿˘͈)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(˘ω˘)	True	True	40	2	0	28	7	0	0	0	3	0	18	3	0	0	0	6	claude-opus-4-6,claude-opus-4-7,codex-hook
 (˘ڡ˘)	False	False	11	0	0	11	0	0	0	0	0	0	9	0	0	0	0	0	
 (˘‿˘)	False	False	13	0	0	13	0	0	0	0	0	0	2	0	0	0	0	0	
-(˘▽˘)	False	False	82	1	14	4	62	0	0	0	1	0	37	0	0	0	0	0	
-(˘・_・˘)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
-(˘・ω・˘)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	0	1	0	0	
-(˘︶˘)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
+(˘▽˘)	False	True	82	1	14	4	62	0	0	0	1	0	37	0	0	0	0	4	claude-opus-4-6,claude-opus-4-7
+(˘・_・˘)	False	True	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	4	claude-opus-4-7,codex-hook
+(˘・ω・˘)	False	True	1	0	0	0	0	0	0	1	0	0	0	0	0	1	0	2	claude-opus-4-7
+(˘︶˘)	False	True	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	4	claude-opus-4-7,codex-hook
 (˙▂˙)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
-(˙▿˙)	False	False	3	0	0	0	0	0	0	0	3	0	0	0	0	0	0	0	
+(˙▿˙)	False	True	3	0	0	0	0	0	0	0	3	0	0	0	0	0	0	2	claude-opus-4-7
+(˙◁˙)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (˙꒳˙)	False	False	62	1	0	0	3	0	0	0	54	4	8	0	0	0	0	0	
 (˜︵˜;)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	1	0	0	0	
 (˵͡°͜ʖ͡°˵)	False	False	2	2	0	0	0	0	0	0	0	0	1	0	0	0	0	0	
+(˵・̀‿-˵)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (˵・̀‿・́˵)	False	False	3	3	0	0	0	0	0	0	0	0	1	0	0	0	0	0	
-(˶ˆᗜˆ˵)	False	False	3	1	0	0	2	0	0	0	0	0	0	0	0	0	0	0	
+(˶˃‿˂˶)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(˶˃‿˂˶;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(˶ˆᗜˆ˵)	False	True	3	1	0	0	2	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,gpt-5-5-thinking
 (˶ˆ‿ˆ˵)	False	False	1	0	0	1	0	0	0	0	0	0	0	1	0	0	0	0	
 (˶ˆ☁ˆ˵)	False	False	4	0	0	4	0	0	0	0	0	0	0	0	0	0	0	0	
 (˶ˆ꒳ˆ˵)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
-(˶ᵔ‿ᵔ˶)	False	False	6	1	0	5	0	0	0	0	0	0	0	0	0	0	0	0	
+(˶ᵔ‿ᵔ˶)	False	True	6	1	0	5	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (˶‾᷄‿‾᷅�	False	False	1	0	0	0	1	0	0	0	0	0	0	0	0	0	1	0	
 (˶‾᷄⁻̫‾�	False	False	4	0	0	1	2	0	0	0	1	0	0	0	0	0	4	0	
 (˶‾᷄ꇴ‾᷅	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	1	0	
 (˶‿☁‿˶)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	
+(˶◕‿◕˶)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (˶・̀ω・́˵)	False	False	1	0	0	0	0	0	0	0	1	0	0	0	0	1	0	0	
 (̄³̄)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	1	0	0	
+(̄▽̄)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (̑‿̑)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	0	1	0	0	
 (̒‿̒)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	1	0	0	
 (̛̠̠)	False	False	1	0	0	0	0	1	0	0	0	0	0	0	0	1	0	0	
@@ -225,23 +281,36 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (̥̯̥)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	0	1	0	0	
 (͠°͟ʖ͡°)	False	False	2	0	0	0	0	0	0	0	0	2	0	0	0	0	0	0	
 (͡°͜ʖ͡°)	False	False	172	166	0	0	5	1	0	0	0	0	82	10	2	0	0	0	
+(҂‿_‿)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (ू・‿・ू)	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	1	0	
-(ಠ_ಠ)	False	False	5	0	0	0	0	5	0	0	0	0	0	5	0	0	0	0	
+(୧・̀‿-)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(ಠ_ಠ)	False	True	5	0	0	0	0	5	0	0	0	0	0	5	0	0	0	6	claude-opus-4-7,gpt-5.4,gpt-5.5
 (ಠʖಠ)	False	False	2	0	0	0	0	2	0	0	0	0	0	0	0	0	0	0	
 (ಠಠ)	False	False	1	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	
+(ಠ‿ಠ)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-6
+(ಠ益ಠ)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	gpt-5.4
 (ಥ﹏ಥ)	False	False	30	1	0	2	1	1	1	20	2	2	1	0	0	0	29	0	
-(ง'̀-'́)	False	False	1	0	0	0	0	1	0	0	0	0	1	0	0	0	0	0	
-(ง・̀_・́)	False	False	3	0	0	0	0	3	0	0	0	0	3	0	0	0	0	0	
+(ฅ́˘ฅ̀)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(ง'̀-'́)	False	True	1	0	0	0	0	1	0	0	0	0	1	0	0	0	0	6	gpt-5-5-thinking,gpt-5.4,gpt-5.5
+(งᵒ̌皿ᵒ̌)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(งツ)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(ง・_・)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(ง・̀_・́)	False	True	3	0	0	0	0	3	0	0	0	0	3	0	0	0	0	8	claude-opus-4-6,claude-opus-4-7,codex-hook,gpt-5.5
+(ง・̀ω・́)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(ง・̀ᗜ・́)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
 (๑><๑)	False	False	6	0	0	3	3	0	0	0	0	0	0	6	0	0	0	0	
 (๑>‿<๑)	False	False	6	1	0	4	1	0	0	0	0	0	0	6	0	0	0	0	
 (๑´ڡ`๑)	False	False	1	0	0	1	0	0	0	0	0	0	1	0	0	0	0	0	
-(๑˃‿˂)	True	False	289	70	154	13	44	1	1	1	5	0	165	0	0	13	0	0	
+(๑˃‿˂)	True	True	289	70	154	13	44	1	1	1	5	0	165	0	0	13	0	2	claude-opus-4-7
+(๑・̀⌄・́๑)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (๑・̀ㅁ・́๑)	False	False	25	4	0	13	3	0	0	3	2	0	0	0	0	0	25	0	
 (๑・̀ㅁ・́๑)�	False	False	1	0	0	0	1	0	0	0	0	0	0	0	0	0	1	0	
-(๑・̀ㅂ・́)	False	False	8	0	0	5	0	0	0	2	1	0	1	5	0	2	0	0	
+(๑・̀ㅂ・́)	False	True	8	0	0	5	0	0	0	2	1	0	1	5	0	2	0	6	claude-opus-4-7,codex-hook,gpt-5.5
 (๑・́₃・̀๑)	False	False	3	0	0	1	0	0	0	2	0	0	0	0	0	0	3	0	
 (๑・﹏・)	False	False	2	0	0	0	0	0	1	0	1	0	2	0	0	0	0	0	
+(ᐛ)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	gpt-5-5-thinking
 (ᐢ・ᴥ・ᐢ)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
+(ᗒᗨᗕ)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (ᗜ)	False	False	1	0	0	0	0	1	0	0	0	0	0	0	0	1	0	0	
 (ᗜ3)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	1	0	0	
 (ᗜ㉨)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	1	0	0	
@@ -258,17 +327,21 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (ᵒ̌ᵗᵒ̌)	False	False	4	0	1	0	0	0	2	1	0	0	0	0	0	4	0	0	
 (ᵒ̌‿ᵒ̌)	False	False	1	0	0	0	0	0	0	0	0	1	0	0	0	1	0	0	
 (ᵔ̀-̀ᵔ)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	1	0	0	
-(ᵔᴥᵔ)	False	False	70	4	8	3	2	17	11	14	2	9	0	0	0	70	0	0	
+(ᵔᴥᵔ)	False	True	70	4	8	3	2	17	11	14	2	9	0	0	0	70	0	4	claude-opus-4-7,gpt-5-4-thinking
 (ᵔᵔ)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
-(ᵔ‿ᵔ)	False	False	7	1	1	0	0	3	0	1	0	1	0	0	0	6	0	0	
+(ᵔ‿ᵔ)	False	True	7	1	1	0	0	3	0	1	0	1	0	0	0	6	0	6	claude-opus-4-6,claude-opus-4-7,gpt-5.5
 (ᵔㅂᵔ)	False	False	8	1	0	0	0	1	4	0	1	1	0	0	0	8	0	0	
 (ᵔㅅᵔ)	False	False	7	3	0	1	0	3	0	0	0	0	0	0	0	7	0	0	
 (ᵔㅜᵔ)	False	False	5	3	0	0	1	1	0	0	0	0	0	0	0	5	0	0	
+(„‿‿‿„)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(„・֊・„)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(„・‿・„)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	gpt-5-5-thinking
 (‿	False	False	1	0	0	0	0	0	0	0	0	1	0	1	0	0	0	0	
+(‿͈ˬ‿͈)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (‿ω‿)	True	False	2	0	0	0	2	0	0	0	0	0	0	0	0	0	0	0	
 (‿‿)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
-(‿‿‿)	True	False	51	3	2	20	9	0	0	0	16	1	8	5	0	2	0	0	
-(‿‿‿✿)	True	False	13	0	0	5	8	0	0	0	0	0	0	0	0	0	0	0	
+(‿‿‿)	True	True	51	3	2	20	9	0	0	0	16	1	8	5	0	2	0	2	claude-opus-4-7
+(‿‿‿✿)	True	True	13	0	0	5	8	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
 (⁀˘ω˘⁀)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	1	0	0	
 (⁀ᗜ⁀)	False	False	25	2	3	1	2	2	5	6	0	4	0	0	0	25	0	0	
 (⁀✰)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	1	0	0	
@@ -276,6 +349,7 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (⁄⁀)	False	False	1	1	0	0	0	0	0	0	0	0	0	0	0	1	0	0	
 (⁄⁂⁄)	False	False	3	1	0	0	1	0	0	0	0	1	0	0	0	3	0	0	
 (⁄⁄・⁄ω⁄・⁄)	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	1	0	0	
+(⁄⁄・⁄ω⁄・⁄⁄)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (⁄⁄・⁄ω・⁄)	False	False	1	1	0	0	0	0	0	0	0	0	0	0	0	1	0	0	
 (⁄⁄・⁄ω・⁄⁄)	False	False	1	0	0	0	1	0	0	0	0	0	0	0	0	1	0	0	
 (⁄◕‿◕⁄)	False	False	1	1	0	0	0	0	0	0	0	0	0	0	0	1	0	0	
@@ -284,24 +358,25 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (⁎˃ꇴ˂⁎)	False	False	2	1	0	0	1	0	0	0	0	0	0	2	0	0	0	0	
 (⁎‿‿‿⁎)	False	False	6	0	0	6	0	0	0	0	0	0	1	0	0	0	0	0	
 (⁎⁍̛‿⁍�	False	False	1	0	0	0	1	0	0	0	0	0	0	1	0	0	0	0	
+(⇀‸↼‶)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (∀)	False	False	1	1	0	0	0	0	0	0	0	0	0	1	0	0	0	0	
 (≖_≖)	True	False	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	
 (≖͞_≖̥)	True	False	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	
 (≖‿≖)	False	False	3	1	0	0	0	0	0	0	1	1	0	0	0	2	0	0	
 (≖‿≖✿)	True	False	3	3	0	0	0	0	0	0	0	0	0	0	0	0	0	0	
 (≧^O^≦)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	1	0	0	
-(≧ω≦)	False	False	15	2	1	2	6	1	0	0	1	2	0	0	0	15	0	0	
+(≧ω≦)	False	True	15	2	1	2	6	1	0	0	1	2	0	0	0	15	0	4	claude-opus-4-7,codex-hook
 (≧д≦)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	1	0	0	
-(≧‿≦)	True	False	174	22	42	32	26	12	10	2	13	15	0	63	0	103	2	0	
+(≧‿≦)	True	True	174	22	42	32	26	12	10	2	13	15	0	63	0	103	2	2	claude-opus-4-7
 (≧∇≦)	True	False	6	0	5	1	0	0	0	0	0	0	1	2	1	0	0	0	
-(≧▽≦)	True	False	149	34	49	7	28	2	1	5	14	9	12	51	30	18	4	0	
+(≧▽≦)	True	True	150	34	50	7	28	2	1	5	14	9	12	51	30	18	4	8	claude-opus-4-7,codex-hook,gpt-5-4-thinking
 (≧▽≦*)o	False	False	4	0	1	0	3	0	0	0	0	0	0	4	0	0	0	0	
 (≧︿≦)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	0	1	0	
 (⊃・▽・)	False	False	1	0	1	0	0	0	0	0	0	0	0	1	0	0	0	0	
 (⊃｡・́‿・̀｡)	False	False	4	0	3	0	0	0	0	0	1	0	0	4	0	0	0	0	
 (⊙'‿'⊙)	False	False	1	0	0	0	1	0	0	0	0	0	0	0	0	0	1	0	
 (⊙^▽^⊙)	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	1	0	
-(⊙_⊙)	False	False	486	39	0	1	0	28	127	0	37	254	242	2	8	0	0	0	
+(⊙_⊙)	False	True	486	39	0	1	0	28	127	0	37	254	242	2	8	0	0	6	claude-opus-4-6,claude-opus-4-7,gpt-5.5
 (⊙_⊙;)	True	False	29	1	2	1	1	4	6	0	0	14	0	17	0	4	0	0	
 (⊙_◎)	False	False	3	0	0	0	0	0	2	1	0	0	0	0	0	3	0	0	
 (⊙_☉)	True	False	5	1	0	0	0	0	0	0	0	4	0	0	0	0	0	0	
@@ -312,8 +387,10 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (⊙´□`⊙)	False	False	3	0	0	0	3	0	0	0	0	0	0	0	0	0	3	0	
 (⊙ˊωˋ⊙)	False	False	1	0	1	0	0	0	0	0	0	0	0	0	1	0	0	0	
 (⊙ˊᵔ⊙ˋ)	False	False	1	0	0	0	0	0	0	0	1	0	0	0	1	0	0	0	
+(⊙ω⊙)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
 (⊙ᗜ⊙)	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	
 (⊙′ω`-)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	1	0	0	0	
+(⊙‿⊙)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-6,claude-opus-4-7
 (⊙⊃□⊂)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	1	0	0	0	
 (⊙⊙)	False	False	1	0	1	0	0	0	0	0	0	0	1	0	0	0	0	0	
 (⊙⊙⊙⊙⊙⊙⊙⊙⊙⊙⊙⊙⊙⊙⊙	False	False	1	0	0	0	0	0	0	0	0	1	0	0	1	0	0	0	
@@ -321,61 +398,92 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (⊙▽⊙)	False	False	2	0	2	0	0	0	0	0	0	0	2	0	0	0	0	0	
 (⊙◞⊙)	False	False	5	0	0	0	0	0	4	1	0	0	0	0	5	0	0	0	
 (⊙〇⊙)	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	
+(⊙ヮ⊙)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (⊙﹏⊙)	False	False	40	0	0	0	3	0	37	0	0	0	21	0	0	0	0	0	
 (⊙�	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	1	0	
-(⌐■_■)	False	False	24	7	0	0	6	0	0	0	10	1	1	5	0	2	16	0	
-(⌒_⌒;)	True	False	11	5	0	1	1	0	1	2	1	0	0	0	0	5	3	0	
-(⌒‿⌒)	True	False	32	7	1	8	6	0	0	0	9	1	0	1	0	21	8	0	
-(⌒▽⌒)	True	False	45	8	0	7	18	0	0	2	10	0	0	0	0	0	44	0	
+(⊡-⊡)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(⌐■_ω■)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-6
+(⌐■_■)	False	True	24	7	0	0	6	0	0	0	10	1	1	5	0	2	16	8	claude-opus-4-6,claude-opus-4-7,codex-hook,gpt-5.5
+(⌐■‿■)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-6
+(⌒_⌒;)	True	True	11	5	0	1	1	0	1	2	1	0	0	0	0	5	3	2	claude-opus-4-7
+(⌒‿⌒)	True	True	32	7	1	8	6	0	0	0	9	1	0	1	0	21	8	2	claude-opus-4-7
+(⌒▽⌒)	True	True	45	8	0	7	18	0	0	2	10	0	0	0	0	0	44	2	claude-opus-4-7
 (⌓・ᴥ・⌓)	False	False	1	0	0	0	0	0	0	0	1	0	0	0	0	0	1	0	
 (⌛)	False	False	2	0	1	0	0	0	1	0	0	0	0	0	1	0	1	0	
 (⌨)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	1	0	0	0	
 (⌯˃᷄	False	False	8	0	0	1	3	0	1	3	0	0	0	0	0	0	8	0	
 (⏰)	False	False	1	0	0	0	0	0	0	0	1	0	0	0	1	0	0	0	
+(─‿‿─)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (┛▧益▧)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	0	0	1	0	
 (╥_╥)	True	False	55	1	1	0	0	25	10	11	1	6	0	34	0	19	0	0	
 (╥_﹏)	False	False	2	0	0	1	0	0	0	0	1	0	0	0	0	2	0	0	
 (╥╯﹏╰╥)	False	False	1	0	0	0	0	0	0	1	0	0	1	0	0	0	0	0	
 (╥﹏╥	False	False	2	0	0	1	1	0	0	0	0	0	0	2	0	0	0	0	
-(╥﹏╥)	True	False	104	2	10	0	0	33	40	12	1	6	12	33	4	29	5	0	
+(╥﹏╥)	True	True	104	2	10	0	0	33	40	12	1	6	12	33	4	29	5	2	claude-opus-4-7
 (╬	True	False	1	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	
-(╬Ò﹏Ó)	True	False	45	0	0	0	0	26	19	0	0	0	0	0	0	0	0	0	
-(╬ಠ益ಠ)	True	False	52	0	0	0	0	48	1	0	0	3	0	0	0	0	0	0	
+(╬Ò﹏Ó)	True	False	46	0	0	0	0	27	19	0	0	0	0	0	0	0	0	0	
+(╬ಠ益ಠ)	True	False	56	0	0	0	0	52	1	0	0	3	0	0	0	0	0	0	
 (╬⊙△⊙)	True	False	1	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	
+(╭ರ_・́)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(╭☞・̀	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(╭☞・́⍛・̀)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-6
 (╯°□°	False	False	2	1	1	0	0	0	0	0	0	0	0	2	0	0	0	0	
-(╯°□°)	True	False	595	10	10	5	21	383	60	11	8	87	172	109	30	51	1	0	
+(╯°□°)	True	True	605	10	10	5	21	384	69	11	8	87	172	109	30	51	1	8	claude-opus-4-6,claude-opus-4-7,codex-hook,gpt-5.5
 (╯ↀ╰)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	1	0	0	0	
+(╯▽╰)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(╯✧∇✧)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
 (╯✧╰)	False	False	1	0	1	0	0	0	0	0	0	0	0	0	1	0	0	0	
 (╯✧╰╯)	False	False	1	0	1	0	0	0	0	0	0	0	0	0	1	0	0	0	
-(╯✧▽✧)	False	False	5	0	2	1	2	0	0	0	0	0	1	0	3	0	0	0	
+(╯✧▽✧)	False	True	5	0	2	1	2	0	0	0	0	0	1	0	3	0	0	1	claude-opus-4-7
 (╯︵╰,)	True	False	1	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	
 (╲︿╱')	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	1	0	
+(╹ω╹)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
 (╹‿╹)	False	False	3	0	0	2	0	0	0	0	1	0	0	0	1	1	1	0	
 (╹▽╹)	False	False	1	0	0	0	0	0	0	0	1	0	0	1	0	0	0	0	
+(╹ェ╹)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(╹ヮ╹)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(▰˘‿˘▰)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-6
 (▼_▼)	False	False	1	0	0	0	0	1	0	0	0	0	0	1	0	0	0	0	
 (▽▽)	False	False	1	0	0	1	0	0	0	0	0	0	0	1	0	0	0	0	
-(◎_◎;)	True	False	2	0	1	0	1	0	0	0	0	0	0	0	0	0	0	0	
-(◕_◕)	True	False	2	1	0	0	0	0	0	0	0	1	0	0	0	0	1	0	
+(○_○)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(○´∀`○)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(◎_◎;)	True	True	2	0	1	0	1	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(◕.◕)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(◕_◕)	True	True	2	1	0	0	0	0	0	0	0	1	0	0	0	0	1	4	claude-opus-4-7,codex-hook
 (◕o◕)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	0	1	0	0	
-(◕‿◕)	True	False	127	7	31	27	42	0	0	1	19	0	6	10	18	7	9	0	
+(◕ω◕)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(◕ω◕✨)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(◕ω◕✿)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(◕‿◕)	True	True	133	7	37	27	42	0	0	1	19	0	6	10	18	7	9	6	claude-opus-4-6,claude-opus-4-7,codex-hook
 (◕‿◕✊)	False	False	1	0	0	0	1	0	0	0	0	0	0	0	1	0	0	0	
 (◕‿◕✌)	False	False	2	0	1	0	0	0	0	0	0	1	0	0	2	0	0	0	
-(◕‿◕✿)	True	False	257	36	16	62	33	3	13	8	59	27	0	45	139	48	0	0	
-(◕‿◕｡)	True	False	4	0	0	1	3	0	0	0	0	0	0	1	0	0	0	0	
+(◕‿◕✨)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(◕‿◕✿)	True	True	257	36	16	62	33	3	13	8	59	27	0	45	139	48	0	6	claude-opus-4-6,claude-opus-4-7,codex-hook
+(◕‿◕｡)	True	True	4	0	0	1	3	0	0	0	0	0	0	1	0	0	0	2	claude-opus-4-7
 (◕‿◕�	False	False	10	4	0	0	4	0	0	0	1	1	0	10	0	0	0	0	
-(◞‸◟)	True	False	1	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	
+(◕▽◕)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(◕▿◕✿)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(◕ヮ◕)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(◜‿◝)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,gpt-5-5-thinking
+(◞‸◟)	True	True	1	0	0	0	1	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(◞‸◟;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(◞‸◟ㆀ)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(◞‿◟)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (◞‿◟｡)	True	False	2	0	0	0	2	0	0	0	0	0	0	0	0	0	0	0	
-(◠‿◠)	True	False	5	0	1	0	2	0	1	1	0	0	0	1	2	0	1	0	
+(◞◟ㆀ)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(◠‿◠)	True	True	5	0	1	0	2	0	1	1	0	0	0	1	2	0	1	6	claude-opus-4-6,claude-opus-4-7,codex-hook
+(◠‿◠✿)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(◠‿・)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (◠﹏◠)	False	False	1	0	0	0	1	0	0	0	0	0	0	0	0	0	1	0	
-(◣_◢)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	1	0	0	0	
+(◣_◢)	False	True	1	0	0	0	0	0	1	0	0	0	0	0	1	0	0	2	claude-opus-4-7
 (☀´▽`)	True	False	1	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	
 (☁‿☁)	False	False	2	0	1	1	0	0	0	0	0	0	0	2	0	0	0	0	
 (★^O^★)	True	False	4	0	3	0	1	0	0	0	0	0	0	3	0	0	0	0	
 (★ω★)	False	False	8	0	8	0	0	0	0	0	0	0	5	0	0	0	0	0	
-(★‿★)	False	False	3	0	3	0	0	0	0	0	0	0	0	1	0	0	0	0	
+(★‿★)	False	True	3	0	3	0	0	0	0	0	0	0	0	1	0	0	0	2	claude-opus-4-7
 (★≧▽^)	True	False	2	0	2	0	0	0	0	0	0	0	0	0	0	0	0	0	
 (★▽★)	True	False	3	0	3	0	0	0	0	0	0	0	0	0	0	0	0	0	
-(☆▽☆)	True	False	2	0	2	0	0	0	0	0	0	0	0	0	0	0	0	0	
+(☆▽☆)	True	True	2	0	2	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (☉д☉;�	False	False	1	1	0	0	0	0	0	0	0	0	0	1	0	0	0	0	
 (☉‿☉)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
 (☕~☕)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
@@ -387,19 +495,21 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (☕✿✿☕)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
 (☕・ω・)	False	False	1	0	0	1	0	0	0	0	0	0	0	1	0	0	0	0	
 (☞‿☞)	False	False	2	0	0	1	0	0	0	0	1	0	0	0	0	2	0	0	
-(☞ﾟヮﾟ)	False	False	5	0	0	1	0	0	2	1	1	0	0	0	0	5	0	0	
+(☞ﾟヮﾟ)	False	True	5	0	0	1	0	0	2	1	1	0	0	0	0	5	0	4	claude-opus-4-6,claude-opus-4-7
+(♡^▽^♡)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (♡˃͈̑‿	True	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	
 (♡˙︶˙♡)	True	False	2	0	1	0	0	0	0	0	1	0	0	0	0	0	0	0	
-(♡‿♡)	True	False	9	0	7	0	2	0	0	0	0	0	0	0	0	0	0	0	
+(♡‿♡)	True	False	10	0	8	0	2	0	0	0	0	0	0	0	0	0	0	0	
 (⚆_⚆)	False	False	1	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	
 (⚖)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	1	0	0	0	
 (⚠)	False	False	4	3	0	0	0	0	1	0	0	0	0	0	3	0	1	0	
 (✈)	False	False	2	0	0	0	0	0	2	0	0	0	0	0	2	0	0	0	
 (✈⚡)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	1	0	0	0	
 (✌)	False	False	1	0	0	0	0	0	0	0	1	0	0	0	1	0	0	0	
+(✦‿✦)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (✧)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	1	0	0	0	
 (✧·∀·)	False	False	1	0	0	0	0	0	0	0	1	0	0	0	1	0	0	0	
-(✧ω✧)	False	False	12	2	9	1	0	0	0	0	0	0	0	12	0	0	0	0	
+(✧ω✧)	False	True	12	2	9	1	0	0	0	0	0	0	0	12	0	0	0	4	claude-opus-4-6,claude-opus-4-7
 (✧‿✧)	False	False	1	0	1	0	0	0	0	0	0	0	0	0	1	0	0	0	
 (✧✧)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	1	0	0	0	
 (✧・̮・)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	1	0	0	0	
@@ -415,10 +525,11 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (✿‿・̀)	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	1	0	0	
 (✿╹‿╹)	False	False	23	3	2	5	2	2	1	1	6	1	0	0	0	23	0	0	
 (✿▽✿)	False	False	1	1	0	0	0	0	0	0	0	0	0	0	1	0	0	0	
-(✿◕‿◕)	True	False	11	4	0	0	3	0	0	1	1	2	0	0	0	8	0	0	
+(✿◕‿◕)	True	True	11	4	0	0	3	0	0	1	1	2	0	0	0	8	0	4	claude-opus-4-7,codex-hook
 (✿◕‿◕✿)	True	False	4	0	1	2	0	0	0	0	1	0	0	0	0	3	0	0	
-(✿◠‿◠)	False	False	153	12	35	43	36	0	2	4	16	5	41	12	1	89	0	0	
+(✿◠‿◠)	False	True	153	12	35	43	36	0	2	4	16	5	41	12	1	89	0	4	claude-opus-4-7,codex-hook
 (✿◠‿�	False	False	2	1	0	0	0	0	0	0	1	0	0	2	0	0	0	0	
+(✿・̀ㅁ・́)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (✿ﾟ▽	True	False	1	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	
 (❀‿❀)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
 (❁´‿`❁)	False	False	1	0	0	1	0	0	0	0	0	0	0	1	0	0	0	0	
@@ -443,51 +554,83 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (〃＾▽＾〃)	False	False	1	0	0	0	0	0	0	0	1	0	0	0	0	1	0	0	
 (〃ﾟ3ﾟ〃)	False	False	3	0	0	0	0	1	1	1	0	0	0	0	0	3	0	0	
 (〃￣ω￣〃)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
-(ノಠ益ಠ)	True	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	
-(ノ◕ヮ◕)	True	False	34	0	30	0	4	0	0	0	0	0	0	0	0	0	0	0	
+(゚ペ)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(゜∇゜)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(ノಠ益ಠ)	True	True	1	0	1	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(ノ◕ヮ◕)	True	True	37	0	33	0	4	0	0	0	0	0	0	0	0	0	0	6	claude-opus-4-6,claude-opus-4-7,codex-hook
 (ノ゜-゜)	False	False	1	0	0	0	1	0	0	0	0	0	0	1	0	0	0	0	
-(・_・)	True	False	174	13	4	3	0	11	17	16	92	18	10	8	3	79	0	0	
-(・_・;)	True	False	124	10	0	0	0	0	17	2	31	64	0	38	0	0	1	0	
+(・	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(・_・)	True	True	174	13	4	3	0	11	17	16	92	18	10	8	3	79	0	10	claude-opus-4-6,claude-opus-4-7,codex-hook,gpt-5.4,gpt-5.5
+(・_・;)	True	True	125	10	0	0	0	0	17	2	32	64	0	38	0	0	1	8	claude-opus-4-7,codex-hook,gpt-5.4,gpt-5.5
 (・_・;?	False	False	1	0	0	0	0	0	0	0	0	1	0	1	0	0	0	0	
 (・_・;?)	False	False	1	0	0	0	0	0	1	0	0	0	0	1	0	0	0	0	
-(・_・?)	True	False	21	0	0	0	0	0	0	0	16	5	0	4	0	0	0	0	
+(・_・?)	True	True	21	0	0	0	0	0	0	0	16	5	0	4	0	0	0	4	claude-opus-4-6,claude-opus-4-7
+(・_・ゞ−☆	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-6
 (・_・ヘ)	True	False	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	
-(・_・ヾ	True	False	11	2	0	0	0	0	1	0	3	5	0	7	0	0	0	0	
+(・_・ヾ	True	True	11	2	0	0	0	0	1	0	3	5	0	7	0	0	0	4	claude-opus-4-6,claude-opus-4-7
 (・_・ヾ)	False	False	1	0	0	0	0	0	0	0	0	1	0	1	0	0	0	0	
 (・`ω´・)	False	False	2	0	0	0	1	0	0	0	1	0	0	0	0	0	2	0	
-(・̀ω・́	False	False	2	0	2	0	0	0	0	0	0	0	0	0	0	0	2	0	
-(・̀ω・́)	False	False	65	12	2	5	10	2	5	4	19	6	8	5	0	49	0	0	
+(・o・)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(・̀.̫・́)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	gpt-5-4-thinking
+(・̀_・́)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,gpt-5.4
+(・̀ω・́	False	True	2	0	2	0	0	0	0	0	0	0	0	0	0	0	2	2	claude-opus-4-7
+(・̀ω・́)	False	True	65	12	2	5	10	2	5	4	19	6	8	5	0	49	0	6	claude-opus-4-7,codex-hook,gpt-5-4-thinking
 (・̀д・́)	False	False	2	0	0	0	0	2	0	0	0	0	1	0	0	0	0	0	
-(・̀‿・́)	True	False	97	10	10	11	6	12	11	7	19	11	1	10	22	62	0	0	
+(・̀‿-)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(・̀‿・́)	True	True	97	10	10	11	6	12	11	7	19	11	1	10	22	62	0	12	claude-opus-4-6,claude-opus-4-7,codex-hook,gpt-5-4-thinking,gpt-5.4,gpt-5.5
+(・̀‿・́;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(・̀⌄・́)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (・̀⌓・́)	False	False	1	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	
 (・̀ㅁ・́)	False	False	2	0	0	0	0	1	0	0	0	1	0	0	0	2	0	0	
+(・̀ㅁ・́;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(・̀ㅂ・́)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(・́ω・̀)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(・́‸・̀)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(・́⌓・̀)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(・́︵・̀)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
 (・́︿・̀)	True	False	1	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	
-(・ω・)	True	False	31	2	0	1	0	0	0	0	28	0	0	9	0	0	0	0	
-(・ω・;)	False	False	1	0	0	0	0	0	1	0	0	0	0	1	0	0	0	0	
+(・̅_・̅)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(・ε・)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(・ω<)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(・ω・)	True	True	31	2	0	1	0	0	0	0	28	0	0	9	0	0	0	6	claude-opus-4-6,claude-opus-4-7,codex-hook
+(・ω・;)	False	True	1	0	0	0	0	0	1	0	0	0	0	1	0	0	0	4	claude-opus-4-7,codex-hook
 (・ω・?)	True	False	1	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	
-(・ω・`)	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	1	0	
+(・ω・`)	False	True	1	0	1	0	0	0	0	0	0	0	0	0	0	0	1	6	claude-opus-4-7,codex-hook
 (・ω・`)ゝo☆	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	1	0	
+(・ω・´)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(・ω・ﾉ	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (・ө・)	False	False	5	0	0	0	0	0	0	0	5	0	2	0	0	0	0	0	
 (・᷄⌓・᷅)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	
 (・―・)	True	False	1	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	
-(・‿・)	True	False	57	2	0	9	24	0	0	0	19	3	0	3	0	46	0	0	
+(・‾‿‾・)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(・‿・)	True	True	57	2	0	9	24	0	0	0	19	3	0	3	0	46	0	6	claude-opus-4-6,claude-opus-4-7,codex-hook
 (・∀・(・∀・(・∀・)	False	False	1	1	0	0	0	0	0	0	0	0	0	1	0	0	0	0	
-(・∀・)	True	False	22	2	0	0	0	0	1	0	19	0	0	13	0	0	0	0	
+(・∀・)	True	True	22	2	0	0	0	0	1	0	19	0	0	13	0	0	0	6	claude-opus-4-6,claude-opus-4-7,codex-hook
+(・∀・;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
 (・⌄・)	False	False	1	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	
 (・▽・)	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	1	0	
+(・⩊・)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(・へ・)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	gpt-5.5
+(・・;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	gpt-5.5
 (・・;ノ)	False	False	1	0	0	0	0	1	0	0	0	0	0	1	0	0	0	0	
+(・︵・)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(・﹏・)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(・ｪ・)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(ーー;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (人*´∀`)	False	False	1	0	1	0	0	0	0	0	0	0	1	0	0	0	0	0	
 (人*´∇	False	False	4	0	0	0	3	0	0	0	1	0	0	4	0	0	0	0	
-(灬°‿°灬)	True	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	
+(灬°‿°灬)	True	True	1	0	0	1	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (ꈍ‿ꈍ✨)	False	False	1	0	1	0	0	0	0	0	0	0	0	1	0	0	0	0	
 (ꈍ‿ꈍ�	False	False	1	0	0	0	0	1	0	0	0	0	0	1	0	0	0	0	
 (꒪_꒪ׅ)	False	False	1	0	0	0	0	1	0	0	0	0	0	1	0	0	0	0	
 (꒪_꒪✿)	False	False	1	0	0	0	0	1	0	0	0	0	0	1	0	0	0	0	
+(꒪ཫ꒪;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (꒪ヮ꒪)	False	False	1	0	1	0	0	0	0	0	0	0	0	1	0	0	0	0	
 (꒪ꇴ꒪)	False	False	5	0	0	0	1	1	2	0	0	1	0	5	0	0	0	0	
 (꒪꒫	False	False	1	0	1	0	0	0	0	0	0	0	0	1	0	0	0	0	
 (꒪꒫꒪	False	False	1	0	0	0	0	0	1	0	0	0	0	1	0	0	0	0	
-(눈_눈)	True	False	2	0	0	0	0	0	0	0	0	2	0	0	0	0	0	0	
+(눈_눈)	True	True	2	0	0	0	0	0	0	0	0	2	0	0	0	0	0	8	claude-opus-4-6,claude-opus-4-7,gpt-5.4,gpt-5.5
+(눈‸눈)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
 (︵・ω・)	False	False	2	0	0	0	0	0	1	1	0	0	0	0	2	0	0	0	
 (︵・ω・︵)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	1	0	0	0	
 (︵︵)	False	False	3	0	0	0	0	0	2	1	0	0	0	0	3	0	0	0	
@@ -500,27 +643,35 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (︿︿)	False	False	50	0	0	2	0	27	6	15	0	0	0	0	50	0	0	0	
 (﹏(._.)っ)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	
 (﹏-)	False	False	3	0	0	0	0	0	3	0	0	0	2	0	0	0	0	0	
+(﹒︠‿﹒︡)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (＠_＠;)	True	False	1	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	
+(＾	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
 (＾3＾)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
 (＾_－)	False	False	1	1	0	0	0	0	0	0	0	0	0	0	0	1	0	0	
 (＾_＾)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
 (＾ω＾)	False	False	1	1	0	0	0	0	0	0	0	0	0	0	0	1	0	0	
 (＾‿＾)	False	False	81	17	10	6	18	0	3	2	11	14	0	0	0	81	0	0	
-(＾∇＾)	False	False	6	0	1	1	2	0	0	0	0	2	0	0	0	6	0	0	
-(＾▽＾)	True	False	6	0	0	2	2	0	0	0	2	0	0	0	0	3	0	0	
+(＾∇＾)	False	True	6	0	1	1	2	0	0	0	0	2	0	0	0	6	0	4	claude-opus-4-7,codex-hook
+(＾▽＾)	True	True	6	0	0	2	2	0	0	0	2	0	0	0	0	3	0	8	claude-opus-4-7,gpt-5-5-thinking,gpt-5.4,gpt-5.5
 (＾▿＾)	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	
+(＾・ω・＾)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (＾ｪ＾)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	1	0	
 (ｏ❁・‿・❁)�	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	0	1	0	
 (ｏ・ω・)	False	False	3	0	0	1	1	0	0	0	1	0	0	0	0	0	3	0	
+(｡-_-｡)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(｡-`ω´-)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (｡-ω-)	True	False	7	0	0	7	0	0	0	0	0	0	0	0	0	0	0	0	
 (｡-ω｡)	False	False	3	0	0	0	1	0	0	0	0	2	0	0	0	0	3	0	
-(｡-‿-｡)	True	False	3	0	0	2	0	0	0	0	1	0	0	0	0	0	0	0	
+(｡-‿-｡)	True	True	3	0	0	2	0	0	0	0	1	0	0	0	0	0	0	2	claude-opus-4-7
 (｡-∀-)	False	False	3	0	0	0	0	0	1	2	0	0	0	0	0	0	3	0	
 (｡>‿<	False	False	1	0	0	0	1	0	0	0	0	0	0	1	0	0	0	0	
+(｡>‿<｡)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (｡>﹏<｡)	True	False	11	0	1	0	1	0	9	0	0	0	5	1	0	0	0	0	
 (｡^‿^｡)	False	False	1	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	
 (｡´‿`｡)	True	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	
 (｡´▽`｡)	False	False	2	0	0	1	1	0	0	0	0	0	1	0	0	0	0	0	
+(｡´꒳`｡)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(｡·‿·｡)	True	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	
 (｡˃ᆺ˂｡)	False	False	2	0	2	0	0	0	0	0	0	0	2	0	0	0	0	0	
 (｡˃‿˂)	True	False	52	4	25	3	20	0	0	0	0	0	23	0	0	0	0	0	
 (｡˃‿˂｡)	False	False	7	0	7	0	0	0	0	0	0	0	1	0	0	0	0	0	
@@ -528,22 +679,27 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (｡˘³˘)	True	False	4	0	0	4	0	0	0	0	0	0	0	0	0	0	0	0	
 (｡˘ω˘｡)	True	False	4	0	0	4	0	0	0	0	0	0	0	0	0	0	0	0	
 (｡‿‿‿｡)	False	False	36	0	0	36	0	0	0	0	0	0	18	0	0	0	0	0	
-(｡╯︵╰｡)	True	False	87	0	1	0	0	0	0	86	0	0	39	0	0	0	0	0	
-(｡◕‿‿◕｡)	True	False	4	1	3	0	0	0	0	0	0	0	2	0	0	0	0	0	
-(｡◕‿◕｡)	True	False	171	18	1	32	32	0	0	0	88	0	87	0	0	0	0	0	
+(｡╯︵╰｡)	True	True	87	0	1	0	0	0	0	86	0	0	39	0	0	0	0	2	claude-opus-4-7
+(｡╹ω╹｡)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(｡◕‿‿◕｡)	True	True	4	1	3	0	0	0	0	0	0	0	2	0	0	0	0	4	claude-opus-4-7,gpt-5.5
+(｡◕‿◕｡)	True	True	172	18	1	33	32	0	0	0	88	0	87	0	0	0	0	6	claude-opus-4-6,claude-opus-4-7,codex-hook
+(｡◕◕｡)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (｡◝‿◜	False	False	1	0	0	0	1	0	0	0	0	0	0	1	0	0	0	0	
-(｡♡‿♡｡)	False	False	2	0	1	0	1	0	0	0	0	0	1	0	0	0	0	0	
-(｡♥‿♥｡)	True	False	198	17	18	76	82	0	0	0	5	0	99	7	0	0	0	0	
+(｡♡‿♡｡)	False	True	2	0	1	0	1	0	0	0	0	0	1	0	0	0	0	2	claude-opus-4-7
+(｡♥‿♥｡)	True	True	198	17	18	76	82	0	0	0	5	0	99	7	0	0	0	4	claude-opus-4-7,codex-hook
+(｡・	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (｡・ˇ‸ˇ・｡)	False	False	3	0	0	0	0	2	0	1	0	0	2	0	0	0	1	0	
-(｡・̀‿-)	True	False	73	11	1	5	18	0	0	0	38	0	18	8	0	0	1	0	
+(｡・̀‿-)	True	True	73	11	1	5	18	0	0	0	38	0	18	8	0	0	1	12	claude-opus-4-6,claude-opus-4-7,codex-hook,gpt-5-4-thinking,gpt-5-5-thinking,gpt-5.5
 (｡・̀‿-)و	False	False	1	0	0	0	1	0	0	0	0	0	0	0	0	0	1	0	
-(｡・̀‿・́｡)	False	False	4	0	0	0	0	0	0	0	4	0	0	0	0	0	0	0	
-(｡・́‿・̀｡)	True	False	10	1	0	1	1	0	2	3	2	0	5	0	0	0	0	0	
+(｡・̀‿・́｡)	False	True	4	0	0	0	0	0	0	0	4	0	0	0	0	0	0	2	claude-opus-4-7
+(｡・́ω・̀｡)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(｡・́‿・̀｡)	True	True	10	1	0	1	1	0	2	3	2	0	5	0	0	0	0	2	claude-opus-4-7
+(｡・́⌒・̀｡)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (｡・́︵・̀｡)	True	False	2	0	0	0	0	0	1	1	0	0	0	0	1	0	0	0	
-(｡・́︿・̀｡)	True	False	438	8	8	7	15	10	128	246	6	10	149	29	22	0	9	0	
-(｡・ω・｡)	True	False	46	0	0	33	0	0	1	0	12	0	3	3	0	0	2	0	
-(｡・‿-)	True	False	1	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	
-(｡・‿・｡)	True	False	14	1	1	6	4	0	0	1	1	0	0	0	0	0	2	0	
+(｡・́︿・̀｡)	True	True	438	8	8	7	15	10	128	246	6	10	149	29	22	0	9	2	claude-opus-4-7
+(｡・ω・｡)	True	True	52	0	0	39	0	0	1	0	12	0	3	3	0	0	2	4	claude-opus-4-7,codex-hook
+(｡・‿-)	True	True	1	0	0	1	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
+(｡・‿・｡)	True	True	15	1	1	7	4	0	0	1	1	0	0	0	0	0	2	4	claude-opus-4-7,codex-hook
 (｡・∀・)｡'	False	False	1	0	0	0	0	0	0	1	0	0	0	0	0	0	1	0	
 (｡・∀・)ﾉﾞ	False	False	2	0	0	0	0	0	0	1	1	0	0	0	0	0	2	0	
 (｡・ㅅ・｡)	False	False	6	0	0	5	0	0	1	0	0	0	5	0	0	0	0	0	
@@ -559,39 +715,47 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (ﾉ´・ω・`)	False	False	22	1	0	0	0	14	7	0	0	0	0	0	22	0	0	0	
 (ﾉ´ﾉ)	False	False	2	0	0	0	0	2	0	0	0	0	0	0	2	0	0	0	
 (ﾉ´ﾟдﾟ)	False	False	1	0	1	0	0	0	0	0	0	0	0	0	0	1	0	0	
+(ﾉωﾉ)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (ﾉ◕‿◕	False	False	1	0	0	0	0	0	1	0	0	0	0	1	0	0	0	0	
 (ﾉ◕ヮ◕	False	False	1	0	1	0	0	0	0	0	0	0	0	1	0	0	0	0	
-(ﾉ◕ヮ◕)	True	False	636	83	175	34	76	69	50	41	42	66	20	48	552	9	0	0	
+(ﾉ◕ヮ◕)	True	True	636	83	175	34	76	69	50	41	42	66	20	48	552	9	0	8	claude-opus-4-6,claude-opus-4-7,codex-hook,gpt-5.5
 (ﾉﾞﾉﾟ)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	1	0	0	0	
 (ﾟ`д´ﾟ)	False	False	1	0	0	0	1	0	0	0	0	0	0	0	0	0	1	0	
 (ﾟoﾟ)	False	False	2	0	2	0	0	0	0	0	0	0	0	0	0	0	0	0	
-(ﾟωﾟ)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	
+(ﾟωﾟ)	False	True	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	2	claude-opus-4-7
 (ﾟдﾟ)	False	False	37	3	4	1	2	11	9	3	2	2	1	0	0	34	0	0	
 (ﾟ‿ﾟ)	False	False	5	1	1	2	0	0	0	0	1	0	0	0	0	5	0	0	
 (ﾟ∀ﾟ)	False	False	19	6	3	2	0	0	1	1	2	4	1	0	1	15	0	0	
 (ﾟ∇ﾟ)	False	False	4	0	3	0	1	0	0	0	0	0	0	0	0	0	4	0	
-(ﾟ▽ﾟ)	False	False	10	0	5	0	5	0	0	0	0	0	1	0	0	0	0	0	
+(ﾟ▽ﾟ)	False	True	10	0	5	0	5	0	0	0	0	0	1	0	0	0	0	4	claude-opus-4-7,codex-hook
 (ﾟ◕_◕)	False	False	3	2	0	0	0	0	0	0	0	1	0	0	0	3	0	0	
 (ﾟ◕‿ﾟ)	False	False	5	1	0	0	0	0	1	0	0	3	0	0	0	5	0	0	
 (ﾟ☉ﾟ)	False	False	1	0	0	0	0	1	0	0	0	0	0	0	0	1	0	0	
 (ﾟヘﾟ)	False	False	3	0	0	0	0	1	2	0	0	0	0	0	0	3	0	0	
-(ﾟヮﾟ)	False	False	2	0	0	0	1	1	0	0	0	0	0	0	0	2	0	0	
+(ﾟヮﾟ)	False	True	2	0	0	0	1	1	0	0	0	0	0	0	0	2	0	2	claude-opus-4-7
+(ﾟーﾟ)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
 (ﾟ﹏ﾟ)	False	False	3	0	0	0	0	0	0	3	0	0	0	0	0	0	3	0	
-(ﾟｰﾟ)	True	False	6	0	0	0	0	0	2	3	1	0	0	0	5	0	0	0	
+(ﾟｰﾟ)	True	True	6	0	0	0	0	0	2	3	1	0	0	0	5	0	0	4	claude-opus-4-7,codex-hook
 (ﾟﾛﾟ)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	1	0	0	0	
-(￢_￢)	False	False	6	0	0	0	0	0	0	0	0	6	4	0	0	0	0	0	
-(￣^￣)	False	False	3	0	0	3	0	0	0	0	0	0	0	0	3	0	0	0	
+(￢_￢)	False	True	6	0	0	0	0	0	0	0	0	6	4	0	0	0	0	2	claude-opus-4-7
+(￣^￣)	False	True	3	0	0	3	0	0	0	0	0	0	0	0	3	0	0	4	gpt-5.4,gpt-5.5
+(￣^￣ゞ	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (￣_￣)	False	False	11	1	0	0	2	2	0	1	0	5	0	0	11	0	0	0	
 (￣_￣;)	False	False	5	0	0	0	0	0	5	0	0	0	0	0	5	0	0	0	
-(￣ε￣)	False	False	1	1	0	0	0	0	0	0	0	0	0	0	1	0	0	0	
+(￣~￣;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(￣ε￣)	False	True	1	1	0	0	0	0	0	0	0	0	0	0	1	0	0	2	claude-opus-4-7
 (￣ε￣;)	False	False	1	0	0	1	0	0	0	0	0	0	0	0	1	0	0	0	
-(￣ω￣)	False	False	2	0	0	2	0	0	0	0	0	0	0	0	2	0	0	0	
-(￣ω￣;)	True	False	14	0	0	2	1	1	4	3	0	3	0	0	13	0	0	0	
+(￣ω￣)	False	True	2	0	0	2	0	0	0	0	0	0	0	0	2	0	0	6	claude-opus-4-6,claude-opus-4-7,codex-hook
+(￣ω￣;)	True	True	14	0	0	2	1	1	4	3	0	3	0	0	13	0	0	4	claude-opus-4-6,claude-opus-4-7
 (￣∇￣)	False	False	30	4	0	6	6	0	0	1	11	2	0	0	30	0	0	0	
 (￣∇￣;)	False	False	13	2	1	1	4	0	0	1	2	2	0	0	13	0	0	0	
-(￣▽￣)	False	False	140	23	13	19	29	2	2	10	23	19	0	4	135	0	1	0	
-(￣▽￣;)	False	False	13	1	2	0	0	0	4	4	0	2	0	0	13	0	0	0	
-(￣ヘ￣)	True	False	1	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	
+(￣▽￣)	False	True	140	23	13	19	29	2	2	10	23	19	0	4	135	0	1	8	claude-opus-4-6,claude-opus-4-7,codex-hook,gpt-5-5-thinking
+(￣▽￣;)	False	True	13	1	2	0	0	0	4	4	0	2	0	0	13	0	0	2	claude-opus-4-7
+(￣へ￣)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	gpt-5.5
+(￣ヘ￣)	True	True	2	0	0	0	0	0	0	0	2	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(￣ヘ￣;)	True	True	1	0	0	0	0	0	0	0	1	0	0	0	0	0	0	4	claude-opus-4-7,codex-hook
+(￣ー￣)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	8	claude-opus-4-6,claude-opus-4-7,codex-hook,gpt-5.4
+(￣ー￣;)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (￣︞￣)	False	False	1	1	0	0	0	0	0	0	0	0	0	0	1	0	0	0	
 (￣︶￣)	False	False	10	4	0	0	0	1	0	2	1	2	0	0	10	0	0	0	
 (￣︿￣)	False	False	8	3	0	0	0	0	1	1	1	2	0	0	8	0	0	0	
@@ -600,8 +764,9 @@ first_word	is_claude	is_wild	total_emit_count	total_emit_HP-D	total_emit_HP-S	to
 (￣﹏￣)	False	False	11	0	0	0	1	3	2	1	0	4	0	0	11	0	0	0	
 (￣﹒￣)	False	False	1	0	0	0	0	0	0	0	0	1	0	0	1	0	0	0	
 (￣￢￢)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	1	0	0	0	
-(￣￣)	False	False	8	0	1	0	0	0	3	2	1	1	0	0	8	0	0	0	
+(￣￣)	False	True	8	0	1	0	0	0	3	2	1	1	0	0	8	0	0	2	claude-opus-4-7
 (￣￣;✿)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	1	0	0	0	
 (￣￣;￣￣)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	1	0	0	0	
+(￣￣|||)	False	True	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	claude-opus-4-7
 (�sad)	False	False	1	0	0	0	0	0	0	1	0	0	0	0	0	0	1	0	
 (�ó_Á⇂)	False	False	1	0	0	0	0	0	1	0	0	0	0	0	0	0	1	0	

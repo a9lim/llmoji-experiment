@@ -60,7 +60,7 @@ from llmoji_study.emotional_analysis import load_emotional_features_stack
 # split via post-hoc labels (LN_DS_LABELS in postq_d_s.py); abandoned
 # 2026-05-06 after the powercheck confirmed LN-null is genuine in
 # gemma + qwen and only power-confounded in models whose HN itself is
-# fused. See docs/2026-05-06-prompt-extension-roadmap.md.
+# fused. See docs/findings.md and docs/previous-experiments.md.
 from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
 
 

@@ -384,7 +384,7 @@ def _soft_similarity_section(
     lines.append("")
     lines.append(
         f"Per-face score: ``similarity = 1 - JSD(pred, gt) / ln 2`` ∈ [0, 1]. "
-        f"Pred dist = judge's 6-quadrant softmax (from JSONL); GT dist = "
+        f"Pred dist = judge's 9-cell softmax (from JSONL); GT dist = "
         f"normalized per-face quadrant emit counts from "
         f"``load_claude_gt_distribution(floor=3)``. "
         f"Faces evaluated: **{n}** (judged ∩ GT-with-≥3-emits)."

@@ -120,12 +120,8 @@ echo "  >>> scripts/66_per_project_quadrants.py --mode gt-priority"
 .venv/bin/python scripts/66_per_project_quadrants.py --mode gt-priority
 
 echo ""
-echo "  >>> scripts/67_wild_residual.py --fixed-k 6"
-.venv/bin/python scripts/67_wild_residual.py --fixed-k 6
-
-echo ""
-echo "  >>> scripts/67_wild_residual.py --gt-only --fixed-k 6"
-.venv/bin/python scripts/67_wild_residual.py --gt-only --fixed-k 6
+echo "  >>> scripts/67_wild_residual.py --fixed-k 9"
+.venv/bin/python scripts/67_wild_residual.py --fixed-k 9
 
 # ---------------------------------------------------------------------
 # Stage 7 — Face overlap with Claude pull (now that haiku/opus jsonls

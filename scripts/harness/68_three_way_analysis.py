@@ -39,7 +39,7 @@ Outputs (data/harness/ + figures/harness/, all `_three_way`):
     8-pattern agreement breakdown
   - three_way_pairwise_heatmap.png — 4×4 similarity heatmap
   - three_way_top_divergent.png — grouped-bar chart of top-N
-    most-divergent faces (4 channels × 6 quadrants per face)
+    most-divergent faces (4 channels × current quadrant cells per face)
 
 Usage:
     python scripts/harness/68_three_way_analysis.py

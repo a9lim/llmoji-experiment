@@ -147,8 +147,8 @@ def _emission_rate_by_quadrant(path: Path) -> dict[str, tuple[int, int]]:
     JSONL. Uses prompt_id prefix to infer parent quadrant (hp/lp/hn/
     ln/nb/np/hb). HP-D (hp21-hp40) and HP-S (hp01-hp20) both aggregate
     under HP here; the dominance split is applied downstream by
-    apply_hn_split / apply_hp_split helpers. v4 cells (NP, HB, HP-D)
-    added 2026-05-06 per docs/2026-05-06-prompt-extension-roadmap.md."""
+    apply_pad_split. v4 cells (NP, HB, HP-D) were added 2026-05-06;
+    see docs/findings.md for the current registry summary."""
     stats: dict[str, list[int]] = {
         "HP": [0, 0], "LP": [0, 0], "HN": [0, 0], "LN": [0, 0], "NB": [0, 0],
         "NP": [0, 0], "HB": [0, 0],

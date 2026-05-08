@@ -2,9 +2,9 @@
 
 Splits the BoL channel from script 68's three-way analysis by source model. The pooled BoL aggregates across every source's per-face synthesis; here each source-model's BoL is kept separate. Headline question: when pooled BoL drifts from Claude-GT (e.g. on `(╯°□°)`), is the drift shared across providers (a kaomoji-vocabulary fact) or concentrated in claude-opus-4-7's deployment (a Claude-specific behavior)?
 
-Coverage: **493 (face, source_model) cells** across 8 source models. 112 faces appear under ≥2 sources. Claude-GT (floor ≥ 3) covers 38 faces in this set.
+Coverage: **493 (face, source_model) cells** across 8 source models. 112 faces appear under ≥2 sources. Claude-GT (floor ≥ 3) covers 50 faces in this set.
 
-For reference: pooled-BoL solo similarity vs Claude-GT (face-uniform across the same 38-face set) = **0.255**.
+For reference: pooled-BoL solo similarity vs Claude-GT (face-uniform across the same 50-face set) = **0.464**.
 
 ## Per-source-model summary
 
@@ -12,14 +12,14 @@ Each row: how that source's per-face BoL stacks up against Claude-GT (Opus-4.7 e
 
 | source_model | n cells | n emits | n with GT | sim vs GT (face-uniform) | sim vs GT (emit-weighted) | modal agree |
 |---|---:|---:|---:|---:|---:|---:|
-| `claude-opus-4-7` | 287 | 3227 | 38 | 0.242 | 0.073 | 26% |
-| `codex-hook` | 88 | 323 | 24 | 0.201 | 0.190 | 12% |
-| `gpt-5.5` | 31 | 272 | 6 | 0.203 | 0.039 | 17% |
-| `claude-opus-4-6` | 49 | 95 | 15 | 0.195 | 0.222 | 13% |
-| `gpt-5.4` | 15 | 27 | 3 | 0.000 | 0.000 | 0% |
-| `gpt-5-5-thinking` | 11 | 19 | 2 | 0.000 | 0.000 | 0% |
-| `gpt-5-4-thinking` | 7 | 11 | 2 | 0.436 | 0.436 | 50% |
-| `<synthetic>` | 5 | 5 | 2 | 0.218 | 0.218 | 0% |
+| `claude-opus-4-7` | 287 | 3227 | 50 | 0.451 | 0.487 | 32% |
+| `codex-hook` | 88 | 323 | 29 | 0.358 | 0.368 | 14% |
+| `gpt-5.5` | 31 | 272 | 7 | 0.323 | 0.287 | 14% |
+| `claude-opus-4-6` | 49 | 95 | 20 | 0.322 | 0.373 | 20% |
+| `gpt-5.4` | 15 | 27 | 4 | 0.263 | 0.178 | 25% |
+| `gpt-5-5-thinking` | 11 | 19 | 2 | 0.307 | 0.246 | 50% |
+| `gpt-5-4-thinking` | 7 | 11 | 2 | 0.438 | 0.438 | 0% |
+| `<synthetic>` | 5 | 5 | 2 | 0.217 | 0.217 | 0% |
 
 ## Cross-source-model pairwise BoL similarity
 
@@ -53,7 +53,7 @@ Per-face breakdowns for the divergent faces from script 68's top-divergent table
 
 | channel | n | HP-D | HP-S | LP | NP | HN-D | HN-S | LN | NB | HB | modal |
 |---|---:|---|---|---|---|---|---|---|---|---|---|
-| **GT (use)** | 56 | 0.00 | 0.00 | 0.00 | 0.00 | 0.59 | 0.41 | 0.00 | 0.00 | 0.00 | **HN-D** |
+| **GT (use)** | 90 | 0.00 | 0.00 | 0.00 | 0.08 | 0.38 | 0.36 | 0.00 | 0.00 | 0.19 | **HN-D** |
 | BoL pooled | — | 0.00 | 0.73 | 0.00 | 0.08 | 0.02 | 0.02 | 0.00 | 0.15 | 0.00 | HP-S |
 | BoL · claude-opus-4-6 | 2 | 0.00 | 0.00 | 0.00 | 1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | NP |
 | BoL · claude-opus-4-7 | 19 | 0.00 | 1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | HP-S |
@@ -64,7 +64,7 @@ Per-face breakdowns for the divergent faces from script 68's top-divergent table
 
 | channel | n | HP-D | HP-S | LP | NP | HN-D | HN-S | LN | NB | HB | modal |
 |---|---:|---|---|---|---|---|---|---|---|---|---|
-| **GT (use)** | 38 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.13 | 0.87 | 0.00 | 0.00 | **LN** |
+| **GT (use)** | 42 | 0.00 | 0.00 | 0.00 | 0.10 | 0.00 | 0.12 | 0.79 | 0.00 | 0.00 | **LN** |
 | BoL pooled | — | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 1.00 | HB |
 | BoL · claude-opus-4-7 | 17 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 1.00 | HB |
 
@@ -80,7 +80,7 @@ Per-face breakdowns for the divergent faces from script 68's top-divergent table
 
 | channel | n | HP-D | HP-S | LP | NP | HN-D | HN-S | LN | NB | HB | modal |
 |---|---:|---|---|---|---|---|---|---|---|---|---|
-| **GT (use)** | 10 | 0.00 | 1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | **HP-S** |
+| **GT (use)** | 14 | 0.00 | 0.86 | 0.00 | 0.14 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | **HP-S** |
 | BoL pooled | — | 0.00 | 0.50 | 0.00 | 0.50 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | HP-S |
 | BoL · claude-opus-4-7 | 4 | 0.00 | 0.50 | 0.00 | 0.50 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | HP-S |
 

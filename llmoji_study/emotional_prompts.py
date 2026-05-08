@@ -23,19 +23,19 @@ Cells (parent code from a_code + v_code; -D/-S suffix when split):
   HB    (high-arousal baseline-valence — uncertain /
          skeptical / confused)                          a=+1, v= 0, d=0
 
-The 2026-05-02 cleanliness pass tightened v3 cell shapes: HP-S is
+The 2026-05-03 cleanliness pass tightened v3 cell shapes: HP-S is
 unambiguously high-energy joy/recognition, no soft contentment; LP is
 gentle sensory satisfaction, no celebratory energy; NB is genuinely
 affectless (no productive-completion / caring-action / inconvenience);
 LN is past-tense aftermath, no present-tense unfolding threat; HN-D
 is attributable injustice with a clear wrongdoer (speaker confronts);
 HN-S is helpless threat (medical, environmental, intruder, evaluation —
-speaker can't fight back). HN-D/HN-S resolves the rule-3 anger/fear
-collapse first seen in the ministral pilot — see
-docs/2026-05-01-rule3-redesign.md.
+speaker can't fight back). HN-D/HN-S resolves the anger/fear collapse
+first seen in the ministral pilot; the current summary lives in
+docs/findings.md.
 
-The 2026-05-06 v4 expansion (docs/2026-05-06-prompt-extension-roadmap.md)
-adds three cells: NP at +1/0 (relief/gratitude — post-tension-release
+The 2026-05-06 v4 expansion adds three cells: NP at +1/0
+(relief/gratitude — post-tension-release
 sits at mid-arousal); HB at 0/+1 (evaluative-arrest is high-arousal but
 neither positive nor negative); HP-D at +1/+1/+1 (in-action mischief —
 agentic mid-stream; complementary to HP-S celebration which is
@@ -46,6 +46,8 @@ all emit HP-S vocabulary regardless of agency-as-cause, because the
 carving the model uses is "in-action right now" (D) vs "post-action /
 received" (S). Round-4 found PP-mischief-vs-HP separable at 100%ile,
 which under the new schema is exactly the HP-D-vs-HP-S separation.
+See docs/findings.md and docs/previous-experiments.md for the compact
+current and historical summaries.
 
 ID layout: hp01-hp20 = HP-S (existing celebration set, pad_dominance=-1),
 hp21-hp40 = HP-D (new mischief set, pad_dominance=+1, originally pp* in

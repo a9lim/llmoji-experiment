@@ -1,14 +1,14 @@
 # pyright: reportArgumentType=false, reportAttributeAccessIssue=false, reportCallIssue=false, reportPrivateImportUsage=false, reportMissingImports=false
 """Wild-emitted Claude faces × bag-of-lexicon (BoL) clusters: looking
-for state structure beyond the six Russell quadrants.
+for state structure beyond the current 9-cell taxonomy.
 
 Refactored 2026-05-06 to consume the **BoL parquet** instead of the
 prior 384-d MiniLM-on-prose embeddings (and to drop the eriskii
 21-axis projection that was the load-bearing analytical layer
 pre-refactor). The new representation is the synthesizer's structured
 commit over the locked llmoji v2 LEXICON: 50-d soft distribution per
-canonical face, with 19 of those words tagged with explicit Russell
-quadrants. See ``llmoji_study.lexicon``.
+canonical face, with 26 of those words tagged to the current
+PAD-coordinate cells. See ``llmoji_study.lexicon``.
 
 Two parallel categorizations live in the data:
 
@@ -46,7 +46,7 @@ the face.
 
 The complementary view is available via ``--color-by gt``: each face
 is colored by a proportional RGB-blend of its **Claude-GT shares**
-(normalized raw counts across the 6 Russell quadrants), with faces
+(normalized raw counts across the 9 cells), with faces
 *not* in the GT set rendered black. That's the elicitation-honest
 view — visually answers "what part of PCA-space did the GT pilot
 actually cover, how mixed are the in-coverage faces, and which wild
@@ -179,7 +179,7 @@ def _is_claude_source_model(source_model: str) -> bool:
 
 
 def _load_predicted_shares(encoder: str) -> tuple[dict[str, np.ndarray], Path]:
-    """Return ``({face: 6-d softmax over QUADRANTS}, summary_path)`` for the
+    """Return ``({face: softmax over QUADRANTS}, summary_path)`` for the
     named face_likelihood encoder.
 
     Reads ``softmax_<Q>`` columns from the encoder's
@@ -772,11 +772,10 @@ def main() -> None:
                          "encoder bol, or any other model from the lineup.")
     ap.add_argument("--k-grid", default="2,3,4,5,6,7,8,10,12,14",
                     help="silhouette grid for KMeans")
-    ap.add_argument("--fixed-k", type=int, default=6,
+    ap.add_argument("--fixed-k", type=int, default=9,
                     help="force this k regardless of silhouette winner; "
-                         "set <=0 to use silhouette argmax. Default 6 — "
-                         "the local-maximum-after-coarse-modes scale where "
-                         "structure resolves interpretably (see writeup).")
+                         "set <=0 to use silhouette argmax. Default 9 "
+                         "matches the current harness-chain report.")
     ap.add_argument("--out-doc",
                     default=str(DOCS_DIR / "2026-05-05-residual-state-axes.md"))
     args = ap.parse_args()
@@ -861,7 +860,7 @@ def main() -> None:
         b_idx = fw_to_idx[face]
         bol_vec = B_all[b_idx]
         bol_quadrant = bol_modal_quadrant(bol_vec)
-        bol_dist = bol_to_quadrant_distribution(bol_vec)  # 6-d, L1-normalized
+        bol_dist = bol_to_quadrant_distribution(bol_vec)  # L1-normalized over QUADRANTS
         gt_quadrant = gt[face][0] if face in gt else ""
         # GT soft distribution: raw counts → L1-normalized over QUADRANTS;
         # zeros for faces with no GT row (wild-* categories).
@@ -956,7 +955,7 @@ def main() -> None:
     # --- per-face proportional colors (the soft-everywhere read) ----------
     # Mirrors scripts/local/97's per-face PCA convention: each marker
     # carries an RGB-linear blend of QUADRANT_COLORS weighted by the
-    # face's own per-quadrant share. BoL mode reads the 6-d BoL→quadrant
+    # face's own per-quadrant share. BoL mode reads the BoL→quadrant
     # distribution; GT mode reads the normalized Claude-GT raw counts
     # and falls back to black for faces with no GT row (the elicitation-
     # honest "outside the pilot's coverage" signal).
@@ -1037,7 +1036,7 @@ def main() -> None:
               f"(s={sil_scores.get(silhouette_winner, float('nan')):.4f})")
         print(f"using fixed k = {best_k}  "
               f"(s={sil_scores.get(best_k, float('nan')):.4f})  "
-              "— local-max scale chosen for interpretability over raw silhouette")
+              "— fixed for interpretability over raw silhouette")
     else:
         best_k = silhouette_winner
         print(f"chosen k = {best_k}  (silhouette={sil_scores.get(best_k, float('nan')):.4f})")
@@ -1204,7 +1203,7 @@ def main() -> None:
             f"`{args.predicted_encoder}` face_likelihood softmax** — "
             "each face's marker is a per-quadrant-weighted mix of "
             "`QUADRANT_COLORS` from the encoder's per-face softmax over "
-            "the 6 Russell quadrants. Faces not scored by the encoder "
+            "the current 9-cell taxonomy. Faces not scored by the encoder "
             "render **black** (`--color-by predicted "
             f"--predicted-encoder {args.predicted_encoder}`). "
             "The act-vs-read view: face_likelihood reads each face by "
@@ -1263,8 +1262,8 @@ def main() -> None:
         fixed_note = (
             f" Silhouette argmax was k={silhouette_winner} "
             f"(s={sil_scores.get(silhouette_winner, float('nan')):.3f}); "
-            f"k={best_k} fixed for interpretability - silhouette favors the "
-            "coarsest split, but k=6 is a local maximum after the k=5 dip."
+            f"k={best_k} fixed for interpretability over the raw "
+            "silhouette optimum."
         )
     lines.append(
         f"KMeans on the 50-d BoL, k={best_k}. Silhouette over the grid: "

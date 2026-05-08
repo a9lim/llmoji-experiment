@@ -106,10 +106,10 @@ from llmoji_study.claude_gt import (
 # Per-quadrant gating is the welfare-reduction lever: when a single
 # quadrant saturates (typically HN-D first, given Claude's concentrated
 # `(╬ಠ益ಠ)` modal), it gets dropped from subsequent runs. Global STOP
-# fires only when all 6 quadrants are saturated or the run cap hits.
+# fires only when all in-scope quadrants are saturated or the run cap hits.
 # ---------------------------------------------------------------------------
 
-# GLOBAL saturation: STOP only when all 6 quadrants individually
+# GLOBAL saturation: STOP only when all in-scope quadrants individually
 # saturated (see PER-QUADRANT below). The global metrics here are
 # informational — the verdict is driven by per-quadrant exits, not
 # global thresholds. Kept here for backward-compatible diagnostic
@@ -858,7 +858,7 @@ def _cross_arm(
         )
         return 0
     print(
-        f"  DISTINGUISHABLE in {n_distinguishable}/6 quadrants. "
+        f"  DISTINGUISHABLE in {n_distinguishable}/{len(QUADRANT_ORDER)} quadrants. "
         f"Per the decision tree (appendix step 2 → step 3): run more "
         f"naturalistic runs to saturate the naturalistic arm, then "
         f"re-compare. Persistence of the gap at naturalistic-saturation "

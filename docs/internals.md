@@ -1,92 +1,85 @@
 # Internals
 
-Two technical-infrastructure surfaces — the hidden-state sidecar pipeline
-and the kaomoji canonicalization rules. Treat both as load-bearing for
-every v3 analysis script.
+Two surfaces are load-bearing: hidden-state sidecars and kaomoji
+canonicalization.
 
-## Hidden-state pipeline
+## Hidden-State Sidecars
 
-After `session.generate()`,
-`llmoji_study.hidden_capture.read_after_generate(session)` reads saklas's
-per-token last-position buckets and writes `(h_first, h_last, h_mean[, per_token])`
-per probe layer to `data/local/hidden/<experiment>/<row_uuid>.npz`. The default
-since the 2026-05-02 perf batch is the three aggregates only — ~700 KB
-per row vs the earlier ~20–70 MB with the full per-token trace included
-(60× shrink; gates on `run_sample(store_full_trace=...)`). Smoke (`99`)
-opts in to the full trace; v3 / v3-introspection runners use the new
-default since no analysis script reads `hidden_L<idx>` post-h_first
-cutover. Loaders (`load_hidden_states(full_trace=False)`) already
-synthesize a length-2 stack from h_first/h_last so legacy
-`lc.hidden_states[0]` / `[-1]` indexing keeps working. Sidecars are
-gitignored, regenerable from the runners; npz writes happen on a
-background thread (`SidecarWriter`) so they overlap the next row's
-generation. JSONL keeps probe scores for back-compat and audit, flushed
-every 20 rows + on error / at run end.
+After generation, `llmoji_study.hidden_capture.read_after_generate()`
+reads saklas buckets and writes one sidecar per row:
 
-`llmoji_study.hidden_state_analysis.load_hidden_features(...)` returns
-`(metadata df, (n_rows, hidden_dim) feature matrix)`. Defaults: `which="h_first"`
-(kaomoji-emission state; methodology-invariant across the
-2026-05-02 MAX_NEW_TOKENS cutover; substantially cleaner Russell-
-quadrant separation than `h_mean` — see findings.md), `layer=None`
-(deepest probe layer). `$LLMOJI_WHICH` overrides the default per-run.
-v3 figures default to `h_first` since 2026-05-02.
+```text
+data/local/hidden/<experiment>/<row_uuid>.npz
+```
 
-Active analyses since 2026-05-04 use the **layer-stack
-representation** rather than picking a single layer. Helpers
-`load_emotional_features_stack` (registry-keyed) and
-`load_emotional_features_stack_at` (path-aware for introspection
-JSONLs) live in `llmoji_study.emotional_analysis` and return
-`(metadata df, (n_rows, n_layers · hidden_dim) feature matrix)` —
-the row-wise concat of every probe layer's `h_first`. Single-layer
-`load_hidden_features(layer=...)` is preserved for harness/internal
-use, but the `preferred_layer` field on `ModelPaths` was deleted
-2026-05-04 (the silhouette-peak heuristic was methodologically
-arbitrary; PCA over the full stack picks informative directions
-agnostically).
+Each sidecar stores `h_first`, `h_last`, and `h_mean` per probe layer.
+`h_first` is the active aggregate because it is the kaomoji-emission
+state. Full per-token traces are opt-in for smoke/debug paths only.
 
-## Kaomoji canonicalization
+JSONL rows keep metadata, emitted face, prompt id, probe scores, and the
+sidecar UUID. Sidecars keep hidden states. Treat the pair as the source
+of truth.
 
-`llmoji.taxonomy.canonicalize_kaomoji(s)` collapses cosmetic-only variants.
-Applied at load time in `load_emotional_features` (v3) and
-`claude_faces.load_embeddings_canonical`. Six rules (extended 2026-04-25 from
-three to six after Qwen revealed substantial cosmetic variation):
+Current analysis loaders:
 
-1. **NFC normalize** (NOT NFKC — NFKC compatibility-decomposes `´` and `˘`
-   into space + combining marks, mangling face glyphs).
-2. **Strip invisible format characters**: ZWSP/ZWNJ/ZWJ (U+200B/C/D), WORD
-   JOINER (U+2060), BOM (U+FEFF), and the U+0602 ARABIC FOOTNOTE MARKER Qwen
-   occasionally emits as a stray byte. Model sometimes interleaves U+2060
-   between every glyph; `(⁠◕⁠‿⁠◕⁠✿⁠)` collapses to `(◕‿◕✿)`.
-3. **Whitelisted typographic substitutions**: arm folds (`）`→`)`, `（`→`(`,
-   `ｃ`→`c`, `﹏`→`_`, `ᴗ`→`‿`); half/full-width punctuation (`＞`→`>`,
-   `＜`→`<`, `；`→`;`, `：`→`:`, `＿`→`_`, `＊`→`*`, `￣`→`~`); near-identical
-   glyph folds (`º`→`°`, `˚`→`°`, `･`→`・`). NOT `·`/`⋅` — those are smaller
-   and could plausibly be a distinct register.
-4. **Strip ASCII spaces inside the bracket span**: `( ; ω ; )` → `(;ω;)`.
-   ASCII spaces only; non-ASCII spacing is part of the face. Applied only
-   when the form starts with `(` and ends with `)`.
-5. **Lowercase Cyrillic capitals** (U+0410–U+042F): `Д` → `д`. Two forms
-   co-occur in the same `(；´X｀)` distressed-face skeleton at near-50/50 in
-   Qwen, so the model isn't choosing semantically.
-6. **Strip arm-modifier characters** from face boundaries: leading `っ`
-   inside `(`, trailing `[ςc]` inside `)`, trailing `[ﻭっ]` outside `)`.
-   Eye/mouth/decoration changes not covered by rule 3 are preserved.
+- `load_emotional_features_stack(model_key)`: registry-keyed layer-stack
+  read.
+- `load_emotional_features_stack_at(path)`: path-aware layer-stack read.
+- `load_hidden_states(full_trace=False)`: lower-level sidecar loader.
 
-Effect on form counts:
-- Gemma v3: 42 raw → **32** canonical (the `(°Д°)` / `(ºДº)` shocked-face
-  pair merged under rule 5 + glyph-fold). Single-form merge doesn't move
-  the 800-row PCA materially.
-- Qwen v3: 73 raw → **65** canonical. Big merges: `(；ω；)` family absorbed
-  ASCII-padded variants → n=82, `(;´д｀)` group merged Cyrillic-case +
-  ASCII-pad variants → n=70, `(>_<)` ↔ `(＞_＜)` → n=36, `(◕‿◕✿)` ↔
-  word-joiner-decorated → n=16, `(´・ω・`)` ↔ `(´･ω･`)` → n=17.
-- Ministral pilot: 9 → 9 (no merges available at this N).
-- Claude-faces: contributor-side canonicalization in `llmoji analyze`
-  before upload; `60_corpus_pull.py` re-canonicalizes on the way in
-  (in case bundles were produced under different package versions). The
-  pre-refactor 160 → 144 row collapse no longer applies — corpus arrives
-  canonical.
+The layer-stack matrix has shape:
 
-JSONL keeps raw `first_word`; `first_word_raw` column exists for audit on
-v1/v2/v3 data. Regenerate per-kaomoji parquets and figures if the rule
-changes.
+```text
+(n_rows, n_probe_layers * hidden_dim)
+```
+
+Do not use old `preferred_layer` logic for current results. Single-layer
+helpers exist for diagnostics and layer-sweep plots only.
+
+## Merged Claude-GT Rows
+
+Claude-GT rows now live in merged files:
+
+```text
+data/harness/claude/emotional_raw.jsonl
+data/harness/claude_intro_v7/emotional_raw.jsonl
+```
+
+Each row has `run_index`. Use `llmoji_study.claude_gt` helpers rather
+than reading legacy `claude-runs*/run-N.jsonl` paths directly.
+
+## Kaomoji Canonicalization
+
+Canonicalization lives in the companion package:
+
+```python
+from llmoji.taxonomy import canonicalize_kaomoji
+```
+
+This repo applies it again on read, because contributor bundles may have
+been produced under different package versions.
+
+Current rule families:
+
+1. NFC normalize, not NFKC.
+2. Strip invisible format characters.
+3. Fold whitelisted typographic near-equivalents.
+4. Strip ASCII spaces inside bracket spans.
+5. Lowercase Cyrillic capitals used as face glyphs.
+6. Strip boundary arm modifiers where they are cosmetic.
+7. Preserve eye, mouth, and decoration changes unless a rule explicitly
+   says they are cosmetic.
+
+Raw emitted form remains useful for audit; canonical form is what counts
+for analysis.
+
+## Quadrants
+
+`llmoji_study/quadrants.py` owns:
+
+- `QUADRANT_ORDER`: aggregate order.
+- `QUADRANT_ORDER_SPLIT`: 9-cell split order.
+- `QUADRANT_COLORS`: OKLCH palette.
+- `SPLIT_MARKERS`: cells split by dominance.
+
+Do not create local copies of these constants in scripts.

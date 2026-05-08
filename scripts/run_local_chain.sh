@@ -97,22 +97,6 @@ echo "  >>> scripts/local/26_v3_quadrant_procrustes.py --models $models_csv --re
 .venv/bin/python scripts/local/26_v3_quadrant_procrustes.py \
     --models "$models_csv" --reference gemma
 
-echo ""
-echo "  >>> scripts/local/25_v3_d_s_classifier.py (default axes HN, HP)"
-.venv/bin/python scripts/local/25_v3_d_s_classifier.py \
-    --models "$models_csv"
-
-# Pairwise alignment — runs gemma vs each of the other 4. Skip for now
-# unless explicitly requested; cross-model alignment is a heavier study.
-# Uncomment if you want it as part of every chain run:
-#
-# for target in qwen ministral gpt_oss_20b granite; do
-#     echo ""
-#     echo "  >>> scripts/local/22_v3_cross_model_alignment.py --ref gemma --target $target"
-#     .venv/bin/python scripts/local/22_v3_cross_model_alignment.py \
-#         --ref gemma --target "$target"
-# done
-
 # ---------------------------------------------------------------------
 # Stage 5 — face-stability triple. Each script iterates MODEL_REGISTRY
 # internally; no per-model orchestration needed.
