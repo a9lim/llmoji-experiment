@@ -6,7 +6,7 @@ Refactored 2026-05-06 to consume the **BoL parquet** instead of the
 prior 384-d MiniLM-on-prose embeddings (and to drop the eriskii
 21-axis projection that was the load-bearing analytical layer
 pre-refactor). The new representation is the synthesizer's structured
-commit over the locked llmoji v2 LEXICON: 48-d soft distribution per
+commit over the locked llmoji v2 LEXICON: 50-d soft distribution per
 canonical face, with 19 of those words tagged with explicit Russell
 quadrants. See ``llmoji_study.lexicon``.
 
@@ -74,12 +74,12 @@ compat but the share columns are the soft-everywhere-honest read.
 Pipeline (post-hoc, no new generation, zero welfare cost):
 
   1. Load BoL parquet (``claude_faces_lexicon_bag.parquet``) →
-     48-d per-face soft distribution.
-  2. Load Claude-GT modal labels (claude-runs naturalistic +
-     introspection arm).
+     50-d per-face soft distribution.
+  2. Load Claude-GT modal labels (data/harness/claude/emotional_raw.jsonl
+     naturalistic + claude_intro_v7/ introspection arm).
   3. Cross-load HF corpus metadata (claude_descriptions.jsonl) for
      emit counts + claude-opus emit attribution.
-  4. PCA(3) on the 48-d BoL; produce a side-by-side 3D plotly HTML —
+  4. PCA(3) on the 50-d BoL; produce a side-by-side 3D plotly HTML —
      left scene colored by quadrant (shared = GT modal, wild = BoL
      modal); right scene colored by KMeans cluster id.
   5. KMeans on BoL; k via silhouette grid but defaulted to k=6 for
@@ -374,21 +374,32 @@ def _scatter_pca_3d_html(
     title: str,
     evr: np.ndarray,
     color_mode: str = "bol",
+    weights: list[int] | np.ndarray | None = None,
 ) -> None:
-    """Two side-by-side 3D scenes on the same PCA(3) coords:
+    """Three side-by-side 3D scenes on the same PCA(3) coords:
 
-      - left:  faces colored by **proportional RGB-blend** of
-               :data:`QUADRANT_COLORS`, weighted by the per-face
-               quadrant share. ``color_mode="bol"`` (default) blends
-               the BoL→quadrant distribution; ``"gt"`` blends the
-               normalized Claude-GT raw counts and falls back to black
-               for faces with no GT row. Mirrors the
-               ``scripts/local/97_build_per_face_pca_3d.py``
-               convention so cross-figure reads stay coherent.
-               **Marker shape = deployment surface** (circle = Claude
-               Code only, diamond = any claude.ai, square = neither).
-      - right: colored by KMeans cluster id; legend carries the
-               deterministic top-2 modal-lexicon-word label.
+      - left:   faces colored by **proportional RGB-blend** of
+                :data:`QUADRANT_COLORS`, weighted by the per-face
+                quadrant share. ``color_mode="bol"`` (default) blends
+                the BoL→quadrant distribution; ``"gt"`` blends the
+                normalized Claude-GT raw counts and falls back to black
+                for faces with no GT row. Mirrors the
+                ``scripts/local/97_build_per_face_pca_3d.py``
+                convention so cross-figure reads stay coherent.
+                **Marker shape = deployment surface** (circle = Claude
+                Code only, diamond = any claude.ai, square = neither).
+      - middle: colored by KMeans cluster id; legend carries the
+                deterministic top-2 modal-lexicon-word label.
+      - right:  per-quadrant **emit-weighted soft centroid** in the
+                same PCA frame. Centroid_q is the soft mean of the
+                face coords weighted by ``n_emit_i × share_q[i]`` for
+                whichever distribution drives ``color_mode``. Marker
+                size scales with each quadrant's total weighted mass;
+                a faded grey scatter of all faces sits behind to ground
+                the centroids in the underlying point cloud. Quadrants
+                with zero mass under the active color mode (e.g. v4-
+                only HP-D / NP / HB under ``--color-by gt``) are
+                dropped from the panel.
 
     The left-scene legend is a small hand-built key — 3 surface-shape
     entries + 6 quadrant-color entries + 1 missing-bucket entry —
@@ -445,16 +456,17 @@ def _scatter_pca_3d_html(
     ]
 
     fig = make_subplots(
-        rows=1, cols=2,
-        specs=[[{"type": "scene"}, {"type": "scene"}]],
+        rows=1, cols=3,
+        specs=[[{"type": "scene"}, {"type": "scene"}, {"type": "scene"}]],
         subplot_titles=(
             f"Color = {color_label}; marker shape = deployment surface "
             "(○ = Claude Code only, ◇ = any claude.ai, □ = neither)",
             "Colored by KMeans cluster (k={}); labels = top-2 modal lexicon words".format(
                 len(cluster_labels),
             ),
+            f"Quadrant centroids · emit-weighted soft mean of {color_share_label}",
         ),
-        horizontal_spacing=0.04,
+        horizontal_spacing=0.03,
     )
 
     sizes = np.clip(6 + 5 * sizes_log, 6, 26)
@@ -603,6 +615,84 @@ def _scatter_pca_3d_html(
             row=1, col=2,
         )
 
+    # --- THIRD scene: per-quadrant emit-weighted centroids ----------------
+    # Soft-everywhere centroid: each face contributes to quadrant q in
+    # proportion to (n_emit_i × share_q[i]) where share comes from the
+    # same distribution driving the left-scene color (BoL / GT /
+    # predicted). Centroid_q is the resulting weighted mean of coords3.
+    # Quadrants with zero mass under the active color mode (e.g.
+    # HP-D / NP / HB are v4-only and have no Claude-GT support) are
+    # dropped from the panel rather than rendered at the origin.
+    if weights is None:
+        weights_arr = np.ones(len(fws), dtype=float)
+    else:
+        weights_arr = np.asarray(weights, dtype=float)
+    weighted_shares = color_share_arr * weights_arr[:, None]   # (n_faces, |QUADRANTS|)
+    mass_per_q = weighted_shares.sum(axis=0)                   # (|QUADRANTS|,)
+    total_mass = float(mass_per_q.sum()) if mass_per_q.sum() > 0 else 1.0
+    max_mass = float(mass_per_q.max()) if mass_per_q.max() > 0 else 1.0
+    centroids = np.zeros((len(QUADRANTS), 3), dtype=float)
+    for j in range(len(QUADRANTS)):
+        if mass_per_q[j] > 0:
+            centroids[j] = (
+                (weighted_shares[:, j:j+1] * coords3).sum(axis=0) / mass_per_q[j]
+            )
+
+    # Faded grey scatter of all faces — visual ground for the centroids.
+    fig.add_trace(
+        go.Scatter3d(
+            x=coords3[:, 0], y=coords3[:, 1], z=coords3[:, 2],
+            mode="markers",
+            name="all faces (faded)",
+            legendgroup="centroid-bg",
+            marker=dict(
+                size=3, color="#bbbbbb", opacity=0.18,
+                line=dict(width=0),
+            ),
+            hoverinfo="skip",
+            scene="scene3",
+            showlegend=False,
+        ),
+        row=1, col=3,
+    )
+
+    # One trace per quadrant centroid (skip empties) so each lands as a
+    # named legend entry sized by total weighted mass.
+    for j, q in enumerate(QUADRANTS):
+        if mass_per_q[j] <= 0:
+            continue
+        size = float(np.clip(16 + 22 * (mass_per_q[j] / max_mass), 16, 38))
+        fig.add_trace(
+            go.Scatter3d(
+                x=[centroids[j, 0]], y=[centroids[j, 1]], z=[centroids[j, 2]],
+                mode="markers+text",
+                name=f"{q} (mass {mass_per_q[j]:.1f})",
+                legendgroup=f"centroid-{q}",
+                text=[q],
+                textposition="top center",
+                textfont=dict(size=11),
+                marker=dict(
+                    size=size,
+                    color=QUADRANT_COLORS[q],
+                    symbol="diamond",
+                    line=dict(color="black", width=1.4),
+                    opacity=0.92,
+                ),
+                hovertemplate=(
+                    f"<b>{q}</b><br>"
+                    f"emit-weighted mass: {mass_per_q[j]:.1f}<br>"
+                    f"share of total: {mass_per_q[j]/total_mass*100:.1f}%<br>"
+                    f"PC1={centroids[j, 0]:.3f}, "
+                    f"PC2={centroids[j, 1]:.3f}, "
+                    f"PC3={centroids[j, 2]:.3f}"
+                    "<extra></extra>"
+                ),
+                scene="scene3",
+                showlegend=True,
+            ),
+            row=1, col=3,
+        )
+
     pc_title = (
         f"PC1 {evr[0]*100:.1f}%, PC2 {evr[1]*100:.1f}%, "
         f"PC3 {evr[2]*100:.1f}%  (sum {sum(evr[:3])*100:.1f}%)"
@@ -613,7 +703,7 @@ def _scatter_pca_3d_html(
         showbackground=True,
     )
     fig.update_layout(
-        height=820, width=1700,
+        height=820, width=2500,
         title=dict(
             text=f"{title}<br><sub>{pc_title}</sub>",
             x=0.5, xanchor="center",
@@ -625,6 +715,12 @@ def _scatter_pca_3d_html(
             aspectmode="cube",
         ),
         scene2=dict(
+            xaxis=dict(title=dict(text="PC1"), **common_axes),
+            yaxis=dict(title=dict(text="PC2"), **common_axes),
+            zaxis=dict(title=dict(text="PC3"), **common_axes),
+            aspectmode="cube",
+        ),
+        scene3=dict(
             xaxis=dict(title=dict(text="PC1"), **common_axes),
             yaxis=dict(title=dict(text="PC2"), **common_axes),
             zaxis=dict(title=dict(text="PC3"), **common_axes),
@@ -1046,6 +1142,7 @@ def main() -> None:
         title=f"HF-corpus Claude faces - PCA(3) on BoL{mode_subtitle}",
         evr=evr,
         color_mode=args.color_by,
+        weights=weights,
     )
 
     # --- markdown writeup --------------------------------------------------
@@ -1150,7 +1247,7 @@ def main() -> None:
     )
     lines.append("")
     lines.append(
-        f"PCA on the 48-d BoL: "
+        f"PCA on the 50-d BoL: "
         f"PC1={evr[0]*100:.1f}%, PC2={evr[1]*100:.1f}%, "
         f"PC3={evr[2]*100:.1f}% var (sum {sum(evr[:3])*100:.1f}%). "
         "Figure: 3D side-by-side (quadrant × surface vs cluster) at "
@@ -1170,7 +1267,7 @@ def main() -> None:
             "coarsest split, but k=6 is a local maximum after the k=5 dip."
         )
     lines.append(
-        f"KMeans on the 48-d BoL, k={best_k}. Silhouette over the grid: "
+        f"KMeans on the 50-d BoL, k={best_k}. Silhouette over the grid: "
         f"{sil_grid_str}.{fixed_note} Sorted by `wild_frac` descending - "
         "the top of the table is where the HF-corpus face vocabulary "
         "diverges most from the GT elicitation set. `share_shared_*` and "

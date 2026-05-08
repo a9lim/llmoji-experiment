@@ -245,15 +245,16 @@ EMOTIONAL_EXPERIMENT = "gemma"
 # llmoji 2.0 changed the per-row shape from a free-form
 # ``synthesis_description: str`` to a structured
 # ``synthesis: {primary_affect, stance_modality_function}`` adjective
-# bag drawn from the locked 48-word LEXICON. 19 of those words are
-# Russell-circumplex anchors (HP/LP/HN-D/HN-S/LN/NB), so the
-# synthesizer's structured commit *is* a 6-d quadrant distribution
-# per face — no encoder, no projection.
+# bag drawn from the locked 50-word LEXICON (llmoji 2.0.1 / LEXICON
+# v2; 26 PAD-cell anchors + 24 extension). The PAD anchors span the
+# 9 v4 deployment cells (HP-D / HP-S / LP / NP / HN-D / HN-S / LN /
+# NB / HB), so the synthesizer's structured commit *is* a 9-d cell
+# distribution per face — no encoder, no projection.
 #
 # Post-2026-05-06 the research side replaced MiniLM-on-prose with
 # bag-of-lexicon (BoL) vectors directly: ``embed_lexicon_bags`` in
 # ``llmoji_study.claude_faces`` pools per-bundle synthesis picks
-# (count-weighted, L1-normalized) into a 48-d soft distribution per
+# (count-weighted, L1-normalized) into a 50-d soft distribution per
 # canonical kaomoji. The legacy MiniLM-prose pipeline (eriskii
 # 21-axis projection, Haiku-labeled clusters,
 # ``claude_faces_embed_description.parquet``) is gone.

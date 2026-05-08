@@ -49,13 +49,39 @@ import pandas as pd
 
 from llmoji.taxonomy import canonicalize_kaomoji
 
-from llmoji_study.claude_gt import CLAUDE_RUNS_DIR, find_run_files
+from llmoji_study.claude_gt import (
+    CLAUDE_GT_DIR,
+    claude_emotional_raw_path,
+    load_emotional_raw,
+)
 from llmoji_study.config import DATA_DIR, MODEL_REGISTRY
+from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
+from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
 
 
 # Default v3 main lineup post-2026-05-03 vocab-pilot expansion.
 DEFAULT_MODELS = ("gemma", "qwen", "ministral", "gpt_oss_20b", "granite")
-QUADRANT_ORDER = ["HP", "LP", "HN-D", "HN-S", "LN", "NB"]
+# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# source of truth shared with figures, JSD math, and the BoL projection.
+QUADRANT_ORDER = list(QUADRANT_ORDER_SPLIT)
+
+
+def _build_prompt_id_to_quadrant() -> dict[str, str]:
+    """{prompt_id → v4 9-cell quadrant} sourced from the EmotionalPrompt
+    registry. HP / HN are bisected on ``pad_dominance``: +1 = D, -1 = S.
+    Other quadrants pass through aggregate. Single source of truth for
+    prompt_id-derived cell labels here and in script 40."""
+    out: dict[str, str] = {}
+    for p in EMOTIONAL_PROMPTS:
+        if p.quadrant in ("HP", "HN") and p.pad_dominance != 0:
+            suffix = "D" if p.pad_dominance > 0 else "S"
+            out[p.id] = f"{p.quadrant}-{suffix}"
+        else:
+            out[p.id] = p.quadrant
+    return out
+
+
+_PROMPT_ID_TO_QUADRANT = _build_prompt_id_to_quadrant()
 
 CLAUDE_KEY = "claude"  # Conventional name for the Claude column in outputs.
 
@@ -81,8 +107,8 @@ def _emit_dist_local(model: str) -> dict[str, dict[str, int]] | None:
     if not rows:
         print(f"  [{model}] empty JSONL; skipping")
         return None
-    # Derive 6-way quadrant from prompt_id (rule-3 split: hn01-20 = HN-D,
-    # hn21-40 = HN-S; lp/hp/ln/nb prefix → that quadrant).
+    # Derive v4 9-way quadrant from prompt_id via the EmotionalPrompt
+    # registry — single source of truth shared with script 40.
     out: dict[str, dict[str, int]] = {}
     n_kept = 0
     for r in rows:
@@ -91,21 +117,8 @@ def _emit_dist_local(model: str) -> dict[str, dict[str, int]] | None:
         fw = canonicalize_kaomoji(fw_raw) or ""
         if not (isinstance(fw, str) and len(fw) > 0 and fw.startswith("(")):
             continue
-        if pid.startswith("hp"):
-            q = "HP"
-        elif pid.startswith("lp"):
-            q = "LP"
-        elif pid.startswith("nb"):
-            q = "NB"
-        elif pid.startswith("ln"):
-            q = "LN"
-        elif pid.startswith("hn"):
-            try:
-                n = int(pid[2:])
-            except ValueError:
-                continue
-            q = "HN-D" if n <= 20 else "HN-S"
-        else:
+        q = _PROMPT_ID_TO_QUADRANT.get(pid)
+        if q is None:
             continue
         if q not in QUADRANT_ORDER:
             continue
@@ -118,36 +131,36 @@ def _emit_dist_local(model: str) -> dict[str, dict[str, int]] | None:
     return out
 
 
-def _emit_dist_claude(claude_runs_dir: Path) -> dict[str, dict[str, int]] | None:
+def _emit_dist_claude(condition_dir: Path) -> dict[str, dict[str, int]] | None:
     """Same shape as _emit_dist_local, but for Claude groundtruth runs.
-    Unions over every run-N.jsonl in ``claude_runs_dir``. Quadrant is
-    already 6-way (no split-HN reconstruction needed). Faces
-    canonicalized to match local-model first_word column."""
-    runs = find_run_files(claude_runs_dir)
-    if not runs:
-        print(f"  [{CLAUDE_KEY}] no run-*.jsonl in {claude_runs_dir}; skipping")
+    Unions over every row in ``condition_dir``'s emotional_raw.jsonl
+    (post-2026-05-08 merged-file layout). Rows store the v3 label that
+    was current at generation time; we remap to v4 9-cell via prompt_id
+    (Claude was only prompted on hp01-20 = HP-S, hn01-40 already split,
+    others pass through). Faces canonicalized to match local-model
+    first_word column."""
+    rows = load_emotional_raw(condition_dir)
+    if not rows:
+        print(f"  [{CLAUDE_KEY}] no rows in "
+              f"{claude_emotional_raw_path(condition_dir)}; skipping")
         return None
     out: dict[str, dict[str, int]] = {}
     n_rows = 0
-    for _idx, jsonl_path in runs:
-        with jsonl_path.open() as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                r = json.loads(line)
-                if "error" in r:
-                    continue
-                q = r.get("quadrant", "")
-                if q not in QUADRANT_ORDER:
-                    continue
-                fw_raw = r.get("first_word") or ""
-                fw = canonicalize_kaomoji(fw_raw) or ""
-                if not fw or not fw.startswith("("):
-                    continue
-                n_rows += 1
-                entry = out.setdefault(fw, {qq: 0 for qq in QUADRANT_ORDER})
-                entry[q] += 1
+    for r in rows:
+        pid = (r.get("prompt_id") or "").lower()
+        # Prefer registry-derived v4 label; fall back to the row's
+        # stored quadrant for prompts not in the current registry
+        # (none expected, but defensive).
+        q = _PROMPT_ID_TO_QUADRANT.get(pid, r.get("quadrant", ""))
+        if q not in QUADRANT_ORDER:
+            continue
+        fw_raw = r.get("first_word") or ""
+        fw = canonicalize_kaomoji(fw_raw) or ""
+        if not fw or not fw.startswith("("):
+            continue
+        n_rows += 1
+        entry = out.setdefault(fw, {qq: 0 for qq in QUADRANT_ORDER})
+        entry[q] += 1
     if not out:
         print(f"  [{CLAUDE_KEY}] no kaomoji-bearing rows; skipping")
         return None
@@ -187,7 +200,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--include-claude", action="store_true",
-        help=f"Also include Claude data from {CLAUDE_RUNS_DIR.name}/run-*.jsonl.",
+        help=f"Also include Claude data from "
+             f"{claude_emotional_raw_path(CLAUDE_GT_DIR).relative_to(DATA_DIR.parent)}.",
     )
     parser.add_argument(
         "--output", default=str(DATA_DIR / "local" / "v3_cross_model_face_overlap.tsv"),
@@ -216,7 +230,7 @@ def main() -> None:
             per_source[m] = d
             print(f"  [{m}] {len(d)} unique faces emitted in v3")
     if args.include_claude:
-        d = _emit_dist_claude(CLAUDE_RUNS_DIR)
+        d = _emit_dist_claude(CLAUDE_GT_DIR)
         if d is not None:
             per_source[CLAUDE_KEY] = d
 

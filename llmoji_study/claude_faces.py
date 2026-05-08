@@ -13,7 +13,7 @@ History:
     pulled directly from llmoji v2's ``synthesis: {primary_affect,
     stance_modality_function}`` adjective bag. No encoder, no MiniLM,
     no prose round-trip — the synthesizer's pick over the locked
-    48-word LEXICON is the vector. See :mod:`llmoji_study.lexicon`
+    50-word LEXICON is the vector. See :mod:`llmoji_study.lexicon`
     for the LEXICON index + Russell-quadrant tags.
 
 Public surface:
@@ -21,14 +21,14 @@ Public surface:
   - :func:`load_descriptions` — read
     ``data/harness/claude_descriptions.jsonl`` (the flat per-canonical
     output of ``scripts/harness/60_corpus_pull.py``).
-  - :func:`embed_lexicon_bags` — for each kaomoji, build a 48-d BoL
+  - :func:`embed_lexicon_bags` — for each kaomoji, build a 50-d BoL
     by count-weighting the per-bundle synthesis picks. Returns
     ``(canonical_kaomoji, count_total, n_v2_descs, BoL_matrix)``.
     Faces with zero v2 descriptions are dropped (BoL is undefined
     for v1-only legacy bundles).
   - :func:`save_bol_parquet` / :func:`load_bol_parquet` — parquet
     round-trip with ``lexicon_version`` stamped via column constant
-    so :func:`llmoji_study.lexicon.assert_lexicon_v1` can refuse
+    so :func:`llmoji_study.lexicon.assert_lexicon_v2` can refuse
     cross-version mixes on read.
 """
 
@@ -44,7 +44,7 @@ from llmoji_study.lexicon import (
     LEXICON_VERSION,
     LEXICON_WORDS,
     N_LEXICON,
-    assert_lexicon_v1,
+    assert_lexicon_v2,
     bol_from_synthesis,
     pool_bol,
 )
@@ -87,9 +87,9 @@ def embed_lexicon_bags(
     extension_weight: float = 0.5,
     require_lexicon_version: int = LEXICON_VERSION,
 ) -> tuple[list[str], np.ndarray, np.ndarray, np.ndarray]:
-    """For each canonical kaomoji, build a 48-d count-weighted BoL.
+    """For each canonical kaomoji, build a 50-d count-weighted BoL.
 
-    Per per-bundle row: convert ``synthesis`` → 48-d weighted indicator
+    Per per-bundle row: convert ``synthesis`` → 50-d weighted indicator
     via :func:`bol_from_synthesis`. Per canonical face: count-weighted
     pool across bundles via :func:`pool_bol` (L1-normalized so the
     output reads as a soft distribution over the lexicon).
@@ -101,7 +101,7 @@ def embed_lexicon_bags(
     v1+v2 lexicon picks would silently corrupt the bag).
 
     Returns ``(canonical_kaomoji, count_total, n_v2_descs, BoL)``
-    where ``BoL`` has shape ``(n_kept, 48)`` and rows are L1-normalized.
+    where ``BoL`` has shape ``(n_kept, 50)`` and rows are L1-normalized.
     """
     out_fw: list[str] = []
     out_count_total: list[int] = []
@@ -174,7 +174,7 @@ def embed_lexicon_bags_per_source(
     require_lexicon_version: int = LEXICON_VERSION,
     min_count: int = 1,
 ) -> tuple[list[str], list[str], np.ndarray, np.ndarray, np.ndarray]:
-    """For each (canonical kaomoji, source_model) cell, build a 48-d BoL.
+    """For each (canonical kaomoji, source_model) cell, build a 50-d BoL.
 
     Long-format counterpart to :func:`embed_lexicon_bags`. Each row of
     the returned matrix is a per-(face, source_model) BoL — one synthesis
@@ -190,7 +190,7 @@ def embed_lexicon_bags_per_source(
       - ``counts[i]`` is the summed per-bundle emit count for that
         (face, source_model) cell
       - ``n_descs[i]`` is the number of v2 description rows pooled
-      - ``B[i]`` is the L1-normalized 48-d BoL
+      - ``B[i]`` is the L1-normalized 50-d BoL
 
     Useful for cross-source drift analysis (does claude-opus-4-7's
     deployment use of `(╯°□°)` synthesize differently from
@@ -275,7 +275,7 @@ def save_bol_parquet_per_source(
     """Persist per-(face, source_model) BoL to parquet (long format).
 
     Columns: ``first_word``, ``source_model``, ``count``, ``n_v2_descs``,
-    ``lexicon_version`` (constant), then 48 ``lex__<word>`` columns.
+    ``lexicon_version`` (constant), then 50 ``lex__<word>`` columns.
     """
     if B.shape[1] != N_LEXICON:
         raise ValueError(
@@ -312,7 +312,7 @@ def load_bol_parquet_per_source(
         raise ValueError(
             f"per-source BoL parquet at {path} mixes lexicon versions: {versions}"
         )
-    assert_lexicon_v1(int(versions[0]))
+    assert_lexicon_v2(int(versions[0]))
     missing = [c for c in LEX_COLUMNS if c not in df.columns]
     if missing:
         raise ValueError(
@@ -338,7 +338,7 @@ def save_bol_parquet(
     """Persist per-face BoL to parquet.
 
     Columns: ``first_word``, ``n``, ``n_v2_descs``, ``lexicon_version``
-    (constant), then 48 ``lex__<word>`` columns in
+    (constant), then 50 ``lex__<word>`` columns in
     :data:`LEXICON_WORDS` order.
     """
     if B.shape[1] != N_LEXICON:
@@ -359,7 +359,7 @@ def save_bol_parquet(
 
 def load_bol_parquet(path: Path) -> tuple[list[str], np.ndarray, np.ndarray, np.ndarray]:
     """Round-trip of :func:`save_bol_parquet`. Hard-fails on lexicon
-    version mismatch via :func:`assert_lexicon_v1`.
+    version mismatch via :func:`assert_lexicon_v2`.
 
     Returns ``(first_words, counts, n_v2_descs, BoL)``.
     """
@@ -373,7 +373,7 @@ def load_bol_parquet(path: Path) -> tuple[list[str], np.ndarray, np.ndarray, np.
         raise ValueError(
             f"BoL parquet at {path} mixes lexicon versions: {versions}"
         )
-    assert_lexicon_v1(int(versions[0]))
+    assert_lexicon_v2(int(versions[0]))
     missing = [c for c in LEX_COLUMNS if c not in df.columns]
     if missing:
         raise ValueError(

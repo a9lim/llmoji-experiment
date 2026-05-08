@@ -34,72 +34,68 @@ import pandas as pd
 from llmoji.taxonomy import KAOMOJI_START_CHARS, is_kaomoji_candidate
 
 
-# Russell-quadrant palette + ordering. Shared with scripts/17_v3_face_scatters.py
-# so per-face plots use a consistent colour scheme.
-QUADRANT_ORDER = ["HP", "LP", "HN", "LN", "NB"]
+# Russell-quadrant palette + ordering — re-exported from the canonical
+# zero-dep ``llmoji_study.quadrants`` module so figure code, JSD math,
+# BoL projection, and analysis scripts all share the same source of
+# truth. Update ``quadrants.py`` to change the registry shape.
+from .quadrants import (  # noqa: E402  (re-export, stays near constants)
+    QUADRANT_COLORS,
+    QUADRANT_ORDER as _QUADRANT_ORDER_TUPLE,
+    QUADRANT_ORDER_SPLIT as _QUADRANT_ORDER_SPLIT_TUPLE,
+    SPLIT_MARKERS as _SPLIT_MARKERS,
+)
 
-# Split-quadrant ordering — same five plus HN bisected on PAD dominance
-# (HN-D anger/contempt, HN-S fear/anxiety). Used by figures opted into the
-# rule-3-redesign view via ``split_hn=True`` on loaders. Untagged HN rows
-# (the borderline-mixed prompts hn06/hn15/hn17) drop out of split-mode
-# entirely; the categorical column gets pd.NA for them so the analysis
-# can either filter or surface them as a small grey bucket as it sees fit.
-QUADRANT_ORDER_SPLIT = ["HP", "LP", "HN-D", "HN-S", "LN", "NB"]
-# Canonical Russell-circumplex mapping, sourced from the a9lim.github.io
-# website palette (`shared-tokens.js::_PALETTE.extended`). All chromatic
-# entries are OKLCH L=0.62, C=0.17 uniform (gamut-capped to sRGB ceiling
-# where needed) — so 50/50 RGB-linear mixes between any two quadrants
-# are perceived-luminance-balanced and stay readable, and the chart
-# blend at any per-face share matches what the website renders for the
-# same semantic category. Adjacent mixes still read sensibly
-# (HN+LN → desaturated violet, HP+LP → muted olive); diagonal
-# "contradictory" mixes (HN+LP "anger meets calm", HP+LN "excited meets
-# sad") fall to muted brown / cool grey — informatively unusual.
-QUADRANT_COLORS = {
-    "HP": "#998700",  # yellow — high arousal, positive (excitement/joy)
-    "LP": "#009F68",  # green  — low arousal, positive (calm/contentment)
-    "HN": "#DA534F",  # red    — high arousal, negative (anger/anxiety)
-    "LN": "#0091C9",  # blue   — low arousal, negative (sadness/depression)
-    "NB": "#808696",  # slate  — neutral baseline (intentionally muted, H=270)
-    # Rule-3-redesign PAD-dominance split (2026-05-01). HN-D inherits HN
-    # red so aggregate-HN views stay backward-compatible; HN-S takes
-    # the website's `purple` (also OKLCH L=0.62 C=0.17) which reads as
-    # "negative but submissive" without colliding with LN blue.
-    "HN-D": "#DA534F",  # red    — anger / contempt (high PAD dominance)
-    "HN-S": "#9769DC",  # purple — fear / anxiety (low PAD dominance)
-}
+# Pandas/Counter call sites historically expected lists (e.g. for
+# concatenation or in-place reordering). The canonical constants in
+# ``quadrants.py`` are tuples; rebind to lists here for back-compat.
+# Most callers only iterate or look up membership, so either works.
+QUADRANT_ORDER = list(_QUADRANT_ORDER_TUPLE)
+QUADRANT_ORDER_SPLIT = list(_QUADRANT_ORDER_SPLIT_TUPLE)
+
 
 def _palette_for(df: pd.DataFrame) -> tuple[list[str], dict[str, str]]:
     """Return ``(order, colors)`` matching whatever quadrant labels are
-    present in ``df["quadrant"]``. Auto-switches to the rule-3 split
-    ordering (HN-D / HN-S in lieu of aggregate HN) when those labels
-    appear; the colors dict is shared (it includes both)."""
+    present in ``df["quadrant"]``. Auto-switches to the v4 9-cell split
+    ordering (HP-D / HP-S / HN-D / HN-S in lieu of aggregate HP / HN)
+    when any split label appears; the colors dict is shared (it includes
+    both forms)."""
     if "quadrant" not in df.columns:
         return QUADRANT_ORDER, QUADRANT_COLORS
     quads = set(df["quadrant"].astype(str).unique())
-    if "HN-D" in quads or "HN-S" in quads:
+    if quads & _SPLIT_MARKERS:
         return QUADRANT_ORDER_SPLIT, QUADRANT_COLORS
     return QUADRANT_ORDER, QUADRANT_COLORS
 
 
-def _hn_split_map() -> dict[str, str]:
-    """Return ``{prompt_id: 'HN-D' | 'HN-S'}`` for tagged HN prompts.
-    Pulls from the EmotionalPrompt registry — single source of truth.
-    Untagged HN prompts (pad_dominance == 0) are absent from the map."""
+def _pad_split_map() -> dict[str, str]:
+    """Return ``{prompt_id: 'HP-D' | 'HP-S' | 'HN-D' | 'HN-S'}`` for
+    tagged HP / HN prompts. Pulls from the EmotionalPrompt registry —
+    single source of truth. Untagged HP / HN prompts (pad_dominance ==
+    0, currently none in v4) are absent from the map. Other quadrants
+    (LP, NP, LN, NB, HB) are dominance-aggregate and absent here."""
     from .emotional_prompts import EMOTIONAL_PROMPTS
-    return {
-        p.id: ("HN-D" if p.pad_dominance > 0 else "HN-S")
-        for p in EMOTIONAL_PROMPTS
-        if p.quadrant == "HN" and p.pad_dominance != 0
-    }
+    out: dict[str, str] = {}
+    for p in EMOTIONAL_PROMPTS:
+        if p.quadrant in ("HP", "HN") and p.pad_dominance != 0:
+            suffix = "D" if p.pad_dominance > 0 else "S"
+            out[p.id] = f"{p.quadrant}-{suffix}"
+    return out
 
 
-def apply_hn_split(
+# Backward-compat alias. Older callers used ``_hn_split_map``; keep it
+# pointing at the generalized v4 implementation so anything that still
+# imports it picks up HP-D / HP-S as well.
+_hn_split_map = _pad_split_map
+
+
+def apply_pad_split(
     df: pd.DataFrame,
     X: np.ndarray | None = None,
 ) -> tuple[pd.DataFrame, np.ndarray | None]:
-    """Replace the ``quadrant`` column in-place with HN-split labels
-    (HN→HN-D/HN-S) and drop rows with untagged HN prompts.
+    """Replace the ``quadrant`` column in-place with v4 dominance-split
+    labels (HP→HP-D/HP-S, HN→HN-D/HN-S) and drop rows with untagged
+    HP / HN prompts (currently none in v4). Other quadrants (LP, NP,
+    LN, NB, HB) pass through unchanged.
 
     For scripts that build their own quadrant column from
     ``prompt_id[:2]`` (rather than going through
@@ -107,11 +103,11 @@ def apply_hn_split(
     ``X`` to keep df+X aligned across the row drop.
 
     Returns ``(df, X)`` after the split; X is None if not provided."""
-    hn_split = _hn_split_map()
+    pad_split = _pad_split_map()
     new_q = df.apply(
         lambda r: (
-            hn_split.get(r["prompt_id"], None)
-            if r["quadrant"] == "HN"
+            pad_split.get(r["prompt_id"], None)
+            if r["quadrant"] in ("HP", "HN")
             else r["quadrant"]
         ),
         axis=1,
@@ -123,6 +119,12 @@ def apply_hn_split(
     if X is not None:
         X = X[keep]
     return df, X
+
+
+# Backward-compat alias. The HN-only function name predates the v4 HP
+# split — point it at the unified implementation so existing callers
+# transparently get HP-D / HP-S splitting too.
+apply_hn_split = apply_pad_split
 
 
 def per_face_dominant_quadrant(df: pd.DataFrame) -> dict[str, str]:
@@ -146,10 +148,11 @@ def per_face_quadrant_weights(df: pd.DataFrame) -> dict[str, dict[str, float]]:
     emission weight (sum to 1 across the active quadrant set).
 
     A face emitted in 21 LN rows + 20 HN rows + 0 elsewhere yields
-    ``{"LN": 0.512, "HN": 0.488, "HP": 0, "LP": 0, "NB": 0}``.
-    With ``split_hn=True`` data, the dict is keyed on the 6-category
-    split palette instead. Faces with zero total emissions return
-    all-zero weights (caller should guard).
+    ``{"LN": 0.512, "HN": 0.488, ...}`` over the 7-cell aggregate v4
+    palette (HP, LP, NP, HN, LN, NB, HB). When the df carries
+    dominance-split labels (HP-D / HP-S / HN-D / HN-S), the dict is
+    keyed on the 9-cell split palette instead. Faces with zero total
+    emissions return all-zero weights (caller should guard).
     """
     from collections import Counter
     order, _ = _palette_for(df)
@@ -191,16 +194,16 @@ def mix_quadrant_color(
         :func:`per_face_quadrant_weights` or per-face emit counts).
         Need not sum to 1 — the helper normalizes internally over the
         positive subset.
-      - 6-element array-like aligned to :data:`QUADRANT_ORDER_SPLIT`
+      - 9-element array-like aligned to :data:`QUADRANT_ORDER_SPLIT`
         (i.e. the soft per-quadrant share that
         :func:`llmoji_study.lexicon.bol_to_quadrant_distribution`
         produces).
 
-    ``colors`` defaults to the full 7-key :data:`QUADRANT_COLORS`
-    palette (5-quadrant + HN-D / HN-S split). Negative weights are
-    clamped to zero before normalization. Quadrants absent from
-    ``colors`` are ignored (e.g. an aggregate ``HN`` weight when only
-    the split palette is present).
+    ``colors`` defaults to the full 11-key :data:`QUADRANT_COLORS`
+    palette (7 v4 aggregate cells + HP-D / HP-S / HN-D / HN-S splits).
+    Negative weights are clamped to zero before normalization.
+    Quadrants absent from ``colors`` are ignored (e.g. an aggregate
+    ``HN`` weight when only the split palette is present).
     """
     if colors is None:
         colors = QUADRANT_COLORS
@@ -256,6 +259,24 @@ def load_rows(path: str) -> pd.DataFrame:
     """
     from .config import PROBES
     df: pd.DataFrame = pd.read_json(path, lines=True)
+    # Drop rows where generation failed mid-batch and probe vectors
+    # didn't get populated (sentinel: ``probe_scores_t0`` is None /
+    # NaN). gpt_oss_20b has done this on a small fraction of rows
+    # (~0.5%) when its harmony format trips a finish-reason it can't
+    # recover from. Keeping them would crash np.asarray with an
+    # inhomogeneous-shape error since None and list[float] don't
+    # stack into a single dtype=float ndarray.
+    if "probe_scores_t0" in df.columns:
+        keep = df["probe_scores_t0"].apply(
+            lambda v: isinstance(v, list) and len(v) == len(PROBES)
+        )
+        n_dropped = int((~keep).sum())
+        if n_dropped:
+            print(
+                f"  load_rows: dropped {n_dropped} rows with missing / "
+                f"malformed probe_scores_t0 (likely failed generations)"
+            )
+        df = df.loc[keep].reset_index(drop=True)
     # Core probes — list-indexed by PROBES order.
     for prefix, src in (("t0", "probe_scores_t0"), ("tlast", "probe_scores_tlast")):
         if src in df.columns:
@@ -1049,7 +1070,11 @@ def compute_probe_correlations(
         return {"n": int(n), "pearson": p.tolist(), "spearman": s.tolist()}
 
     out["by_subset"]["all"] = pair_stats(df)
-    for q in ("HP", "LP", "HN", "LN", "NB"):
+    # Per-quadrant subsets across the v4 7-cell aggregate — keeping the
+    # aggregate (not split) view here because per-probe-correlation
+    # matrices benefit from larger N per cell, and probe correlation
+    # structure is unlikely to change meaningfully on the dominance axis.
+    for q in QUADRANT_ORDER:
         out["by_subset"][q] = pair_stats(df[df["quadrant"] == q])
     return out
 
@@ -1237,15 +1262,27 @@ def summary_table(
     """Per-kaomoji summary with hidden-state cosine-to-mean consistency.
 
     Columns: first_word, n, median_within_consistency, dominant_quadrant,
-    HP_n, LP_n, HN_n, LN_n, NB_n.
+    plus a ``<q>_n`` count column per quadrant. The count columns
+    auto-track the active quadrant set:
+
+    - When df carries v4 dominance-split labels (HP-D / HP-S / HN-D /
+      HN-S etc.), the count columns are 9-cell:
+      ``HP-D_n / HP-S_n / LP_n / NP_n / HN-D_n / HN-S_n / LN_n / NB_n / HB_n``.
+    - When df carries v4 aggregate labels (HP / LP / NP / HN / LN /
+      NB / HB), the count columns are 7-cell.
+
+    The dominant_quadrant value matches whichever cell shape is in use.
     """
     from .hidden_state_analysis import cosine_to_mean
 
+    order, _ = _palette_for(df)
+    count_cols = [f"{q}_n" for q in order]
+    base_cols = [
+        "first_word", "n", "median_within_consistency", "dominant_quadrant",
+    ]
+
     if len(df) == 0:
-        return pd.DataFrame(columns=[
-            "first_word", "n", "median_within_consistency",
-            "dominant_quadrant", "HP_n", "LP_n", "HN_n", "LN_n", "NB_n",
-        ])
+        return pd.DataFrame(columns=base_cols + count_cols)
 
     rows: list[dict[str, Any]] = []
     for km, group in df.groupby("first_word"):
@@ -1256,17 +1293,15 @@ def summary_table(
         sims = cosine_to_mean(vecs)
         q_counts = group["quadrant"].value_counts()
         dominant = str(q_counts.idxmax()) if len(q_counts) else ""
-        rows.append({
+        row: dict[str, Any] = {
             "first_word": km,
             "n": int(len(group)),
             "median_within_consistency": float(np.median(sims)),
             "dominant_quadrant": dominant,
-            "HP_n": int(q_counts.get("HP", 0)),
-            "LP_n": int(q_counts.get("LP", 0)),
-            "HN_n": int(q_counts.get("HN", 0)),
-            "LN_n": int(q_counts.get("LN", 0)),
-            "NB_n": int(q_counts.get("NB", 0)),
-        })
+        }
+        for q in order:
+            row[f"{q}_n"] = int(q_counts.get(q, 0))
+        rows.append(row)
     out = pd.DataFrame(rows)
     if len(out):
         out = out.sort_values("median_within_consistency", ascending=False).reset_index(drop=True)

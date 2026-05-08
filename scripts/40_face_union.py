@@ -16,7 +16,7 @@ Inputs:
   - ``data/local/<short>/emotional_raw.jsonl`` for each v3 main model
     (whichever exist on disk; missing models are skipped). LABELED
     quadrant ground truth.
-  - ``data/harness/claude-runs/run-*.jsonl`` (optional Claude inclusion;
+  - ``data/harness/claude/emotional_raw.jsonl`` (optional Claude inclusion;
     union over all sequential runs). LABELED quadrant ground truth.
   - ``data/harness/hf_dataset/contributors/<id>/<bundle>/<provider>.jsonl``
     files (in-the-wild contributor journals: Claude Code, Claude.ai
@@ -66,15 +66,20 @@ from llmoji.sources.journal import iter_journal
 from llmoji.taxonomy import canonicalize_kaomoji
 
 from llmoji_study.claude_gt import (
-    CLAUDE_RUNS_DIR,
-    CLAUDE_RUNS_INTROSPECTION_DIR as CLAUDE_INTROSPECTION_RUNS_DIR,
-    find_run_files,
+    CLAUDE_GT_DIR,
+    CLAUDE_GT_INTRO_DIR,
+    claude_emotional_raw_path,
+    find_run_indices,
+    load_emotional_raw,
 )
 from llmoji_study.config import DATA_DIR, MODEL_REGISTRY
+from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
 
 
 DEFAULT_MODELS = ("gemma", "qwen", "ministral", "gpt_oss_20b", "granite")
-QUADRANT_ORDER = ["HP", "LP", "HN-D", "HN-S", "LN", "NB"]
+# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# source of truth shared with figures, JSD math, and the BoL projection.
+QUADRANT_ORDER = list(QUADRANT_ORDER_SPLIT)
 WILD_DATA_DIR = DATA_DIR / "harness" / "hf_dataset" / "contributors"
 # v3_face_union pools v3 local emit + Claude pilot + wild contributor faces
 # — genuinely cross-platform, lives at data/ root (not under local/ or harness/).
@@ -84,7 +89,6 @@ OUT_TSV = DATA_DIR / "v3_face_union.tsv"
 # Introspection-arm sources. Optional inclusion via --include-introspection.
 # Each contributes face-emission counts in its respective quadrants alongside
 # the naturalistic v3 + Claude data, expanding the union vocabulary.
-# CLAUDE_INTROSPECTION_RUNS_DIR imported from claude_gt above.
 GEMMA_INTROSPECTION_PATH = DATA_DIR / "local" / "gemma_intro_v7_primed" / "emotional_raw.jsonl"
 
 
@@ -101,25 +105,33 @@ def _is_clean_kaomoji(fw: str) -> bool:
     return all(ord(c) <= 0xFFFF for c in fw)
 
 
+def _build_prompt_id_to_quadrant() -> dict[str, str]:
+    """{prompt_id → v4 9-cell quadrant} sourced from the EmotionalPrompt
+    registry. HP / HN are bisected on ``pad_dominance``: +1 = D, -1 = S.
+    Everything else (LP, NP, LN, NB, HB) passes through as the
+    EmotionalPrompt.quadrant aggregate. Single source of truth — when
+    the registry shape changes, this map updates automatically.
+    """
+    from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
+    out: dict[str, str] = {}
+    for p in EMOTIONAL_PROMPTS:
+        if p.quadrant in ("HP", "HN") and p.pad_dominance != 0:
+            suffix = "D" if p.pad_dominance > 0 else "S"
+            out[p.id] = f"{p.quadrant}-{suffix}"
+        else:
+            out[p.id] = p.quadrant
+    return out
+
+
+_PROMPT_ID_TO_QUADRANT = _build_prompt_id_to_quadrant()
+
+
 def _bucket_from_prompt_id(pid: str) -> str | None:
-    """Derive the 6-way Russell quadrant from a v3 prompt_id.
-    HN-D / HN-S split: hn01-20 = HN-D, hn21-40 = HN-S."""
-    pid = (pid or "").lower()
-    if pid.startswith("hp"):
-        return "HP"
-    if pid.startswith("lp"):
-        return "LP"
-    if pid.startswith("nb"):
-        return "NB"
-    if pid.startswith("ln"):
-        return "LN"
-    if pid.startswith("hn"):
-        try:
-            n = int(pid[2:])
-        except ValueError:
-            return None
-        return "HN-D" if n <= 20 else "HN-S"
-    return None
+    """Derive the v4 9-cell Russell quadrant from a prompt_id.
+    Reads :data:`_PROMPT_ID_TO_QUADRANT` (built from the EmotionalPrompt
+    registry). Returns None for prompt_ids not in the registry (e.g.
+    pre-v4 Claude run rows on retired prompts)."""
+    return _PROMPT_ID_TO_QUADRANT.get((pid or "").lower())
 
 
 def _accumulate_local(
@@ -212,34 +224,35 @@ def _accumulate_wild(
 
 
 def _accumulate_claude(
-    jsonl_path: Path, by_face: dict, claude_faces: set, dropped: dict,
+    rows: list[dict], by_face: dict, claude_faces: set, dropped: dict,
 ) -> int:
     """Same shape as `_accumulate_local`, but for Claude groundtruth.
-    Quadrant comes from the row's ``quadrant`` field (already 6-way).
-    Mutates `by_face`, `claude_faces`, `dropped`."""
+    Rows store the v3 label that was current at generation time; remap
+    to v4 9-cell via prompt_id (Claude was only prompted on hp01-20 =
+    HP-S, hn01-40 already split, others pass through). Mutates
+    `by_face`, `claude_faces`, `dropped`."""
     n_kept = 0
-    with jsonl_path.open() as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            r = json.loads(line)
-            if "error" in r:
-                continue
-            q = r.get("quadrant", "")
-            if q not in QUADRANT_ORDER:
-                continue
-            fw_raw = r.get("first_word") or ""
-            fw = canonicalize_kaomoji(fw_raw) or ""
-            if not (isinstance(fw, str) and len(fw) > 0 and fw.startswith("(")):
-                continue
-            if not _is_clean_kaomoji(fw):
-                dropped[fw] = dropped.get(fw, 0) + 1
-                continue
-            entry = by_face.setdefault(fw, {qq: 0 for qq in QUADRANT_ORDER})
-            entry[q] += 1
-            claude_faces.add(fw)
-            n_kept += 1
+    for r in rows:
+        if "error" in r:
+            continue
+        pid = (r.get("prompt_id") or "").lower()
+        # Prefer registry-derived v4 label; fall back to the row's
+        # stored quadrant for prompt_ids not in the current registry
+        # (none expected, but defensive).
+        q = _PROMPT_ID_TO_QUADRANT.get(pid, r.get("quadrant", ""))
+        if q not in QUADRANT_ORDER:
+            continue
+        fw_raw = r.get("first_word") or ""
+        fw = canonicalize_kaomoji(fw_raw) or ""
+        if not (isinstance(fw, str) and len(fw) > 0 and fw.startswith("(")):
+            continue
+        if not _is_clean_kaomoji(fw):
+            dropped[fw] = dropped.get(fw, 0) + 1
+            continue
+        entry = by_face.setdefault(fw, {qq: 0 for qq in QUADRANT_ORDER})
+        entry[q] += 1
+        claude_faces.add(fw)
+        n_kept += 1
     return n_kept
 
 
@@ -251,8 +264,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--no-claude", action="store_true",
-        help=f"Skip Claude groundtruth runs. Default: include the union "
-             f"of all runs in {CLAUDE_RUNS_DIR.name}/ if any exist.",
+        help=f"Skip Claude groundtruth runs. Default: include all rows "
+             f"from {claude_emotional_raw_path(CLAUDE_GT_DIR).relative_to(DATA_DIR)} "
+             f"if it exists.",
     )
     parser.add_argument(
         "--no-wild", action="store_true",
@@ -261,13 +275,13 @@ def main() -> None:
     )
     parser.add_argument(
         "--no-introspection", action="store_true",
-        help=f"Skip introspection-arm data (Claude introspection runs in "
-             f"{CLAUDE_INTROSPECTION_RUNS_DIR.name}/ and gemma's "
-             f"{GEMMA_INTROSPECTION_PATH.name}). Default: include if "
-             f"either path exists. Introspection-arm faces are pooled "
-             f"into the same per-quadrant counts as naturalistic — this "
-             f"expands the union vocabulary so face_likelihood scorers "
-             f"see the priming-only kaomoji.",
+        help=f"Skip introspection-arm data (Claude introspection in "
+             f"{claude_emotional_raw_path(CLAUDE_GT_INTRO_DIR).relative_to(DATA_DIR)} "
+             f"and gemma's {GEMMA_INTROSPECTION_PATH.name}). Default: "
+             f"include if either path exists. Introspection-arm faces "
+             f"are pooled into the same per-quadrant counts as "
+             f"naturalistic — this expands the union vocabulary so "
+             f"face_likelihood scorers see the priming-only kaomoji.",
     )
     args = parser.parse_args()
 
@@ -300,30 +314,33 @@ def main() -> None:
         print(f"  [{m}] {n} kaomoji-bearing rows kept")
 
     if not args.no_claude:
-        runs = find_run_files()
-        if runs:
+        nat_indices = find_run_indices(CLAUDE_GT_DIR)
+        if nat_indices:
             n_total = 0
-            for idx, path in runs:
-                n = _accumulate_claude(path, by_face, claude_faces, dropped)
+            for idx in nat_indices:
+                rows = load_emotional_raw(CLAUDE_GT_DIR, run_index=idx)
+                n = _accumulate_claude(rows, by_face, claude_faces, dropped)
                 n_total += n
                 print(f"  [claude run-{idx}] {n} kaomoji-bearing rows kept")
             print(f"  [claude all runs] {n_total} kaomoji-bearing rows kept")
         else:
-            print(f"  [claude] no run-*.jsonl in {CLAUDE_RUNS_DIR}; skipping")
+            print(f"  [claude] no rows in "
+                  f"{claude_emotional_raw_path(CLAUDE_GT_DIR)}; skipping")
 
     if not args.no_introspection:
         # Claude introspection arm — same shape as naturalistic Claude runs.
-        intro_runs = find_run_files(CLAUDE_INTROSPECTION_RUNS_DIR)
-        if intro_runs:
+        intro_indices = find_run_indices(CLAUDE_GT_INTRO_DIR)
+        if intro_indices:
             n_total = 0
-            for idx, path in intro_runs:
-                n = _accumulate_claude(path, by_face, claude_faces, dropped)
+            for idx in intro_indices:
+                rows = load_emotional_raw(CLAUDE_GT_INTRO_DIR, run_index=idx)
+                n = _accumulate_claude(rows, by_face, claude_faces, dropped)
                 n_total += n
                 print(f"  [claude-intro run-{idx}] {n} kaomoji-bearing rows kept")
             print(f"  [claude-intro all runs] {n_total} kaomoji-bearing rows kept")
         else:
-            print(f"  [claude-intro] no run-*.jsonl in "
-                  f"{CLAUDE_INTROSPECTION_RUNS_DIR}; skipping")
+            print(f"  [claude-intro] no rows in "
+                  f"{claude_emotional_raw_path(CLAUDE_GT_INTRO_DIR)}; skipping")
         # Gemma introspection (v7-primed) — uses the local-shape accumulator
         # since prompt_id → quadrant derivation matches v3 main.
         if GEMMA_INTROSPECTION_PATH.exists():

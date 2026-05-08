@@ -51,8 +51,11 @@ from sklearn.metrics import cohen_kappa_score
 from llmoji_study.config import DATA_DIR
 from llmoji_study.face_likelihood_discovery import summary_path_for
 from llmoji_study.jsd import LN2, js, normalize, similarity
+from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
 
-QUADRANTS = ("HP", "LP", "HN-D", "HN-S", "LN", "NB")
+# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# source of truth shared with figures, JSD math, and the BoL projection.
+QUADRANTS = QUADRANT_ORDER_SPLIT
 
 
 def _load(model: str, prefer_pilot: bool) -> tuple[pd.DataFrame, str]:

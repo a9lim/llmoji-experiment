@@ -12,6 +12,164 @@ ensemble headlines, the disclosure-pilot reversal) lives in
 references a "historical" or "pre-2026-05-XX" finding, that's where
 the full earlier framing is preserved.
 
+## v4 9-cell deployment registry — mechanical PAD naming (2026-05-06)
+
+Round-1/2/3/4 pilot rationale: [`2026-05-06-prompt-extension-roadmap.md`](2026-05-06-prompt-extension-roadmap.md)
+(superseded — preserved as methodological record). Shipped state in
+`llmoji_study/emotional_prompts.py` as of 2026-05-06 evening.
+
+After three rounds of orthogonal-category exploration (11 categories
+piloted) plus a canonicalization-validation run (round 4, 5
+categories × 10 prompts × 4 seeds × 2 models = 400 generations on
+gemma + qwen), the v4 deployment registry shipped as 9 cells laid
+out on a clean PAD-coordinate grid — every cell is mechanically
+named from (arousal, valence, dominance) coordinates with no
+overrides:
+
+```
+            v=+1            v=0     v=-1
+a=+1     HP-D, HP-S         HB      HN-D, HN-S
+a= 0       NP                ·       ·
+a=-1       LP                ·      LN
+                            NB
+```
+
+- **HP-D** (a=+1, v=+1, d=+1) — high-arousal positive, dominant.
+  In-action mischief / playful agency. The old round-4 `playful`
+  set, promoted with the new naming + structural framing. Modal
+  face: gemma+qwen `(¬‿¬)` / `( ͡° ͜ʖ ͡°)` family.
+- **HP-S** (a=+1, v=+1, d=-1) — high-arousal positive, submissive.
+  Post-action celebration / received-outcome. The existing 20 v3
+  HP prompts all reframe as HP-S under the in-action-vs-post-action
+  carving — the old "I deadlifted" / "I PR'd" celebrations are
+  community-recognition shape (S), not in-action agency (D).
+- **LP** (a=-1, v=+1) — low-arousal positive (sensory-tender
+  baseline). 20 v3 LP prompts unchanged.
+- **NP** (a=0, v=+1) — neutral-arousal positive. Relief + gratitude.
+  Round-4's `received_positive` set, V/A retagged to (a=0) because
+  post-tension-release sits at mid-arousal not low-arousal. Renamed
+  from LP-R (the locked-2026-05-06-afternoon name) — "neutral arousal
+  positive" matches the structural V/A position rather than the
+  source-vs-tender flavor framing.
+- **HN-D** (a=+1, v=-1, d=+1) — anger / contempt. v3 unchanged.
+- **HN-S** (a=+1, v=-1, d=-1) — fear / anxiety. v3 unchanged.
+- **LN** (a=-1, v=-1) — bereaved / weary. D/S split abandoned per
+  the powercheck verdict (see below).
+- **NB** (a=0, v=0) — neutral baseline (genuinely affectless). v3
+  unchanged.
+- **HB** (a=+1, v=0) — high-arousal baseline-valence. Uncertain /
+  skeptical / confused (round-4's `uncertain` set, fused skeptical
+  + confused). Renamed from UC; the "B" parallels NB's neutral-
+  baseline-valence shape, locking the cell into the mechanical
+  naming convention.
+
+**Two coordinate-real cells deferred:** NN at (a=0, v=-1) and LB at
+(a=-1, v=0). NN is the disappointment / annoyance / discouragement
+register (mirror of NP); LB is bored / drowsy / listless (low-energy
+disengagement). Both are real affective states but the structural
+case for v4 inclusion was theoretical, not empirical. 20 pilot
+prompts each drafted + empirical promotion protocol parked at
+[`2026-05-06-nn-lb-future-cells.md`](2026-05-06-nn-lb-future-cells.md);
+revisit after v4 face-level analysis surfaces whether existing data
+has hidden NN/LB clusters miscoded into LN / NB / HN-D.
+
+`wonder` + `determination` cells (round-4 pilot artifacts) stay
+narrative-only references in the historical roadmap doc. Round-4
+data + scripts cleared post-promotion (see git history of 2026-05-06).
+
+**HP D/S ↔ existing HP reframe.** Round-2's HP D/S null on the
+original 7D/13S agency-as-cause labels (gemma 81.9%ile / qwen 50.1%
+/ opus 85.5%, all under 95%) becomes consistent with round-4's
+PP-vs-HP separability at 100%ile under a different carving: existing
+HP is empirically all HP-S (post-action / received-outcome
+celebration regardless of who did the underlying action), and the
+old `playful` set is the actual HP-D (in-action / agentic-mid-stream
+mischief). The dominance axis IS real for HP — the post-hoc agency
+labels were just measuring the wrong axis. Cross-axis validation
+test (HN's D/S classifier transfer to HP-S vs HP-D rows) parked as
+a near-term TODO; v4 emit data needed first.
+
+Round-1 hypothesis revision: agency-positive evaluative vocabulary
+(`(¬_¬)`-skeptical / `(`・ω・´)`-determined / `(¬‿¬)`-mischievous) is
+NOT specifically Claude-vocabulary — qwen produces all three at
+scale. Gemma is the outlier in the lineup, not Claude.
+
+### Powercheck verdict — LN D/S abandoned (2026-05-06)
+
+`scripts/local/25_v3_d_s_classifier.py --powercheck LN --n-subsamples 20`
+matched HN to LN's 5D/15S sample size with k=20 random subsamples
+across the 5-model lineup. Verdict was mixed:
+
+| model | HN at 5D/15S median bal_acc | IQR | null q95 | % subsamples separable | LN at full n |
+|---|---:|---|---:|---:|---|
+| gemma | **0.817** | [0.725, 0.867] | 0.652 | **90%** | 0.667 (null) |
+| qwen | **0.900** | [0.599, 0.925] | 0.637 | **70%** | 0.560 (null) |
+| ministral | 0.458 | [0.331, 0.589] | 0.665 | 5% | 0.638 (null) |
+| gpt_oss_20b | 0.667 | [0.600, 0.767] | 0.650 | 50% | 0.500 (null) |
+| granite | 0.513 | [0.436, 0.557] | 0.668 | 5% | 0.405 (null) |
+
+- **gemma + qwen: LN null is genuine.** HN signal survives the
+  n-cut (90% / 70% of subsamples still separable), so the design
+  has power at 5D/15S in those models and LN doesn't trip it. Real
+  signal absence, not data-scarcity.
+- **ministral + granite: LN null is power-confounded.** HN signal
+  collapses to ≤5% at the cut; can't tell whether LN has signal.
+  Their full-n HN is at 1.000, so the dominance signal exists, just
+  below detection threshold at 5D/15S in their hidden-state
+  geometries. (HN itself reads as more fused in those two models —
+  HN-D / HN-S vocabulary collapses onto a shared modal face — so the
+  dominance signal would be untrustworthy even if it surfaced.)
+- **gpt_oss_20b on the bubble (50%)** — likely power-limited.
+- **Methodological sub-finding:** qwen's IQR width [0.599, 0.925]
+  shows that *which* 5 D-prompts you pick has dispositive impact on
+  separability at 5D/15S. A single (5D, 15S) draw isn't enough; the
+  pre-promotion checklist now reports subsample distributions, not
+  point estimates. Outputs at `data/d_s_classifier_powercheck.{tsv,md}`.
+
+LN D/S split dropped from the v4 registry on this evidence; LN
+stays as a single dominance-unsplit cell. The proposed "5 new LN-D
+prompts" plan (originally to balance the 5D/15S asymmetry) is
+abandoned. `llmoji_study/postq_d_s.py` deprecated, `LN_DS_LABELS` /
+`HP_DS_LABELS` reduced to empty stubs (HP D/S now lives in registry
+`pad_dominance` directly).
+
+### LEXICON v2 — 9-cell PAD alignment (2026-05-06)
+
+`llmoji 2.0.1` ships LEXICON v2: 50 words / 9 cells / 26 circumplex
+anchors / 24 extension axes. v1 was 48 / 6 / 19 / 29.
+
+- **Six words moved extension → circumplex:** `playful` / `sly` /
+  `smug` → HP-D (in-action mischief), `confused` / `uncertain` →
+  HB (evaluative arrest).
+- **Two words retagged within circumplex:** `satisfied` / `relieved`
+  LP → NP (post-tension-release shape isn't sensory-tender).
+- **Two new words added:** `skeptical` (HB judgment-leaning sub-
+  flavor — "I don't believe this"), `grateful` (NP recipient-of-help
+  anchor).
+- **One word reaffirmed:** `hopeful` stays LP (quiet anticipatory
+  positive, no recipient framing).
+- **One stance kept extension:** `proud` stays in stance/extension
+  family (bilateral — self-pride is affect, other-pride is stance
+  toward another, so the extension home preserves flexibility).
+
+`LEXICON_VERSION 1 → 2` bump means v1-stamped harness BoL parquets
+are locked out by `assert_lexicon_v2`. Per the no-prior-analysis
+state of v1 corpus (no one had run BoL analysis on it yet), amending
+in place is safe; harness corpus needs re-synthesis with v2 schema
+before downstream re-pooling. Concrete v2 cell anchors:
+
+```
+HP-D (3): playful, sly, smug
+HP-S (3): cheery, excited, triumphant
+LP   (3): peaceful, tender, hopeful
+NP   (3): satisfied, relieved, grateful
+HN-D (3): indignant, frustrated, contemptuous
+HN-S (3): anxious, alarmed, overwhelmed
+LN   (3): sad, weary, hollow
+NB   (2): neutral, detached
+HB   (3): confused, uncertain, skeptical
+```
+
 ## Current state (2026-05-06)
 
 The headline metric is **distribution similarity vs Claude-GT** —
@@ -1633,13 +1791,19 @@ sqrt(ln 2) so the y-axis sits in [0, 1].
 Outputs: `figures/local/v3_state_predicts_face.tsv` +
 per-model hexbin scatter `figures/local/<short>/fig_v3_state_predicts_face.png`.
 
-**Script 38 — 3D PC × probe rotation per model.** Top-3 PCs of h_first
-@ preferred_layer, with the canonical probes (happy.sad / angry.calm /
-fearful.unflinching) projected into the PC subspace via row-level
-correlation. Orthogonal Procrustes finds R ∈ O(3) such that R · D[k] ≈
-e_k, rotating the PC-space frame so each probe approximately aligns
-with a canonical axis. Apply to row coords + render as interactive
-HTML at `figures/local/<short>/fig_v3_pc_probe_rotation_3d.html`.
+**Script 29 — 3D PC point clouds per model.** Top-3 PCs of the
+h_first layer-stack rendered as a per-quadrant 3D scatter in native
+PC1/PC2/PC3 axes. One marker per row, colored by Russell quadrant
+(HN bisected). Output: `figures/local/<short>/fig_v3_pc_point_clouds_3d.html`.
+
+Earlier versions of this script also fit an orthogonal Procrustes
+rotation aligning the canonical probes (happy.sad / angry.calm /
+fearful.unflinching) onto the canonical x/y/z axes, then drew probe
++ rotated-PC arrows over the scatter. That apparatus was retired
+2026-05-07 — the residual-angle finding is preserved here for the
+record (numbers below) but the figure now shows point clouds only.
+
+Historical Procrustes-rotation numbers (pre-retirement):
 
 | model | top-3 PC variance | weakest-captured probe | residual angles after rotation |
 | --- | ---: | --- | --- |
@@ -1664,8 +1828,9 @@ Findings:
    "anger axis" — but happy.sad and fearful.unflinching are at 42°
    and 43°. Ministral has one probe-aligned PC and two PCs that aren't.
 
-Outputs: 3 per-model HTMLs + `figures/local/v3_pc_probe_rotation.tsv`
-(per probe per model: pc_capture_norm, rotated_xyz, angle_deg_to_target).
+Outputs: per-model `fig_v3_pc_point_clouds_3d.html`. The rotation /
+angle TSV (`v3_pc_probe_rotation.tsv`) was retired alongside the
+arrow rendering.
 
 **Cross-model decoupling — the structural finding.** Forward (script
 37) and reverse (script 36 at h_mean) ranks **invert**:

@@ -38,8 +38,11 @@ from llmoji_study.jsd import js, normalize, similarity
 
 from llmoji_study.config import DATA_DIR
 from llmoji_study.face_likelihood_discovery import discover_parquets
+from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
 
-QUADRANTS = ["HP", "LP", "HN-D", "HN-S", "LN", "NB"]
+# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# source of truth shared with figures, JSD math, and the BoL projection.
+QUADRANTS = list(QUADRANT_ORDER_SPLIT)
 
 
 def _discover(prefer_full: bool) -> dict[str, tuple[str, bool]]:

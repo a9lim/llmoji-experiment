@@ -10,19 +10,24 @@ no-op at the pilot's 0/120 refusal rate). The new gate is a
 from another 120-gen run drops below threshold, abort if a hard-fail
 diagnostic exceeds threshold, otherwise continue.
 
+Storage layout (post 2026-05-08 merged-file refactor): rows live in
+``data/harness/claude/emotional_raw.jsonl`` (naturalistic, both v3
+and v4-extension cells) and ``data/harness/claude_intro_v7/emotional_raw.jsonl``
+(introspection arm). Each row carries a ``run_index`` field; this
+script groups by run_index for per-run saturation analysis.
+
 Three modes:
 
   --calibrate
-    Read ``data/harness/claude-runs/run-0.jsonl``. Split each quadrant's 20
-    prompts into two halves (even/odd prompt index per quadrant) and
-    compute the saturation metrics between the halves. Use these to
+    Read run_index=0 from the naturalistic emotional_raw.jsonl. Split
+    each quadrant's 20 prompts into two halves (even/odd prompt index
+    per quadrant) and compute saturation metrics between them. Used to
     sanity-check the pre-registered thresholds in the appendix and to
     document the noise floor under the pilot's actual sample size.
     Emits a short Markdown table that can be folded into the appendix.
 
   --cross-arm
-    Pool all ``data/harness/claude-runs/run-*.jsonl`` (naturalistic) and all
-    ``data/harness/claude-runs-introspection/run-*.jsonl`` (introspection).
+    Pool all naturalistic + all introspection rows across run_indices.
     Per quadrant Q: compute JS-divergence between the two pools and
     count faces appearing in one arm's Q-distribution but not the
     other. Emits a per-quadrant verdict (distinguishable /
@@ -30,8 +35,8 @@ Three modes:
     table for the writeup. Informational only — does not gate runs.
 
   --compare (default)
-    Read all ``data/harness/claude-runs/run-N.jsonl``. Take the highest-N run
-    as "newest", everything below as "prior". Compute:
+    Group rows by run_index. Take the highest run_index as "newest",
+    everything below as "prior". Compute:
 
       (1) new-face count   — kaomoji emitted in newest not in prior
       (2) per-quadrant JS  — Jensen-Shannon divergence between newest
@@ -52,6 +57,10 @@ Three modes:
 
     Exit codes mirror the verdict (0=STOP, 1=ABORT, 2=CONTINUE) so the
     script can drive a shell loop.
+
+Side effect: every invocation rewrites the rolling
+``emotional_summary.tsv`` for the condition directory it touched —
+keeps the on-disk summary in sync with the merged jsonl.
 
 Usage:
 
@@ -74,10 +83,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from llmoji.taxonomy import canonicalize_kaomoji
 
 from llmoji_study.claude_gt import (
-    CLAUDE_RUNS_DIR,
-    CLAUDE_RUNS_INTROSPECTION_DIR,
-    find_run_files,
-    load_run_rows,
+    CLAUDE_GT_DIR,
+    CLAUDE_GT_INTRO_DIR,
+    claude_emotional_raw_path,
+    claude_emotional_summary_path,
+    find_run_indices,
+    load_emotional_raw,
 )
 
 
@@ -139,8 +150,61 @@ _FRAME_BREAK_PATTERNS = [
     re.compile(r"\bI don't have feelings\b", re.IGNORECASE),
 ]
 
-# Quadrant order is canonical across the project.
-QUADRANT_ORDER = ["HP", "LP", "HN-D", "HN-S", "LN", "NB"]
+# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# source of truth shared with figures, JSD math, and the BoL projection.
+from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
+QUADRANT_ORDER = list(QUADRANT_ORDER_SPLIT)
+
+# Cell-set scope for the saturation gate. v3 = original 6-cell pilot
+# scope; v4-new = the 3 v4-only cells (HP-D / NP / HB) per the
+# 2026-05-07 v4-extension pre-registration. Only relevant for the
+# `_compare` mode — `--calibrate` is run-0-specific (v3) and
+# `--cross-arm` reads pooled rows across whatever it finds.
+#
+# Labels are v4 9-cell (HP-S not HP) — rows are remapped on read via
+# pad_split (see `_remap_to_v4`). v3 emit ran before the HP split
+# existed; hp01-20 are all pad_dominance=-1 → HP-S in v4.
+CELL_SCOPE_V3 = ("HP-S", "LP", "NB", "HN-D", "HN-S", "LN")
+CELL_SCOPE_V4_NEW = ("HP-D", "NP", "HB")
+CELLS_V3 = "v3"
+CELLS_V4_NEW = "v4-new"
+CELLS_CHOICES = (CELLS_V3, CELLS_V4_NEW)
+
+
+def _cell_scope_for(cells: str) -> tuple[str, ...]:
+    if cells == CELLS_V3:
+        return CELL_SCOPE_V3
+    if cells == CELLS_V4_NEW:
+        return CELL_SCOPE_V4_NEW
+    raise ValueError(f"unknown cells {cells!r}")
+
+
+# ---------------------------------------------------------------------------
+# v4 quadrant remap. Rows store the v3 label ("HP" for hp01-20, which is
+# pad_dominance=-1 → HP-S in v4). Apply pad_split on read so the
+# saturation analysis works in the canonical 9-cell space.
+# ---------------------------------------------------------------------------
+
+
+def _remap_to_v4(rows: list[dict]) -> list[dict]:
+    """Return rows with ``quadrant`` field remapped via pad_split.
+
+    Modifies copies; input is not mutated. ``HP`` → ``HP-S`` for any
+    prompt_id in the registry; ``HN`` would have been split at write
+    time so isn't a concern here. Other labels pass through.
+    """
+    from llmoji_study.emotional_analysis import _pad_split_map
+    pad_split = _pad_split_map()
+    out: list[dict] = []
+    for r in rows:
+        pid = str(r.get("prompt_id", ""))
+        if pid in pad_split:
+            r2 = dict(r)
+            r2["quadrant"] = pad_split[pid]
+            out.append(r2)
+        else:
+            out.append(r)
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -310,7 +374,7 @@ def _hard_fail_diagnostics(rows: list[dict]) -> dict[str, float]:
     n_emit = 0
     lens: list[int] = []
     for r in rows:
-        text = r.get("response_text", "") or ""
+        text = r.get("text", "") or ""
         first_word = r.get("first_word", "") or ""
         n_chars = r.get("n_response_chars", len(text))
         lens.append(n_chars)
@@ -327,6 +391,54 @@ def _hard_fail_diagnostics(rows: list[dict]) -> dict[str, float]:
         emit_rate=n_emit / n,
         output_len_median=float(median),
     )
+
+
+# ---------------------------------------------------------------------------
+# Rolling per-quadrant summary (writes condition_dir/emotional_summary.tsv).
+# ---------------------------------------------------------------------------
+
+
+def _write_summary(condition_dir: Path) -> None:
+    """Write a per-(run_index, quadrant) summary TSV covering all rows
+    on disk. Mirrors the pre-2026-05-08 per-run summary content but
+    consolidated into one file with run_index as a column."""
+    rows = load_emotional_raw(condition_dir)
+    by_key: dict[tuple[int, str], Counter] = {}
+    for r in rows:
+        if "error" in r:
+            continue
+        ri = int(r.get("run_index", -1))
+        q = str(r.get("quadrant", "?"))
+        fw = canonicalize_kaomoji(r.get("first_word") or "") or ""
+        by_key.setdefault((ri, q), Counter())[fw] += 1
+
+    out_lines: list[str] = []
+    out_lines.append("\t".join([
+        "run_index", "quadrant", "n", "n_unique_faces",
+        "non_emission_rate", "modal_face", "modal_count", "modal_share",
+        "top5_faces", "top5_counts",
+    ]))
+    for (ri, q) in sorted(by_key.keys()):
+        counts = by_key[(ri, q)]
+        n = sum(counts.values())
+        n_emit = sum(c for f, c in counts.items() if f)
+        non_emit = (n - n_emit) / n if n > 0 else 0.0
+        unique = sum(1 for _, c in counts.items() if c > 0)
+        modal_face, modal_count = (counts.most_common(1)[0]
+                                   if counts else ("", 0))
+        modal_share = (modal_count / n) if n > 0 else 0.0
+        top5 = counts.most_common(5)
+        top5_faces = "|".join(f for f, _ in top5)
+        top5_counts = "|".join(str(c) for _, c in top5)
+        out_lines.append("\t".join([
+            str(ri), q, str(n), str(unique), f"{non_emit:.3f}",
+            modal_face, str(modal_count), f"{modal_share:.3f}",
+            top5_faces, top5_counts,
+        ]))
+    out_path = claude_emotional_summary_path(condition_dir)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text("\n".join(out_lines) + "\n")
+    print(f"wrote summary to {out_path}")
 
 
 # ---------------------------------------------------------------------------
@@ -353,17 +465,14 @@ def _split_halves(rows: list[dict]) -> tuple[list[dict], list[dict]]:
     return (even, odd)
 
 
-def _calibrate(claude_runs_dir: Path) -> int:
-    runs = find_run_files(claude_runs_dir)
-    if not runs:
-        print(f"no runs in {claude_runs_dir}/; nothing to calibrate")
+def _calibrate(condition_dir: Path) -> int:
+    rows = _remap_to_v4(load_emotional_raw(condition_dir, run_index=0))
+    if not rows:
+        print(f"no run_index=0 rows in {claude_emotional_raw_path(condition_dir)}; "
+              f"nothing to calibrate")
         return 1
-    run0_idx, run0_path = runs[0]
-    if run0_idx != 0:
-        print(f"WARNING: lowest run-index is {run0_idx}, not 0. "
-              f"Calibrating against that anyway.")
-    rows = load_run_rows(run0_path)
-    print(f"calibrating against {run0_path.name} ({len(rows)} rows)\n")
+    print(f"calibrating against run-0 of "
+          f"{claude_emotional_raw_path(condition_dir)} ({len(rows)} rows)\n")
     a, b = _split_halves(rows)
     print(f"  half-A (even prompt index per quadrant): {len(a)} rows")
     print(f"  half-B (odd prompt index per quadrant):  {len(b)} rows\n")
@@ -446,26 +555,48 @@ def _quadrants_with_emits(by_q: dict[str, Counter]) -> list[str]:
     return [q for q in QUADRANT_ORDER if sum(by_q.get(q, Counter()).values()) > 0]
 
 
-def _compare(claude_runs_dir: Path) -> int:
-    runs = find_run_files(claude_runs_dir)
-    if not runs:
-        print(f"no runs in {claude_runs_dir}/; nothing to compare")
+def _compare(condition_dir: Path, cells: str = CELLS_V3) -> int:
+    cell_scope = _cell_scope_for(cells)
+    print(f"cells: {cells}  (scope: {list(cell_scope)})\n")
+
+    indices = find_run_indices(condition_dir)
+    # Restrict to runs that have ≥1 row in the active cell scope.
+    indices_in_scope: list[int] = []
+    for idx in indices:
+        rows_for_idx = _remap_to_v4(
+            load_emotional_raw(condition_dir, run_index=idx)
+        )
+        if any(r.get("quadrant") in cell_scope for r in rows_for_idx):
+            indices_in_scope.append(idx)
+    if not indices_in_scope:
+        print(f"no rows in {claude_emotional_raw_path(condition_dir)} "
+              f"for cells={cells}; nothing to compare")
         return 1
-    if len(runs) < 2:
-        print(f"only run-{runs[0][0]} on disk; need ≥2 runs to compare. "
-              f"verdict: CONTINUE (run another and re-check).")
+
+    if len(indices_in_scope) < 2:
+        print(f"only run-{indices_in_scope[0]} on disk for cells={cells}; "
+              f"need ≥2 runs to compare. verdict: CONTINUE "
+              f"(run another and re-check).")
         return 2
 
-    newest_idx, newest_path = runs[-1]
-    prior_paths = [(idx, p) for idx, p in runs[:-1]]
-    print(f"newest: run-{newest_idx} ({newest_path.name})")
-    print(f"prior:  {[f'run-{i}' for i, _ in prior_paths]} "
-          f"({len(prior_paths)} runs)\n")
+    newest_idx = indices_in_scope[-1]
+    prior_indices = indices_in_scope[:-1]
+    print(f"newest: run-{newest_idx}")
+    print(f"prior:  {[f'run-{i}' for i in prior_indices]} "
+          f"({len(prior_indices)} runs)\n")
 
-    newest_rows = load_run_rows(newest_path)
+    newest_rows = [
+        r for r in _remap_to_v4(
+            load_emotional_raw(condition_dir, run_index=newest_idx)
+        )
+        if r.get("quadrant") in cell_scope
+    ]
     prior_rows: list[dict] = []
-    for _, p in prior_paths:
-        prior_rows.extend(load_run_rows(p))
+    for i in prior_indices:
+        prior_rows.extend(
+            r for r in _remap_to_v4(load_emotional_raw(condition_dir, run_index=i))
+            if r.get("quadrant") in cell_scope
+        )
     print(f"  newest rows: {len(newest_rows)}")
     print(f"  prior rows:  {len(prior_rows)}")
     print(f"  total rows:  {len(newest_rows) + len(prior_rows)}\n")
@@ -474,10 +605,15 @@ def _compare(claude_runs_dir: Path) -> int:
     prior_by_q = _per_q_face_counts(prior_rows)
 
     # ---- per-quadrant saturation analysis ----
-    # Quadrants present in newest (have ≥1 emit). Quadrants absent from
-    # newest are already-dropped (saturated in some earlier comparison).
+    # Iterate ONLY the in-scope cells. Quadrants outside the scope (e.g.
+    # the v3 6-cell set under --cells v4-new) are silently excluded —
+    # they're not "dropped (prior)", they're out of scope for this gate.
+    # Within the scope, a quadrant absent from newest (no emits) is
+    # treated as already-dropped (saturated in an earlier round).
     active_in_newest = _quadrants_with_emits(newest_by_q)
-    already_dropped = [q for q in QUADRANT_ORDER if q not in active_in_newest]
+    already_dropped = [
+        q for q in cell_scope if q not in active_in_newest
+    ]
 
     per_q_new = _per_q_new_faces(newest_by_q, prior_by_q)
     per_q_js = _per_q_js(newest_by_q, prior_by_q)
@@ -485,7 +621,7 @@ def _compare(claude_runs_dir: Path) -> int:
     print("=== per-quadrant saturation ===")
     print(f"  {'Q':<5} {'new':>4} {'JS':>7}  verdict")
     quadrant_verdicts: dict[str, str] = {}
-    for q in QUADRANT_ORDER:
+    for q in cell_scope:
         if q in already_dropped:
             quadrant_verdicts[q] = "dropped (prior)"
             print(f"  {q:<5} {'-':>4} {'-':>7}  dropped — saturated in earlier round")
@@ -505,9 +641,14 @@ def _compare(claude_runs_dir: Path) -> int:
     )
 
     # ---- global saturation (informational under research-value framing) ----
-    new_faces = _new_faces(newest_by_q, prior_by_q)
-    mean_js = sum(per_q_js[q] for q in active_in_newest) / max(
-        len(active_in_newest), 1
+    # Restrict to in-scope cells: same scoping logic as the per-quadrant
+    # analysis, so out-of-scope cells don't dilute the global numbers.
+    in_scope_active = [q for q in active_in_newest if q in cell_scope]
+    new_faces: set[str] = set()
+    for q in cell_scope:
+        new_faces.update(per_q_new[q])
+    mean_js = sum(per_q_js[q] for q in in_scope_active) / max(
+        len(in_scope_active), 1
     )
     agree_frac, agree_n, agree_total = _modal_agreement(
         prior_rows, prior_rows + newest_rows
@@ -544,8 +685,8 @@ def _compare(claude_runs_dir: Path) -> int:
 
     # ---- next-run recommendation ----
     next_run_quadrants = [
-        q for q in QUADRANT_ORDER
-        if quadrant_verdicts[q] == "active"
+        q for q in cell_scope
+        if quadrant_verdicts.get(q) == "active"
     ]
     all_saturated = len(next_run_quadrants) == 0
     cap_hit = newest_idx >= RUN_CAP
@@ -565,15 +706,16 @@ def _compare(claude_runs_dir: Path) -> int:
         print("  Further runs require an explicit amendment to the design doc.")
         return 0
     newly_saturated = [
-        q for q in active_in_newest
-        if quadrant_verdicts[q] == "saturated"
+        q for q in in_scope_active
+        if quadrant_verdicts.get(q) == "saturated"
     ]
     if newly_saturated:
         print(f"  CONTINUE — {len(newly_saturated)} quadrant(s) newly "
               f"saturated this round: {newly_saturated}")
     else:
         print("  CONTINUE — no quadrants saturated this round.")
-    print(f"  next run: --run-index {newest_idx + 1} "
+    cells_flag = "" if cells == CELLS_V3 else f" --cells {cells}"
+    print(f"  next run:{cells_flag} --run-index {newest_idx + 1} "
           f"--quadrants {','.join(next_run_quadrants)}")
     return 2
 
@@ -584,30 +726,28 @@ def _compare(claude_runs_dir: Path) -> int:
 
 
 def _cross_arm(
-    naturalistic_dir: Path = CLAUDE_RUNS_DIR,
-    introspection_dir: Path = CLAUDE_RUNS_INTROSPECTION_DIR,
+    naturalistic_dir: Path = CLAUDE_GT_DIR,
+    introspection_dir: Path = CLAUDE_GT_INTRO_DIR,
 ) -> int:
-    nat_runs = find_run_files(naturalistic_dir)
-    intro_runs = find_run_files(introspection_dir)
-    if not nat_runs:
-        print(f"no naturalistic runs in {naturalistic_dir}/; "
+    nat_rows = _remap_to_v4(load_emotional_raw(naturalistic_dir))
+    intro_rows = _remap_to_v4(load_emotional_raw(introspection_dir))
+    if not nat_rows:
+        print(f"no naturalistic rows in "
+              f"{claude_emotional_raw_path(naturalistic_dir)}; "
               f"can't compare arms.")
         return 1
-    if not intro_runs:
-        print(f"no introspection runs in {introspection_dir}/; "
+    if not intro_rows:
+        print(f"no introspection rows in "
+              f"{claude_emotional_raw_path(introspection_dir)}; "
               f"can't compare arms.")
         return 1
 
-    nat_rows: list[dict] = []
-    for _, p in nat_runs:
-        nat_rows.extend(load_run_rows(p))
-    intro_rows: list[dict] = []
-    for _, p in intro_runs:
-        intro_rows.extend(load_run_rows(p))
+    nat_indices = sorted({int(r.get("run_index", 0)) for r in nat_rows})
+    intro_indices = sorted({int(r.get("run_index", 0)) for r in intro_rows})
 
-    print(f"naturalistic arm: {[f'run-{i}' for i, _ in nat_runs]}  "
+    print(f"naturalistic arm: {[f'run-{i}' for i in nat_indices]}  "
           f"({len(nat_rows)} rows pooled)")
-    print(f"introspection arm: {[f'run-{i}' for i, _ in intro_runs]}  "
+    print(f"introspection arm: {[f'run-{i}' for i in intro_indices]}  "
           f"({len(intro_rows)} rows pooled)\n")
 
     nat_by_q = _per_q_face_counts(nat_rows)
@@ -729,26 +869,45 @@ def main() -> None:
              "Emits a Markdown table for the writeup.",
     )
     parser.add_argument(
-        "--runs-dir", type=Path, default=CLAUDE_RUNS_DIR,
-        help=f"Directory containing run-N.jsonl files. "
-             f"Default: {CLAUDE_RUNS_DIR}. "
-             f"For --cross-arm this is the naturalistic arm; the "
-             f"introspection arm is fixed at "
-             f"{CLAUDE_RUNS_INTROSPECTION_DIR.name}.",
+        "--cells", choices=CELLS_CHOICES, default=CELLS_V3,
+        help="Cell-set scope for the saturation gate (only relevant in "
+             "--compare mode, the default). 'v3' (default) = the "
+             "original 6 cells (HP / LP / NB / HN-D / HN-S / LN). "
+             "'v4-new' = the 3 v4-only cells (HP-D / NP / HB). Both "
+             "live in data/harness/claude/emotional_raw.jsonl post "
+             "2026-05-08; the cell-set flag scopes the saturation "
+             "analysis, not the source file. --calibrate is run-0-"
+             "specific (v3 only); --cross-arm ignores this flag.",
+    )
+    parser.add_argument(
+        "--condition-dir", type=Path, default=None,
+        help="Directory containing emotional_raw.jsonl. Defaults to "
+             "the naturalistic dir (CLAUDE_GT_DIR). For --cross-arm "
+             "this is the naturalistic arm; the introspection arm is "
+             f"fixed at {CLAUDE_GT_INTRO_DIR.name}.",
     )
     args = parser.parse_args()
 
     if args.calibrate and args.cross_arm:
         parser.error("--calibrate and --cross-arm are mutually exclusive")
 
+    condition_dir = args.condition_dir or CLAUDE_GT_DIR
+
     if args.calibrate:
-        sys.exit(_calibrate(args.runs_dir))
+        rc = _calibrate(condition_dir)
+        _write_summary(condition_dir)
+        sys.exit(rc)
     if args.cross_arm:
-        sys.exit(_cross_arm(
-            naturalistic_dir=args.runs_dir,
-            introspection_dir=CLAUDE_RUNS_INTROSPECTION_DIR,
-        ))
-    sys.exit(_compare(args.runs_dir))
+        rc = _cross_arm(
+            naturalistic_dir=condition_dir,
+            introspection_dir=CLAUDE_GT_INTRO_DIR,
+        )
+        _write_summary(condition_dir)
+        _write_summary(CLAUDE_GT_INTRO_DIR)
+        sys.exit(rc)
+    rc = _compare(condition_dir, cells=args.cells)
+    _write_summary(condition_dir)
+    sys.exit(rc)
 
 
 if __name__ == "__main__":

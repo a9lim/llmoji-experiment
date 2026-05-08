@@ -2,7 +2,7 @@
 
 Reads ``data/harness/claude_descriptions.jsonl`` (the flat HF-corpus
 output of ``scripts/harness/60_corpus_pull.py``). For each canonical
-kaomoji, builds a 48-d weighted indicator over the locked llmoji v2
+kaomoji, builds a 50-d weighted indicator over the locked llmoji v2
 LEXICON by count-weighted pooling of every per-bundle ``synthesis``
 pick, L1-normalized so each row reads as a soft distribution over the
 lexicon.
@@ -12,7 +12,7 @@ synthesized prose description through MiniLM and pooled the resulting
 384-d embeddings — a noisy reconstruction of structure that was
 already present in the v2 ``synthesis`` object. Post-refactor we
 consume the structured commit directly. See
-``llmoji_study.lexicon`` for the canonical 48-word index + Russell-
+``llmoji_study.lexicon`` for the canonical 50-word index + Russell-
 quadrant tags, and ``llmoji_study.claude_faces.embed_lexicon_bags``
 for the pooler.
 

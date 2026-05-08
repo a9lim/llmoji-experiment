@@ -13,9 +13,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from llmoji_study.emotional_analysis import QUADRANT_COLORS
+from llmoji_study.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT
 
-QUADRANTS_SPLIT = ["HP", "LP", "HN-D", "HN-S", "LN", "NB"]
+# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# source of truth shared with figures, JSD math, and the BoL projection.
+QUADRANTS_SPLIT = list(QUADRANT_ORDER_SPLIT)
 
 
 def _use_cjk_font() -> None:

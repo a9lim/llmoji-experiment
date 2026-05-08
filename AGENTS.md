@@ -26,7 +26,24 @@
 >   Notable recent: [`2026-05-06-use-read-act-channels.md`](docs/2026-05-06-use-read-act-channels.md)
 >   (three-channel per-face analysis: GT use vs Opus/Haiku read vs
 >   BoL act, with per-source-model drift extension and case files
->   for `(╯°□°)`, `(´;ω;`)`, `(╥﹏╥)`).
+>   for `(╯°□°)`, `(´;ω;`)`, `(╥﹏╥)`);
+>   [`2026-05-06-prompt-extension-roadmap.md`](docs/2026-05-06-prompt-extension-roadmap.md)
+>   (PAD-octant + orthogonal-category prompt extensions; 9-cell v4
+>   deployment registry **HP-D / HP-S / LP / HN-D / HN-S / LN / NB / NP /
+>   HB** wired into `EMOTIONAL_PROMPTS` 2026-05-06, mechanically named
+>   from V/A/D coordinates with no overrides; round-1 + round-4 pilot
+>   artifacts cleared post-promotion);
+>   [`2026-05-06-nn-lb-future-cells.md`](docs/2026-05-06-nn-lb-future-cells.md)
+>   (two coordinate-real PAD cells deferred from v4 promotion — NN at
+>   (a=0, v=-1) and LB at (a=-1, v=0). 20 pilot prompts each drafted +
+>   empirical promotion protocol parked for a future session);
+>   [`2026-05-07-quadrants-canonical-module.md`](docs/2026-05-07-quadrants-canonical-module.md)
+>   (single-source-of-truth refactor — `llmoji_study/quadrants.py`
+>   consolidates v4 9-cell ordering + OKLCH color palette; Claude GT
+>   `prompt_id`-lookup remap so v3-stored labels read as v4 9-cell
+>   on the fly; `_quadrant_of` HP-split fix in script 50; `np19`
+>   tightened from 35→23 words for the gpt_oss_20b harmony length
+>   quirk; defensive None-probe row handling).
 
 ## What this is
 
@@ -64,10 +81,22 @@ not nothing.
   later runs as soon as they stop surfacing meaningful info.
 - Re-design rather than 10×ing on negative or noisy findings.
 
-## Status (2026-05-06)
+## Status (2026-05-07)
 
 ### Current methodology
 
+- **Canonical quadrants module** (2026-05-07):
+  `llmoji_study/quadrants.py` is the single source of truth for the
+  v4 9-cell taxonomy + OKLCH-uniform color palette. `QUADRANT_ORDER`
+  (7-tuple aggregate `HP/LP/NP/HN/LN/NB/HB`), `QUADRANT_ORDER_SPLIT`
+  (9-tuple split `HP-D/HP-S/LP/NP/HN-D/HN-S/LN/NB/HB`), `QUADRANT_COLORS`
+  (11-key dict), `SPLIT_MARKERS` (frozenset). Zero deps so the JSD math
+  layer can re-export without pulling pandas / matplotlib. Re-exported
+  from `emotional_analysis`, `jsd`, `lexicon`, `per_project_charts`;
+  hardcoded copies in 17 scripts replaced with imports.
+  `apply_pad_split` (formerly `apply_hn_split`, kept as alias)
+  generalizes the registry-driven dominance-split. Detail:
+  `docs/2026-05-07-quadrants-canonical-module.md`.
 - **Soft-everywhere evaluation.** Post-hoc face_likelihood evaluation is
   distribution-vs-distribution via JSD. Headline metric:
   `similarity = 1 − JSD/ln 2` ∈ [0, 1], reported in two flavors —
@@ -76,7 +105,10 @@ not nothing.
   is the soft mean of per-encoder softmax distributions. Per-face
   deliverable is the full distribution, not a hard label.
   Detail: `docs/2026-05-05-soft-everywhere-methodology.md`. Helpers in
-  `llmoji_study/jsd.py` + `claude_gt.load_claude_gt_distribution()`.
+  `llmoji_study/jsd.py` + `claude_gt.load_claude_gt_distribution()`
+  (the latter remaps Claude's stored v3 6-cell labels to v4 9-cell on
+  read via prompt_id registry lookup, so 9-cell encoder distributions
+  compare cleanly to Claude GT without aggregate-HP leakage).
 - **Layer-stack representation.** Active analyses read
   `(n_rows, n_layers · hidden_dim)` per model — concat of every probe
   layer's `h_first`. The single-layer `preferred_layer` field on
@@ -90,17 +122,21 @@ not nothing.
   reads from this canonical source.
 - **Bag-of-lexicon (BoL) corpus representation** at
   `data/harness/claude_faces_lexicon_bag.parquet` (built by
-  `scripts/harness/62_corpus_lexicon.py`). Per canonical face: 48-d
+  `scripts/harness/62_corpus_lexicon.py`). Per canonical face: 50-d
   L1-normalized soft distribution over the locked llmoji v2 LEXICON
-  (19 Russell-circumplex anchors + 29 stance/modality/functional/
-  confidence words), pooled across per-bundle synthesis picks weighted
-  by emit count. Replaces the pre-2026-05-06 MiniLM-on-prose 384-d
-  embedding parquet (`claude_faces_embed_description.parquet`, gone).
-  Helpers in `llmoji_study/lexicon.py`. Lexicon-version-stamped on
-  read; v3 LEXICON rotation will hard-fail consumers via
-  `assert_lexicon_v1`. The eriskii 21-axis projection that previously
-  consumed the MiniLM parquet (scripts 64/65) is gone — BoL is a
-  more direct + interpretable representation of the same signal.
+  (26 PAD-cell circumplex anchors across HP-D / HP-S / LP / NP /
+  HN-D / HN-S / LN / NB / HB + 24 stance / modality / functional /
+  confidence extension words), pooled across per-bundle synthesis
+  picks weighted by emit count. Replaces the pre-2026-05-06 MiniLM-
+  on-prose 384-d embedding parquet (`claude_faces_embed_description
+  .parquet`, gone). Helpers in `llmoji_study/lexicon.py`. Lexicon-
+  version-stamped on read; v3 LEXICON rotation will hard-fail
+  consumers via `assert_lexicon_v2`. The eriskii 21-axis projection
+  that previously consumed the MiniLM parquet (scripts 64/65) is
+  gone — BoL is a more direct + interpretable representation of the
+  same signal. Note: existing v1-stamped parquets are locked out by
+  `assert_lexicon_v2`; corpus needs re-synthesis with v2 schema (see
+  `llmoji 2.0.1` release for the rotation rationale).
 - **Introspection priming = v7** (`preambles/introspection_v7.txt`),
   baked into `config.INTROSPECTION_PREAMBLE`. Preambles **replace**
   `KAOMOJI_INSTRUCTION` via `instruction_override` plumbing — they are
@@ -167,7 +203,7 @@ not nothing.
   identical to the pre-refresh number; LN drift (-0.027) is within
   what the smaller n per quadrant (4–17) can sustain.
 - **Wild-emit residual analysis** (script 67 — clusters the
-  HF-corpus canonical-kaomoji faces in 48-d BoL space). The k=6
+  HF-corpus canonical-kaomoji faces in 50-d BoL space). The k=6
   clustering surfaces sub-cluster structure beyond the six Russell
   quadrants, with deterministic top-2 modal-lexicon-word labels
   per cluster. Cluster-summed shares typically split LP-heavy
@@ -179,13 +215,15 @@ not nothing.
   HN-S vocabulary in particular is more diverse in the wild
   corpus than in the elicitation set. Cluster-table outputs at
   `data/harness/wild_residual_clusters{,_gt_only}.tsv`.
-- **Sequential Claude scaling complete.** 880 naturalistic
-  (`data/harness/claude-runs/run-{0..7}.jsonl`) + 120 introspection
-  (`data/harness/claude-runs-introspection/run-0.jsonl`) = 1000
-  Opus-4.7 rows under naturalistic / v7-introspection conditions. Per-quadrant
-  saturation gate exited HN-D after r2 and LN after r6; HP/LP/HN-S/NB
-  went to cap (r7). Welfare ledger ~460 negative-affect gens vs ~540
-  worst case. Detail: `docs/2026-05-04-claude-groundtruth-pilot.md`.
+- **Sequential Claude scaling complete.** 880 naturalistic + 120
+  introspection = 1000 Opus-4.7 rows under naturalistic / v7-introspection
+  conditions, all in `data/harness/claude/emotional_raw.jsonl` and
+  `data/harness/claude_intro_v7/emotional_raw.jsonl` respectively
+  (post-2026-05-08 merged-file refactor — replaces the old per-run
+  jsonl layout under `claude-runs*/`). Per-quadrant saturation gate
+  exited HN-D after r2 and LN after r6; HP/LP/HN-S/NB went to cap
+  (r7). Welfare ledger ~460 negative-affect gens vs ~540 worst case.
+  Detail: `docs/2026-05-04-claude-groundtruth-pilot.md`.
 - **Cross-arm comparison: introspection vs naturalistic =
   DISTINGUISHABLE in 6/6 quadrants at scale.** Gaps stayed stable across
   the 8x naturalistic accumulation; only NB had any compression early
@@ -256,6 +294,52 @@ not nothing.
 
 ### Open
 
+- **Claude-GT v4-extension pilot (2026-05-07): COMPLETE at RUN_CAP=7,
+  480 gens.** Filled the three v4-only cells (HP-D / NP / HB) that v3
+  elicitation never touched. 8 runs × 60 gens, 0 errors, 0 frame-
+  breaks, 100% emit-rate, modal-quadrant agreement 100% (27/27 faces
+  ≥3 emits) at the cap. Pooled Claude-GT now has nonzero mass in all
+  9 v4 cells: HP-D 26 unique faces / NP 40 / HB 19 (cf. HP-S 38 / LP
+  38 / HN-S 34 / NB 34 / LN 18 / HN-D 10). NP confirmed broadest as
+  expected for the relief / gratitude register. **Saturation note:**
+  the v3-calibrated `PER_Q_JS_MAX = 0.05` threshold was uncrossable
+  for these cells at n=20 prompts/cell/run — JS values floored in the
+  0.10–0.20 band, so all 3 cells stayed nominally "active" through
+  cap. Per-cell new-face counts came down cleanly (HP-D 6→5→3→0→2→1→3,
+  NP 9→4→4→5→2→1→2, HB 3→2→2→2→2→0→1) — vocabulary essentially settled
+  but distribution-shape JS sits above the v3 noise floor. The
+  v4-new cells likely have higher inherent entropy than v3; threshold
+  re-calibration on this dataset is a future tooling note, not a
+  signal-quality concern. Welfare ledger: 480 non-negative-affect
+  gens (mischief / relief / uncertainty), 0 refusals. Auto-pools into
+  every downstream consumer via `claude_gt.CLAUDE_RUNS_V4_EXTENSION_DIR`.
+  Detail: [`docs/2026-05-07-claude-gt-v4-extension-pilot.md`](docs/2026-05-07-claude-gt-v4-extension-pilot.md).
+- **v4 emit run in progress** (2026-05-06 evening): regenerating 8
+  prompt_ids whose text was tightened in the cell-cleanliness pass
+  (hp08/hp16/hp19/hn14/hn25/lp18/nb09/nb16) + 60 new prompts (hp21-40
+  HP-D, np01-20 NP, hb01-20 HB) × 8 seeds × 6 configs (gemma, qwen,
+  ministral, gpt_oss_20b, granite, gemma_intro_v7_primed) = 3,264
+  generations. Once complete, downstream pipeline regen needed:
+  scripts 10/11 (emit summaries), 40 (face union), 50 (face_likelihood
+  per encoder), 52/53/54 (ensemble), 25 (D/S classifier under new HP
+  labels), harness 50/68/69 (face_likelihood + three-way + per-source).
+- **Cross-axis D-direction validation**: train HN's D/S classifier on
+  hidden states (confirmed separable at 100%ile per script 25), apply
+  to (HP-S + HP-D) hidden states once v4 emit finishes. Tests whether
+  "D = in-action mode" reads the same direction across HN and HP cells.
+  If yes, structurally validates the PP→HP-D rename; if no, dominance
+  is HN-specific and HP-D should revert to a freestanding cell.
+- **NN + LB cells (deferred)**: two coordinate-real PAD cells without
+  v4 vocabulary — NN at (a=0, v=-1) is the disappointment / annoyance
+  / discouragement register (mirror of NP), LB at (a=-1, v=0) is the
+  bored / drowsy / listless register. Pilot prompts drafted +
+  empirical promotion protocol parked at
+  [`docs/2026-05-06-nn-lb-future-cells.md`](docs/2026-05-06-nn-lb-future-cells.md).
+  Decision criterion: in-the-wild cluster surface check + per-encoder
+  confusion matrix on v4 emit data must show miscoding-into-adjacent-
+  cells before pilot emit; pilot must hit ≥95%ile face-level + hidden-
+  state separability before LEXICON-v3 / 11-cell-registry promotion.
+
 - Face-stability triple under v7 priming (scripts 27/28/29 on
   `data/local/gemma_intro_v7_primed/emotional_raw.jsonl`).
 - Multi-seed verification of v7 vs v3 introspection (~12 min compute,
@@ -280,6 +364,13 @@ not nothing.
 python -m venv .venv && source .venv/bin/activate
 pip install -e ../llmoji   # editable; or pip install 'llmoji>=2.0,<3'
 pip install -e .            # saklas, anthropic, pyarrow, plotly, scikit-learn, matplotlib
+
+# Pipeline orchestrators (post-emit regen of analysis chain).
+# Per-stage scripts below are the source of truth — these wrap them.
+scripts/run_per_model.sh <model> [<suffix>] [<preamble>]   # one model
+scripts/run_local_chain.sh                                  # all 6 configs + cross-model
+ANTHROPIC_API_KEY=… scripts/run_harness_chain.sh            # harness regen
+ANTHROPIC_API_KEY=… scripts/run_all.sh                      # local + harness, tee'd to logs/
 
 # Smoke test the hidden-state pipeline (~5 min). Asserts MAX_NEW_TOKENS=16.
 python scripts/local/90_hidden_state_smoke.py
@@ -314,7 +405,7 @@ python scripts/local/33_introspection_custom.py --preamble-file preambles/intros
 # Face-stability triple (state↔face bidirectional, no model time)
 python scripts/local/27_v3_face_stability.py
 python scripts/local/28_v3_state_predicts_face.py
-python scripts/local/29_v3_pc_probe_rotation_3d.py       # interactive 3D HTML per model
+python scripts/local/29_v3_pc_point_clouds_3d.py         # interactive 3D HTML per model
 
 # Cross-platform: canonical face union (rerun after any v3 main update).
 # Pools v3 emit + Claude pilot + wild contributor faces — lives at scripts/ root.
@@ -344,14 +435,19 @@ python scripts/53_topk_pooling.py --prefer-full
 python scripts/54_ensemble_predict.py --models gemma,ministral,qwen
 
 # Blog-post figure regen → ../a9lim.github.io/blog-assets/introspection-via-kaomoji/
-python scripts/local/99_regen_blog_figures.py
+scripts/regen_blog.sh                          # full regen: static PNGs + 3D HTMLs
+scripts/regen_blog.sh --skip-3d                # PNGs only (light/dark heatmaps + layerwise)
+scripts/regen_blog.sh --skip-static            # 3D HTMLs only (procrustes/per-face/wild-faces)
+# Underlying steps if you want them individually:
+python scripts/local/99_regen_blog_figures.py  # 12 themed PNGs
+python scripts/local/98_wrap_blog_3d_html.py   # wraps 3 raw 3D HTMLs with blog styling
 
 # Harness side (contributor-corpus + Claude API; needs ANTHROPIC_API_KEY for 50)
 python scripts/harness/60_corpus_pull.py             # snapshot a9lim/llmoji
 python scripts/harness/61_corpus_basics.py
 python scripts/harness/62_corpus_lexicon.py          # build pooled BoL parquet (no GPU/API)
 python scripts/harness/64_corpus_lexicon_per_source.py  # long-format per-(face, source_model) BoL
-python scripts/harness/63_corpus_pca.py              # 48-d BoL PCA + KMeans cluster panels
+python scripts/harness/63_corpus_pca.py              # 50-d BoL PCA + KMeans cluster panels
 python scripts/harness/55_bol_encoder.py             # BoL → face_likelihood-shaped TSV (auto-discovered by 52/53/54)
 # Cross-platform per-project quadrants + face judgment + wild residuals
 # (each pulls from both sides). Output to data/harness/ and figures/harness/.
@@ -371,13 +467,33 @@ python scripts/67_wild_residual.py --color-by predicted # colored by ensemble-pr
 # Run-0 was the original block-staged pilot; runs 1+ are single-block
 # runs under the saturation protocol. See
 # docs/2026-05-04-claude-groundtruth-pilot.md for the full decision tree.
+# All rows write to data/harness/claude/emotional_raw.jsonl with a
+# run_index field stamped per row (mirrors the local emotional_raw.jsonl
+# layout). Per-row schema rewrite happened 2026-05-08 — see
+# docs/2026-05-08-merged-emotional-raw-refactor.md.
 ANTHROPIC_API_KEY=… python scripts/harness/00_emit.py --run-index N
 ANTHROPIC_API_KEY=… python scripts/harness/00_emit.py --run-index N --quadrants HP,LP,NB
 python scripts/harness/10_emit_analysis.py    # exit 0=STOP, 1=ABORT, 2=CONTINUE; emits next-run cmd
 
-# Introspection arm (parallel; routes to data/harness/claude-runs-introspection/)
+# Backfill missing rows for any (run_index, quadrant) tuple already
+# present in the merged file (e.g. after stale-row removal). Naturally
+# respects saturation drops — quadrants absent from a given run are
+# not refilled.
+ANTHROPIC_API_KEY=… python scripts/harness/00_emit.py --fill-gaps
+ANTHROPIC_API_KEY=… python scripts/harness/00_emit.py --fill-gaps --preamble introspection
+
+# Introspection arm (parallel; routes to data/harness/claude_intro_v7/emotional_raw.jsonl)
 ANTHROPIC_API_KEY=… python scripts/harness/00_emit.py --run-index N --preamble introspection
 python scripts/harness/10_emit_analysis.py --cross-arm    # per-Q distinguishable / indistinguishable
+
+# v4-extension pilot (2026-05-07): the 3 v4-only cells (HP-D / NP / HB)
+# that v3 elicitation never touched. Same saturation protocol; rows
+# co-locate with v3 cells in data/harness/claude/emotional_raw.jsonl
+# (cells differ by quadrant field, not file). See
+# docs/2026-05-07-claude-gt-v4-extension-pilot.md.
+ANTHROPIC_API_KEY=… python scripts/harness/00_emit.py --cells v4-new --run-index 0
+python scripts/harness/10_emit_analysis.py --cells v4-new
+ANTHROPIC_API_KEY=… python scripts/harness/00_emit.py --cells v4-new --run-index N --quadrants HP-D,NP,HB
 ```
 
 ## Layout
@@ -416,6 +532,13 @@ llmoji-study/
                                # tags + bol_from_synthesis / pool_bol /
                                # bol_to_quadrant_distribution helpers
     jsd.py                     # JSD + similarity helpers (soft-everywhere)
+    quadrants.py               # canonical v4 9-cell taxonomy + OKLCH-uniform
+                               # color palette; zero-dep single source of
+                               # truth re-exported by emotional_analysis,
+                               # jsd, lexicon, per_project_charts + 17
+                               # scripts. QUADRANT_ORDER (7 v4 aggregate),
+                               # QUADRANT_ORDER_SPLIT (9 v4 split),
+                               # QUADRANT_COLORS (11 keys), SPLIT_MARKERS.
     per_project_charts.py      # script-66 chart helpers
     face_likelihood_discovery.py # post-2026-05-05 layout-aware enumeration
                                # of face_likelihood {summary,parquet} files
@@ -478,13 +601,17 @@ llmoji-study/
       v3_probe_correlations.json
       temp_smoke_verdict.md
     harness/                   # claude/contributor-corpus-side data
-      claude-runs/             # naturalistic run-{0..7}.jsonl (Opus 4.7)
-                               # + per-run *_summary.tsv companions
-      claude-runs-introspection/  # v7-primed run-0.jsonl + summary
+      claude/                  # naturalistic Opus 4.7 (v3 + v4-ext cells merged)
+                               # — emotional_raw.jsonl + emotional_summary.tsv;
+                               # mirrors local/<model>/ layout. Each row carries
+                               # run_index stamped at write time (sequential
+                               # runs share one file; saturation analysis groups
+                               # by run_index).
+      claude_intro_v7/         # introspection arm (v7 preamble) — same shape
       hf_dataset/              # snapshot of a9lim/llmoji (gitignored)
       claude_descriptions.jsonl
       claude_disclosure_pilot{,_summary}.{jsonl,tsv}
-      claude_faces_lexicon_bag.parquet            # pooled 48-d BoL,
+      claude_faces_lexicon_bag.parquet            # pooled 50-d BoL,
                                                   # lexicon_version-stamped
       claude_faces_lexicon_bag_per_source.parquet # long-format per-(face, source_model)
       haiku_face_quadrant_judgment{,_summary}.{jsonl,md}

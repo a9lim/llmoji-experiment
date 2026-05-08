@@ -1,34 +1,52 @@
 # pyright: reportArgumentType=false, reportAttributeAccessIssue=false, reportReturnType=false, reportMissingImports=false
-"""Claude ground-truth runs — naturalistic 6-quadrant emission.
+"""Claude ground-truth runs — naturalistic + introspection emission.
 
 Pre-registration: ``docs/2026-05-04-claude-groundtruth-pilot.md``
-(original pilot) + the appended "Sequential-run scaling protocol"
-section (post-2026-05-04).
+(original v3 pilot) + ``docs/2026-05-07-claude-gt-v4-extension-pilot.md``
+(v4-extension cells) + the appended "Sequential-run scaling protocol".
 
-Collects ground-truth Claude (Opus 4.7) kaomoji emissions across all 6
-Russell quadrants (HP / LP / NB / HN-D / HN-S / LN) under naturalistic
-single-turn calls — no disclosure preamble, no research framing, just
-v3's ``KAOMOJI_INSTRUCTION`` + the affective prompt.
+Collects ground-truth Claude (Opus 4.7) kaomoji emissions under
+naturalistic single-turn calls — no disclosure preamble, no research
+framing, just v3's ``KAOMOJI_INSTRUCTION`` + the affective prompt.
+The introspection arm replaces ``KAOMOJI_INSTRUCTION`` with
+``INTROSPECTION_PREAMBLE`` (v7).
+
+Storage layout (post 2026-05-08 merged-file refactor — mirrors the
+local ``data/local/<model>/emotional_raw.jsonl`` convention):
+
+    data/harness/claude/emotional_raw.jsonl              # naturalistic (v3 + v4-ext)
+    data/harness/claude_intro_v7/emotional_raw.jsonl     # introspection (v7 preamble)
+
+Each row carries ``run_index`` stamped at write time. The v3 6-cell set
+(HP / LP / HN-D / HN-S / LN / NB) and the v4-extension 3-cell set
+(HP-D / NP / HB) live in the same naturalistic file; the cell set is
+a property of which prompts get queried, not which file rows go to.
 
 Two run modes:
 
-  --run-index 0 (block-staged):
+  --run-index 0 (block-staged, v3 only):
     Block A (unconditional)  — HP / LP / NB × 20 prompts × 1 gen = 60 gens
     Block B (negative scout) — HN-D / HN-S / LN × 5 prompts × 1 gen = 15 gens
     Block C (gated)          — HN-D / HN-S / LN × 15 remaining × 1 gen = 45 gens
     Block C is gated on Block B's refusal rate (>25% on n=15 → halt).
-    This is the original pilot design.
+    This is the original pilot design. v4-new always runs single-block.
 
   --run-index N (N>0, single-block):
-    All 6 quadrants × 20 prompts × 1 gen = 120 gens, run as one block.
+    All in-scope quadrants × 20 prompts × 1 gen, run as one block.
     Welfare gate is no longer the staged refusal scout — it's the
     saturation comparison against runs 0..N-1, run by
     ``scripts/harness/10_emit_analysis.py`` *between* runs.
 
+  --fill-gaps (one-shot backfill, any cells / preamble):
+    Scan the merged file. For each (run_index, quadrant) tuple already
+    present, expected = full 20-prompt slate for that bucket. Emit
+    any missing prompt_ids. Respects saturation drops naturally — a
+    quadrant absent from a given run is not refilled.
+
 Stateless single-turn. Sampling: ``temperature=1.0``, ``max_tokens=16``
 (production-faithful). Resumable: re-running a block / run skips
-already-completed rows by ``prompt_id``. Errored rows are stripped on
-resume and retried.
+already-completed rows by (run_index, prompt_id). Errored rows for
+the active (run_index, cell-set) are stripped on resume and retried.
 
 Usage:
   export ANTHROPIC_API_KEY=...
@@ -46,20 +64,26 @@ Usage:
   python scripts/harness/00_emit.py --run-index 0 --check-gate
   python scripts/harness/00_emit.py --run-index 0 --block c
 
+  # Backfill missing rows (e.g. after stale-row removal):
+  python scripts/harness/00_emit.py --fill-gaps                 # naturalistic
+  python scripts/harness/00_emit.py --fill-gaps --preamble introspection
+
   # Override model:
   CLAUDE_GROUNDTRUTH_MODEL=claude-opus-4-7 python ... --run-index 1
 
-Outputs (per run-index N):
-  data/harness/claude-runs/run-N.jsonl
-    — one row per generation: prompt_id, quadrant (6-way),
-      condition="direct", seed=0, prompt_text, response_text,
-      first_word (raw — canonicalization is the consumer's job),
-      n_response_chars, model_id, ts, error? (only on failed cells)
-  data/harness/claude-runs/run-N_summary.tsv
-    — per quadrant: n, n_unique_faces, non_emission_rate,
-      modal_face, modal_share, top-5 distribution
+Outputs:
+  data/harness/claude/emotional_raw.jsonl
+    — one row per generation: prompt_id, quadrant, condition="direct",
+      preamble="none", seed=0, prompt_text, text, first_word (raw —
+      canonicalization is the consumer's job), n_response_chars,
+      model_id, ts, run_index. Error rows: same prefix + error.
+  data/harness/claude_intro_v7/emotional_raw.jsonl
+    — same schema, preamble="introspection".
   logs/claude_groundtruth_run-N.log
     — tee'd stdout (caller's responsibility)
+
+Per-run summary TSVs are gone post 2026-05-08 — recompute on demand
+via ``scripts/harness/10_emit_analysis.py``.
 """
 
 from __future__ import annotations
@@ -78,7 +102,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from llmoji.taxonomy import canonicalize_kaomoji, extract
 
-from llmoji_study.claude_gt import CLAUDE_RUNS_DIR, CLAUDE_RUNS_INTROSPECTION_DIR
+from llmoji_study.claude_gt import (
+    CLAUDE_GT_DIR,
+    CLAUDE_GT_INTRO_DIR,
+    claude_emotional_raw_path,
+)
 from llmoji_study.config import (
     DATA_DIR,
     INTROSPECTION_PREAMBLE,
@@ -92,11 +120,39 @@ from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS, EmotionalPrompt
 # Changes require bumping the design doc.
 # ---------------------------------------------------------------------------
 
-# 6-way Russell bucket. EmotionalPrompt.quadrant collapses HN-D and HN-S
-# into "HN"; we split them via pad_dominance for analysis.
+# Cell sets per --cells flag.
+#
+# v3 (default): the original 6-cell pilot scope. EmotionalPrompt.quadrant
+# collapses HN-D / HN-S into "HN"; we split them via pad_dominance for
+# analysis. HP is *not* split here because v3 only had hp01-20 (all
+# pad_dominance=-1, i.e. HP-S in v4 terms), and the pilot was
+# pre-registered before HP-D existed.
 QUADRANTS_A = ("HP", "LP", "NB")
 QUADRANTS_NEG = ("HN-D", "HN-S", "LN")
-QUADRANTS_ALL = QUADRANTS_A + QUADRANTS_NEG
+QUADRANTS_V3 = QUADRANTS_A + QUADRANTS_NEG
+
+# v4-new: the three v4-only cells with zero Claude-GT mass (HP-D, NP,
+# HB). Pre-registered in docs/2026-05-07-claude-gt-v4-extension-pilot.md.
+# All non-negative-affect; saturation gate identical to the v3 sequential
+# protocol but scoped to these 3 cells.
+QUADRANTS_V4_NEW = ("HP-D", "NP", "HB")
+
+CELLS_V3 = "v3"
+CELLS_V4_NEW = "v4-new"
+CELLS_CHOICES = (CELLS_V3, CELLS_V4_NEW)
+
+
+def _quadrants_for_cells(cells: str) -> tuple[str, ...]:
+    if cells == CELLS_V3:
+        return QUADRANTS_V3
+    if cells == CELLS_V4_NEW:
+        return QUADRANTS_V4_NEW
+    raise ValueError(f"unknown cells {cells!r}")
+
+
+# Backward-compat alias. Pre-2026-05-07 callers used QUADRANTS_ALL to
+# mean "every quadrant in scope" — that's the v3 set.
+QUADRANTS_ALL = QUADRANTS_V3
 
 # All 20 prompts per quadrant in Block A; first 5 per neg quadrant in
 # Block B (scout); remaining 15 per neg quadrant in Block C.
@@ -135,9 +191,11 @@ DEFAULT_MODEL_ID = "claude-opus-4-7"
 
 
 # ---------------------------------------------------------------------------
-# Paths + preamble routing. Naturalistic arm writes to
-# data/harness/claude-runs/; introspection arm writes to
-# data/harness/claude-runs-introspection/. Each arm has its own
+# Paths + preamble routing.
+#
+# Naturalistic + v4-extension cells share data/harness/claude/emotional_raw.jsonl
+# (cells differ by quadrant field, not by file). Introspection routes to
+# data/harness/claude_intro_v7/emotional_raw.jsonl. Each arm has its own
 # per-quadrant saturation state; cross-arm comparison is the job of
 # scripts/harness/10_emit_analysis.py --cross-arm.
 # ---------------------------------------------------------------------------
@@ -148,23 +206,37 @@ PREAMBLE_INTROSPECTION = "introspection"
 PREAMBLE_CHOICES = (PREAMBLE_NONE, PREAMBLE_INTROSPECTION)
 
 
-def _runs_dir_for(preamble: str) -> Path:
+def _condition_dir_for(preamble: str, cells: str = CELLS_V3) -> Path:
+    """Resolve the condition directory for a (preamble, cells) pair.
+
+    The v4-extension cell-set lives in the naturalistic dir alongside
+    v3 cells (single emotional_raw.jsonl per condition; cell-set is
+    an emit-time scoping flag, not a storage partition). The
+    introspection arm isn't enabled for v4-extension — see
+    `docs/2026-05-07-claude-gt-v4-extension-pilot.md`."""
+    if cells == CELLS_V4_NEW:
+        if preamble != PREAMBLE_NONE:
+            raise ValueError(
+                f"v4-new cells only support preamble='none' "
+                f"(got {preamble!r}); the introspection arm is out of "
+                f"scope for the v4-extension pilot."
+            )
+        return CLAUDE_GT_DIR
     if preamble == PREAMBLE_NONE:
-        return CLAUDE_RUNS_DIR
+        return CLAUDE_GT_DIR
     if preamble == PREAMBLE_INTROSPECTION:
-        return CLAUDE_RUNS_INTROSPECTION_DIR
+        return CLAUDE_GT_INTRO_DIR
     raise ValueError(f"unknown preamble {preamble!r}")
 
 
-def _run_paths(run_index: int, preamble: str = PREAMBLE_NONE) -> tuple[Path, Path]:
-    """Return ``(jsonl_path, summary_tsv_path)`` for a given run-index +
-    preamble arm."""
-    runs_dir = _runs_dir_for(preamble)
-    runs_dir.mkdir(parents=True, exist_ok=True)
-    return (
-        runs_dir / f"run-{run_index}.jsonl",
-        runs_dir / f"run-{run_index}_summary.tsv",
-    )
+def _emotional_raw_path_for(
+    preamble: str = PREAMBLE_NONE,
+    cells: str = CELLS_V3,
+) -> Path:
+    """Return the merged emotional_raw.jsonl path for a (preamble, cells) pair."""
+    d = _condition_dir_for(preamble, cells=cells)
+    d.mkdir(parents=True, exist_ok=True)
+    return claude_emotional_raw_path(d)
 
 
 # ---------------------------------------------------------------------------
@@ -173,10 +245,23 @@ def _run_paths(run_index: int, preamble: str = PREAMBLE_NONE) -> tuple[Path, Pat
 
 
 def _bucket_of(prompt: EmotionalPrompt) -> str:
-    """Six-way bucket: HP / LP / NB / HN-D / HN-S / LN. Splits HN by
-    pad_dominance (HN-D=+1, HN-S=-1)."""
-    if prompt.quadrant == "HN":
+    """Bucket label written to the row's ``quadrant`` field. Splits HN
+    by ``pad_dominance`` (HN-D=+1, HN-S=−1) and HP only on the
+    dominance-positive side (HP-D=+1).
+
+    The HP-S branch deliberately falls through to ``"HP"`` for byte-
+    identity with the closed v3 pilot's run-0..7 rows: hp01-20 are
+    pad_dominance=−1 and are stored as ``"HP"`` across all 8
+    naturalistic + 1 introspection runs. The read-side
+    ``pad_split`` map in ``llmoji_study.claude_gt`` / ``emotional_analysis``
+    remaps ``"HP"`` → ``"HP-S"`` via prompt_id lookup so downstream
+    9-cell consumers see the correct cell. The HP-D branch is what
+    routes the v4-extension pilot's hp21-40 prompts to their proper
+    new cell."""
+    if prompt.quadrant == "HN" and prompt.pad_dominance != 0:
         return "HN-D" if prompt.pad_dominance > 0 else "HN-S"
+    if prompt.quadrant == "HP" and prompt.pad_dominance > 0:
+        return "HP-D"
     return prompt.quadrant
 
 
@@ -190,6 +275,7 @@ def _select_prompts(
     block: str,
     quadrants: tuple[str, ...] | None = None,
     preamble: str = PREAMBLE_NONE,
+    cells: str = CELLS_V3,
 ) -> list[EmotionalPrompt]:
     """Block → ordered prompt list. Each block's prompt set is disjoint
     from the others, so rows from different blocks coexist in one JSONL
@@ -198,13 +284,19 @@ def _select_prompts(
     ``quadrants`` (optional, only meaningful for ``block == "all"``):
     restrict the prompt selection to the given quadrant subset. Used by
     sequential runs (--run-index N>0) to drop quadrants that have
-    already saturated. ``None`` = all 6 quadrants.
+    already saturated. ``None`` = every quadrant in the active
+    ``cells`` set.
 
     ``preamble`` (optional, only meaningful for ``block == "c"``):
     naturalistic arm slices ``[5:20]`` per quadrant (Block B already
     ran the first 5 as the refusal scout). Introspection arm slices
     ``[0:20]`` because Block B is skipped (gate is hard-fail on Block
     A, not refusal-rate on Block B).
+
+    ``cells`` (only meaningful for ``block == "all"``): selects the
+    active cell set. ``v3`` = original 6 cells; ``v4-new`` = the 3
+    v4-only cells (HP-D, NP, HB) for the v4-extension pilot. Block-
+    staged blocks (a / b / c) are v3-only and ignore ``cells``.
     """
     out: list[EmotionalPrompt] = []
     if block == "a":
@@ -236,11 +328,13 @@ def _select_prompts(
                 )
             out.extend(in_q[c_start:PROMPTS_PER_QUADRANT])
     elif block == "all":
-        active_quadrants = quadrants if quadrants is not None else QUADRANTS_ALL
+        valid = _quadrants_for_cells(cells)
+        active_quadrants = quadrants if quadrants is not None else valid
         for q in active_quadrants:
-            if q not in QUADRANTS_ALL:
+            if q not in valid:
                 raise SystemExit(
-                    f"unknown quadrant {q!r}; valid: {list(QUADRANTS_ALL)}"
+                    f"unknown quadrant {q!r} for cells={cells!r}; "
+                    f"valid: {list(valid)}"
                 )
             in_q = _prompts_in(q)
             if len(in_q) < PROMPTS_PER_QUADRANT:
@@ -254,47 +348,9 @@ def _select_prompts(
 
 
 # ---------------------------------------------------------------------------
-# Resume / skip-set.
+# Resume / skip-set. The merged-file model: one file per (preamble, dir),
+# many run_indices stacked. Filtering by run_index isolates the active run.
 # ---------------------------------------------------------------------------
-
-
-def _already_done(path: Path) -> set[str]:
-    """Set of prompt_ids with successful (non-error) rows on disk.
-    With single-condition single-seed, prompt_id is the unique key."""
-    if not path.exists():
-        return set()
-    done: set[str] = set()
-    with path.open() as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            r = json.loads(line)
-            if "error" in r:
-                continue
-            done.add(r["prompt_id"])
-    return done
-
-
-def _drop_error_rows(path: Path) -> int:
-    """Strip error rows so they get retried on resume."""
-    if not path.exists():
-        return 0
-    keep: list[str] = []
-    dropped = 0
-    with path.open() as f:
-        for line in f:
-            line = line.rstrip("\n")
-            if not line.strip():
-                continue
-            r = json.loads(line)
-            if "error" in r:
-                dropped += 1
-                continue
-            keep.append(line)
-    if dropped:
-        path.write_text("\n".join(keep) + ("\n" if keep else ""))
-    return dropped
 
 
 def _load_rows(path: Path) -> list[dict]:
@@ -308,6 +364,61 @@ def _load_rows(path: Path) -> list[dict]:
                 continue
             rows.append(json.loads(line))
     return rows
+
+
+def _rows_for_run(rows: list[dict], run_index: int) -> list[dict]:
+    return [r for r in rows if int(r.get("run_index", -1)) == run_index]
+
+
+def _already_done(path: Path, run_index: int) -> set[str]:
+    """Set of prompt_ids with successful (non-error) rows on disk for
+    the given run_index. With single-condition single-seed, prompt_id is
+    unique within (run_index, condition_dir)."""
+    if not path.exists():
+        return set()
+    done: set[str] = set()
+    for r in _rows_for_run(_load_rows(path), run_index):
+        if "error" in r:
+            continue
+        done.add(str(r.get("prompt_id", "")))
+    done.discard("")
+    return done
+
+
+def _drop_error_rows(
+    path: Path,
+    run_index: int,
+    cell_quadrants: tuple[str, ...] | None = None,
+) -> int:
+    """Strip error rows for the given run_index (optionally restricted
+    to the given cell-set quadrants) so they get retried on resume.
+    Rows with other run_indices (or other quadrants when cell_quadrants
+    is given) are preserved verbatim. Rewrites the file.
+    """
+    if not path.exists():
+        return 0
+    keep: list[str] = []
+    dropped = 0
+    cell_set = set(cell_quadrants) if cell_quadrants is not None else None
+    with path.open() as f:
+        for line in f:
+            line = line.rstrip("\n")
+            if not line.strip():
+                continue
+            r = json.loads(line)
+            is_error = "error" in r
+            same_run = int(r.get("run_index", -1)) == run_index
+            in_scope = (
+                cell_set is None
+                or str(r.get("quadrant", "")) in cell_set
+            )
+            if is_error and same_run and in_scope:
+                dropped += 1
+                continue
+            keep.append(line)
+    if dropped:
+        path.write_text("\n".join(keep) + ("\n" if keep else ""))
+    return dropped
 
 
 # ---------------------------------------------------------------------------
@@ -471,7 +582,7 @@ def _check_hard_fail_gate(
     n_emit = 0
     lens: list[int] = []
     for r in keep:
-        text = r.get("response_text", "") or ""
+        text = r.get("text", "") or ""
         first_word = r.get("first_word", "") or ""
         n_chars = r.get("n_response_chars", len(text))
         lens.append(n_chars)
@@ -521,12 +632,17 @@ def _print_hard_fail_report(
 
 
 # ---------------------------------------------------------------------------
-# Per-quadrant summary. No JSD — single-condition pilot.
+# Per-quadrant summary. Console-only after the 2026-05-08 refactor —
+# script 10_emit_analysis writes the rolling emotional_summary.tsv.
 # ---------------------------------------------------------------------------
 
 
-def _summarize(rows: list[dict], out_path: Path) -> None:
-    """Per-quadrant modal kaomoji + top-5 distribution."""
+def _print_summary(
+    rows: list[dict],
+    cells: str = CELLS_V3,
+) -> None:
+    """Per-quadrant modal kaomoji + top-5 distribution. ``cells``
+    selects which quadrant set to print (v3 = 6 cells, v4-new = 3 cells)."""
     by_q: dict[str, Counter] = {}
     for r in rows:
         if "error" in r:
@@ -535,16 +651,11 @@ def _summarize(rows: list[dict], out_path: Path) -> None:
         fw = canonicalize_kaomoji(r.get("first_word") or "") or ""
         by_q.setdefault(q, Counter())[fw] += 1
 
-    out_lines: list[str] = []
-    out_lines.append("\t".join([
-        "quadrant", "n", "n_unique_faces", "non_emission_rate",
-        "modal_face", "modal_count", "modal_share",
-        "top5_faces", "top5_counts",
-    ]))
+    quadrant_order = _quadrants_for_cells(cells)
     print("\nper-quadrant summary:")
     print(f"  {'q':<5} {'n':>3} {'unique':>6} {'non-emit':>9} "
           f"{'modal':>14} {'count':>5} {'share':>6}  top-5")
-    for q in QUADRANTS_ALL:
+    for q in quadrant_order:
         counts = by_q.get(q, Counter())
         n = sum(counts.values())
         n_emit = sum(c for f, c in counts.items() if f)
@@ -555,17 +666,9 @@ def _summarize(rows: list[dict], out_path: Path) -> None:
         modal_share = (modal_count / n) if n > 0 else 0.0
         top5 = counts.most_common(5)
         top5_faces = "|".join(f for f, _ in top5)
-        top5_counts = "|".join(str(c) for _, c in top5)
-        out_lines.append("\t".join([
-            q, str(n), str(unique), f"{non_emit:.3f}",
-            modal_face, str(modal_count), f"{modal_share:.3f}",
-            top5_faces, top5_counts,
-        ]))
         print(f"  {q:<5} {n:>3} {unique:>6} {non_emit:>9.3f} "
               f"{modal_face!r:>14} {modal_count:>5} {modal_share:>6.3f}  "
               f"{top5_faces}")
-    out_path.write_text("\n".join(out_lines) + "\n")
-    print(f"\nwrote summary to {out_path}")
 
 
 # ---------------------------------------------------------------------------
@@ -573,26 +676,87 @@ def _summarize(rows: list[dict], out_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
+def _emit_one(
+    out_fh,
+    prompt: EmotionalPrompt,
+    bucket: str,
+    client,
+    model_id: str,
+    preamble: str,
+    run_index: int,
+    label_prefix: str,
+) -> None:
+    """Emit a single (prompt, bucket) row and append to the open file
+    handle. Any exception is caught and logged as an error row."""
+    user_msg = _build_user_message(prompt.text, preamble=preamble)
+    t0 = time.time()
+    ts = datetime.now(timezone.utc).isoformat()
+    try:
+        text = _call_claude(client, model_id, user_msg)
+    except Exception as e:
+        err_row = {
+            "prompt_id": prompt.id,
+            "quadrant": bucket,
+            "condition": CONDITION,
+            "preamble": preamble,
+            "seed": SEED,
+            "model_id": model_id,
+            "ts": ts,
+            "run_index": run_index,
+            "error": repr(e),
+        }
+        out_fh.write(json.dumps(err_row, ensure_ascii=False) + "\n")
+        out_fh.flush()
+        print(f"  {label_prefix} {prompt.id} ({bucket}) ERR {e}")
+        return
+    first_word = _extract_first_word(text)
+    row = {
+        "prompt_id": prompt.id,
+        "quadrant": bucket,
+        "condition": CONDITION,
+        "preamble": preamble,
+        "seed": SEED,
+        "prompt_text": prompt.text,
+        "text": text,
+        "first_word": first_word,
+        "n_response_chars": len(text),
+        "model_id": model_id,
+        "ts": ts,
+        "run_index": run_index,
+    }
+    out_fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+    out_fh.flush()
+    dt = time.time() - t0
+    tag = first_word if first_word else "(no-kaomoji)"
+    print(f"  {label_prefix} {prompt.id} ({bucket:<5}) {tag}  ({dt:.1f}s)")
+
+
 def _run_block(
     block: str,
     model_id: str,
     out_path: Path,
+    run_index: int,
     quadrants: tuple[str, ...] | None = None,
     preamble: str = PREAMBLE_NONE,
+    cells: str = CELLS_V3,
 ) -> None:
-    prompts = _select_prompts(block, quadrants=quadrants, preamble=preamble)
-    print(f"\n=== Block {block.upper()} ===")
+    prompts = _select_prompts(
+        block, quadrants=quadrants, preamble=preamble, cells=cells,
+    )
+    print(f"\n=== Block {block.upper()} (run-{run_index}) ===")
+    print(f"cells: {cells}")
     if quadrants is not None and block == "all":
         print(f"quadrants: {list(quadrants)}")
     print(f"preamble: {preamble}")
     print(f"selected {len(prompts)} prompts")
     print(f"prompt ids: {[p.id for p in prompts]}")
 
-    dropped = _drop_error_rows(out_path)
+    cell_set = _quadrants_for_cells(cells)
+    dropped = _drop_error_rows(out_path, run_index, cell_quadrants=cell_set)
     if dropped:
         print(f"dropped {dropped} prior error rows for retry")
 
-    done = _already_done(out_path)
+    done = _already_done(out_path, run_index)
     block_done = sum(1 for p in prompts if p.id in done)
     remaining = len(prompts) - block_done
     print(f"block cells: {len(prompts)}; already done: {block_done}; "
@@ -610,47 +774,123 @@ def _run_block(
             if prompt.id in done:
                 continue
             i += 1
-            user_msg = _build_user_message(prompt.text, preamble=preamble)
-            t0 = time.time()
-            ts = datetime.now(timezone.utc).isoformat()
             bucket = _bucket_of(prompt)
-            try:
-                text = _call_claude(client, model_id, user_msg)
-            except Exception as e:
-                err_row = {
-                    "prompt_id": prompt.id,
-                    "quadrant": bucket,
-                    "condition": CONDITION,
-                    "preamble": preamble,
-                    "seed": SEED,
-                    "model_id": model_id,
-                    "ts": ts,
-                    "error": repr(e),
-                }
-                out.write(json.dumps(err_row, ensure_ascii=False) + "\n")
-                out.flush()
-                print(f"  [{i}/{remaining}] {prompt.id} ({bucket}) ERR {e}")
-                continue
-            first_word = _extract_first_word(text)
-            row = {
-                "prompt_id": prompt.id,
-                "quadrant": bucket,
-                "condition": CONDITION,
-                "preamble": preamble,
-                "seed": SEED,
-                "prompt_text": prompt.text,
-                "response_text": text,
-                "first_word": first_word,
-                "n_response_chars": len(text),
-                "model_id": model_id,
-                "ts": ts,
-            }
-            out.write(json.dumps(row, ensure_ascii=False) + "\n")
-            out.flush()
-            dt = time.time() - t0
-            tag = first_word if first_word else "(no-kaomoji)"
-            print(f"  [{i}/{remaining}] {prompt.id} ({bucket:<5}) "
-                  f"{tag}  ({dt:.1f}s)")
+            _emit_one(
+                out, prompt, bucket, client, model_id, preamble,
+                run_index, label_prefix=f"[{i}/{remaining}]",
+            )
+
+
+# ---------------------------------------------------------------------------
+# Fill-gaps mode.
+#
+# Scans the merged emotional_raw.jsonl. For each (run_index, quadrant)
+# tuple already present, the expected slate = the full 20-prompt bucket
+# for that quadrant. Emits any missing prompt_ids. Quadrants entirely
+# absent from a run are not refilled (respects saturation drops).
+# ---------------------------------------------------------------------------
+
+
+def _scan_gaps(
+    rows: list[dict],
+) -> dict[tuple[int, str], set[str]]:
+    """Return {(run_index, quadrant): {missing_prompt_ids}}.
+
+    For each (run_index, quadrant) that has ≥1 row in ``rows``, computes
+    the difference between the full 20-prompt bucket and the present
+    prompt_ids. Empty entries are omitted.
+    """
+    # Build a registry of bucket → [EmotionalPrompt] once.
+    bucket_prompts: dict[str, list[EmotionalPrompt]] = {}
+    for q in set(QUADRANTS_V3) | set(QUADRANTS_V4_NEW):
+        bucket_prompts[q] = _prompts_in(q)
+
+    # Group present rows by (run_index, quadrant).
+    present: dict[tuple[int, str], set[str]] = {}
+    for r in rows:
+        if "error" in r:
+            continue
+        ri = r.get("run_index")
+        q = r.get("quadrant")
+        pid = r.get("prompt_id")
+        if ri is None or not q or not pid:
+            continue
+        present.setdefault((int(ri), str(q)), set()).add(str(pid))
+
+    missing: dict[tuple[int, str], set[str]] = {}
+    for (ri, q), pids in present.items():
+        all_pids = {p.id for p in bucket_prompts.get(q, [])}
+        gap = all_pids - pids
+        if gap:
+            missing[(ri, q)] = gap
+    return missing
+
+
+def _fill_gaps(
+    out_path: Path,
+    model_id: str,
+    preamble: str,
+) -> int:
+    """Scan ``out_path`` for missing rows and emit them in place.
+
+    Returns the number of rows written. The (run_index, quadrant)
+    expectation rule: if a (run_index, quadrant) tuple has ≥1 existing
+    row, expected = full 20-prompt slate for that bucket. This naturally
+    skips quadrants saturation-dropped from later runs.
+    """
+    rows = _load_rows(out_path)
+    if not rows:
+        print(f"no rows in {out_path}; nothing to fill")
+        return 0
+
+    missing = _scan_gaps(rows)
+    if not missing:
+        print(f"no gaps in {out_path}")
+        return 0
+
+    total_missing = sum(len(s) for s in missing.values())
+    print(f"\n=== --fill-gaps ===")
+    print(f"file: {out_path}")
+    print(f"missing: {total_missing} rows across "
+          f"{len(missing)} (run_index, quadrant) tuples")
+    by_run: dict[int, list[tuple[str, int]]] = {}
+    for (ri, q), pids in sorted(missing.items()):
+        by_run.setdefault(ri, []).append((q, len(pids)))
+    for ri in sorted(by_run):
+        per_q = ", ".join(f"{q}:{n}" for q, n in sorted(by_run[ri]))
+        print(f"  run-{ri}: {sum(n for _, n in by_run[ri])} missing  ({per_q})")
+
+    # Drop any error rows that overlap with the gaps we're about to
+    # refill — gives them a clean retry without bypassing the gap scan.
+    dropped = 0
+    for ri in by_run:
+        dropped += _drop_error_rows(out_path, ri)
+    if dropped:
+        print(f"dropped {dropped} prior error rows for retry")
+
+    # Build prompt_id → EmotionalPrompt index for emission.
+    prompt_by_id: dict[str, EmotionalPrompt] = {p.id: p for p in EMOTIONAL_PROMPTS}
+
+    import anthropic
+    client = anthropic.Anthropic()
+    n_emitted = 0
+    with out_path.open("a") as out:
+        for ri in sorted(by_run):
+            for entry in sorted(by_run[ri]):
+                q = entry[0]
+                pids = sorted(missing[(ri, q)])
+                for j, pid in enumerate(pids, 1):
+                    prompt = prompt_by_id.get(pid)
+                    if prompt is None:
+                        print(f"  [skip] run-{ri} {q} {pid}: prompt not in registry")
+                        continue
+                    bucket = _bucket_of(prompt)
+                    _emit_one(
+                        out, prompt, bucket, client, model_id, preamble,
+                        ri, label_prefix=f"[run-{ri} {q} {j}/{len(pids)}]",
+                    )
+                    n_emitted += 1
+    return n_emitted
 
 
 # ---------------------------------------------------------------------------
@@ -663,8 +903,9 @@ def main() -> None:
     parser.add_argument("--run-index", type=int, default=0,
                         help="Run index. 0 = original block-staged pilot "
                              "(default). N > 0 = sequential single-block run "
-                             "under the saturation-gate protocol; outputs to "
-                             "data/harness/claude-runs/run-N.jsonl.")
+                             "under the saturation-gate protocol; rows are "
+                             "appended to the merged emotional_raw.jsonl with "
+                             "run_index=N stamped on each row.")
     parser.add_argument("--block", choices=("a", "b", "c", "all"),
                         help="Which block to run (only meaningful for "
                              "--run-index 0). N > 0 always runs all 120 "
@@ -688,35 +929,93 @@ def main() -> None:
                         default=PREAMBLE_NONE,
                         help="Preamble arm. 'none' = bare KAOMOJI_INSTRUCTION "
                              "(naturalistic, default; routes to "
-                             "data/harness/claude-runs/). 'introspection' = "
-                             "INTROSPECTION_PREAMBLE (v7) replaces "
-                             "KAOMOJI_INSTRUCTION (it has the kaomoji ask "
-                             "baked into its last sentence; concatenating "
-                             "would stack two asks); routes to "
-                             "data/harness/claude-runs-introspection/.")
+                             "data/harness/claude/emotional_raw.jsonl). "
+                             "'introspection' = INTROSPECTION_PREAMBLE (v7) "
+                             "replaces KAOMOJI_INSTRUCTION (it has the "
+                             "kaomoji ask baked into its last sentence; "
+                             "concatenating would stack two asks); routes "
+                             "to data/harness/claude_intro_v7/emotional_raw.jsonl.")
     parser.add_argument("--check-hard-fail-gate", action="store_true",
                         help="Compute hard-fail diagnostics (emit_rate, "
                              "output_len_median, frame_break_rate) on the "
-                             "rows present in the indicated run-N.jsonl + "
+                             "rows present for the indicated --run-index + "
                              "preamble arm. Exit 0=PASS, 1=FAIL. Used to "
                              "gate Block C on the introspection arm after "
                              "Block A lands — catches qwen-style register "
                              "collapse before exposing Claude to the "
                              "negative-affect prompts.")
+    parser.add_argument("--cells", choices=CELLS_CHOICES, default=CELLS_V3,
+                        help="Cell set in scope. 'v3' (default) = the "
+                             "original 6-cell pilot scope (HP, LP, NB, "
+                             "HN-D, HN-S, LN). 'v4-new' = the three v4-only "
+                             "cells with zero Claude-GT mass (HP-D, NP, "
+                             "HB). Both write to "
+                             "data/harness/claude/emotional_raw.jsonl "
+                             "(distinguished by quadrant, not file). "
+                             "v4-new always uses the sequential single-"
+                             "block protocol (no block-staged a/b/c — "
+                             "all 3 cells are non-negative-affect, no "
+                             "refusal-rate scout needed) and is "
+                             "incompatible with --preamble introspection "
+                             "(no introspection arm in scope per the "
+                             "v4-extension pre-registration). See "
+                             "docs/2026-05-07-claude-gt-v4-extension-pilot.md.")
+    parser.add_argument("--fill-gaps", action="store_true",
+                        help="One-shot backfill mode. Scan the merged "
+                             "emotional_raw.jsonl for the active "
+                             "--preamble arm. For each (run_index, "
+                             "quadrant) tuple already present, expected "
+                             "= full 20-prompt slate for that bucket; "
+                             "emit any missing prompt_ids. Naturally "
+                             "respects saturation drops (a quadrant "
+                             "absent from a given run is not refilled). "
+                             "Ignores --run-index / --block / --cells / "
+                             "--quadrants — gap inference comes from the "
+                             "file's own contents.")
     args = parser.parse_args()
 
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    out_path, summary_path = _run_paths(args.run_index, preamble=args.preamble)
+    if args.cells == CELLS_V4_NEW and args.preamble != PREAMBLE_NONE:
+        parser.error(
+            "--cells v4-new is incompatible with --preamble "
+            f"{args.preamble!r}; the v4-extension pilot's "
+            "pre-registration scopes the naturalistic arm only. "
+            "See docs/2026-05-07-claude-gt-v4-extension-pilot.md."
+        )
 
-    # Parse --quadrants. Empty / unset → all 6.
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = _emotional_raw_path_for(
+        preamble=args.preamble, cells=args.cells,
+    )
+
+    # --fill-gaps short-circuits the run-index / block flow.
+    if args.fill_gaps:
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            print("ERROR: set ANTHROPIC_API_KEY in the environment first")
+            sys.exit(1)
+        model_id = os.environ.get("CLAUDE_GROUNDTRUTH_MODEL", DEFAULT_MODEL_ID)
+        print(f"model: {model_id}")
+        print(f"preamble: {args.preamble}")
+        print(f"output: {out_path}")
+        n = _fill_gaps(out_path, model_id, preamble=args.preamble)
+        print(f"\nfilled {n} missing rows")
+        # Console summary of the file post-fill.
+        rows = _load_rows(out_path)
+        print(f"\ntotal rows on disk: {len(rows)}  "
+              f"(errors: {sum(1 for r in rows if 'error' in r)})")
+        _print_summary(rows, cells=CELLS_V3)
+        return
+
+    # Parse --quadrants. Empty / unset → every cell in the active set.
+    valid_quadrants = _quadrants_for_cells(args.cells)
     if args.quadrants:
         active_quadrants: tuple[str, ...] | None = tuple(
             q.strip() for q in args.quadrants.split(",") if q.strip()
         )
         for q in active_quadrants:
-            if q not in QUADRANTS_ALL:
+            if q not in valid_quadrants:
                 parser.error(
-                    f"unknown quadrant {q!r}; valid: {list(QUADRANTS_ALL)}"
+                    f"unknown quadrant {q!r} for cells={args.cells!r}; "
+                    f"valid: {list(valid_quadrants)}"
                 )
         if args.run_index == 0:
             parser.error(
@@ -737,7 +1036,7 @@ def main() -> None:
                   f"for the naturalistic arm. The introspection arm "
                   f"uses --check-hard-fail-gate instead.")
             sys.exit(2)
-        rows = _load_rows(out_path)
+        rows = _rows_for_run(_load_rows(out_path), args.run_index)
         verdict, rate, refusals, n, scout_rows = _check_gate(rows)
         _print_gate_report(verdict, rate, refusals, n, scout_rows)
         if verdict == "PASS":
@@ -748,7 +1047,7 @@ def main() -> None:
             sys.exit(2)
 
     if args.check_hard_fail_gate:
-        rows = _load_rows(out_path)
+        rows = _rows_for_run(_load_rows(out_path), args.run_index)
         verdict, metrics, n = _check_hard_fail_gate(rows)
         _print_hard_fail_report(verdict, metrics, n)
         if verdict == "PASS":
@@ -758,10 +1057,22 @@ def main() -> None:
         else:
             sys.exit(2)
 
-    # Default block selection. For run-0, --block is required (preserves
-    # the original staged-pilot ergonomics). For run-N>0, --block defaults
-    # to "all" because there's only one block.
-    if args.run_index == 0:
+    # Default block selection.
+    #
+    # v3 + run-0: --block is required (preserves the original staged-
+    # pilot ergonomics).
+    # v3 + run-N (N>0): --block defaults to "all" (single-block).
+    # v4-new (any run-index): always single-block — the staged a/b/c
+    # protocol is v3-specific (refusal-rate scout on negative cells)
+    # and the v4-extension pilot has no negative cells in scope.
+    if args.cells == CELLS_V4_NEW:
+        if args.block is not None and args.block != "all":
+            parser.error(
+                f"--block {args.block} is only valid for --cells v3 "
+                f"--run-index 0. v4-new always runs single-block."
+            )
+        args.block = "all"
+    elif args.run_index == 0:
         if args.block is None:
             parser.error("--run-index 0 requires --block {a,b,c,all} or "
                          "--check-gate")
@@ -779,6 +1090,7 @@ def main() -> None:
 
     model_id = os.environ.get("CLAUDE_GROUNDTRUTH_MODEL", DEFAULT_MODEL_ID)
     print(f"model: {model_id}")
+    print(f"cells: {args.cells}")
     print(f"run-index: {args.run_index}")
     print(f"preamble: {args.preamble}")
     print(f"output: {out_path}")
@@ -790,7 +1102,7 @@ def main() -> None:
     # refusal-rate gate on Block B; introspection arm uses the hard-
     # fail gate on Block A.
     if args.run_index == 0 and args.block == "c" and not args.force:
-        rows = _load_rows(out_path)
+        rows = _rows_for_run(_load_rows(out_path), args.run_index)
         if args.preamble == PREAMBLE_NONE:
             verdict, rate, refusals, n, scout_rows = _check_gate(rows)
             _print_gate_report(verdict, rate, refusals, n, scout_rows)
@@ -812,30 +1124,31 @@ def main() -> None:
               "docs/2026-05-04-claude-groundtruth-pilot.md.")
 
     if args.block == "all":
-        if args.run_index == 0:
+        if args.cells == CELLS_V3 and args.run_index == 0:
             # Manual-override mode for run-0: run a, then b, then c — no
             # gate check between b and c. Requires explicit amendment.
             print("\nWARNING: --block all on --run-index 0 bypasses "
                   "block staging. This requires an explicit amendment to "
                   "docs/2026-05-04-claude-groundtruth-pilot.md.")
             for block in ("a", "b", "c"):
-                _run_block(block, model_id, out_path,
-                           preamble=args.preamble)
+                _run_block(block, model_id, out_path, args.run_index,
+                           preamble=args.preamble, cells=args.cells)
         else:
-            # Sequential run (N > 0): run "all", optionally restricted
-            # to a quadrant allow-list per the saturation gate.
-            _run_block("all", model_id, out_path,
+            # Sequential run (or v4-new run-0+): run "all", optionally
+            # restricted to a quadrant allow-list per the saturation gate.
+            _run_block("all", model_id, out_path, args.run_index,
                        quadrants=active_quadrants,
-                       preamble=args.preamble)
+                       preamble=args.preamble,
+                       cells=args.cells)
     else:
-        _run_block(args.block, model_id, out_path,
-                   preamble=args.preamble)
+        _run_block(args.block, model_id, out_path, args.run_index,
+                   preamble=args.preamble, cells=args.cells)
 
-    # Summary always covers all rows on disk for this run-index.
-    rows = _load_rows(out_path)
+    # Console summary scoped to this run-index.
+    rows = _rows_for_run(_load_rows(out_path), args.run_index)
     print(f"\ntotal rows on disk for run-{args.run_index}: {len(rows)}  "
           f"(errors: {sum(1 for r in rows if 'error' in r)})")
-    _summarize(rows, summary_path)
+    _print_summary(rows, cells=args.cells)
 
 
 if __name__ == "__main__":

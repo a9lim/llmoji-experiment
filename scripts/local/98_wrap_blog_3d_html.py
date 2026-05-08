@@ -248,7 +248,7 @@ def wrap_procrustes(raw_path: Path, out_path: Path, overlay_scene: str = "scene6
     scene.bgcolor = 'rgba(0,0,0,0)';
     scene.domain = {{ x: [0, 1], y: [0, 1] }};
     scene.aspectmode = 'cube';
-    scene.camera = {{ eye: {{ x: 1.5, y: 1.5, z: 1.35 }} }};
+    scene.camera = {{ eye: {{ x: 1.85, y: 1.85, z: 1.65 }} }};
     ['xaxis', 'yaxis', 'zaxis'].forEach(function(ax) {{
       if (!scene[ax]) scene[ax] = {{}};
       scene[ax].gridcolor = c.grid;
@@ -319,18 +319,12 @@ def wrap_procrustes(raw_path: Path, out_path: Path, overlay_scene: str = "scene6
     print(f"  wrote {out_path}")
 
 
-# Quadrant colors for the wild-faces legend bar. Pulled from
-# llmoji_study.emotional_analysis.QUADRANT_COLORS so the static legend
+# Quadrant colors for the wild-faces legend bar. Sourced from the
+# canonical ``llmoji_study.quadrants`` module so the static legend
 # matches the per-face proportional-blend colors plotly draws.
-WILD_QUADRANTS = ("HP", "LP", "HN-D", "HN-S", "LN", "NB")
-WILD_QUADRANT_COLORS = {
-    "HP":   "#998700",
-    "LP":   "#009F68",
-    "HN-D": "#DA534F",
-    "HN-S": "#9769DC",
-    "LN":   "#0091C9",
-    "NB":   "#808696",
-}
+from llmoji_study.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT  # noqa: E402
+WILD_QUADRANTS = QUADRANT_ORDER_SPLIT
+WILD_QUADRANT_COLORS = {q: QUADRANT_COLORS[q] for q in WILD_QUADRANTS}
 # Surface marker shapes match the plotly markers script 67 emits:
 # circle = Claude Code journal only, diamond = any claude.ai export,
 # square = neither (HF corpus only, from another contributor).
@@ -400,7 +394,7 @@ def wrap_wild_faces(raw_path: Path, out_path: Path) -> None:
     scene.bgcolor = 'rgba(0,0,0,0)';
     scene.domain = {{ x: [0, 1], y: [0, 1] }};
     scene.aspectmode = 'cube';
-    scene.camera = {{ eye: {{ x: 1.5, y: 1.5, z: 1.35 }} }};
+    scene.camera = {{ eye: {{ x: 1.85, y: 1.85, z: 1.65 }} }};
     ['xaxis', 'yaxis', 'zaxis'].forEach(function(ax) {{
       if (!scene[ax]) scene[ax] = {{}};
       scene[ax].gridcolor = c.grid;
@@ -531,7 +525,7 @@ def wrap_per_face(raw_path: Path, out_path: Path, subtitles: list[str]) -> None:
     scene.bgcolor = 'rgba(0,0,0,0)';
     scene.domain = {{ x: [0, 1], y: [0, 1] }};
     scene.aspectmode = 'cube';
-    scene.camera = {{ eye: {{ x: 1.5, y: 1.5, z: 1.35 }} }};
+    scene.camera = {{ eye: {{ x: 1.85, y: 1.85, z: 1.65 }} }};
     ['xaxis', 'yaxis', 'zaxis'].forEach(function(ax) {{
       if (!scene[ax]) scene[ax] = {{}};
       scene[ax].gridcolor = c.grid;

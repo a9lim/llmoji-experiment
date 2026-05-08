@@ -1,6 +1,6 @@
 """Bag-of-lexicon (BoL) PCA chart of Claude's kaomoji vocabulary.
 
-Reads the 48-d per-canonical-kaomoji BoL parquet from script 62
+Reads the 50-d per-canonical-kaomoji BoL parquet from script 62
 (structured commit over the locked llmoji v2 LEXICON), fits PCA on
 those 48 dims, and plots a 2D scatter.
 
@@ -208,7 +208,7 @@ def main() -> None:
             "(extension-only picks)"
         )
 
-    print("fitting PCA(2) on 48-d BoL...")
+    print("fitting PCA(2) on 50-d BoL...")
     pca = PCA(n_components=2)
     coords = pca.fit_transform(B)
     var = pca.explained_variance_ratio_

@@ -32,9 +32,12 @@ import numpy as np
 
 from llmoji_study.config import DATA_DIR, MODEL_REGISTRY
 from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
+from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
 
 MODELS = ["gemma", "qwen"]
-QUADRANTS = ["HP", "LP", "HN-D", "HN-S", "LN", "NB"]
+# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# source of truth shared with figures, JSD math, and the BoL projection.
+QUADRANTS = list(QUADRANT_ORDER_SPLIT)
 
 JACCARD_FAIL = 0.6
 DELTA_H_FAIL = 0.5

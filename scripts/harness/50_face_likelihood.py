@@ -4,8 +4,9 @@ the Claude-GT subset).
 
 Asks a Claude model (Haiku or Opus, configurable) to classify each
 kaomoji from ``data/v3_face_union.parquet`` (or, with ``--gt-only``,
-just the Claude-GT subset) into one of the 6 Russell quadrants
-(HP / LP / HN-D / HN-S / LN / NB), then compares the model's judgment
+just the Claude-GT subset) into one of the v4 9 Russell-circumplex
+cells (HP-D / HP-S / LP / NP / HN-D / HN-S / LN / NB / HB),
+then compares the model's judgment
 to the behavior-derived modal (argmax of per-quadrant emit counts in
 the union) and — for the Claude-pilot subset — to Claude's own
 emission modal. When a previous run with the *other* model's
@@ -23,8 +24,8 @@ can also see how introspection sharpness scales with model size.
 
 Sampling: ``temperature=0`` for reproducibility (introspection task,
 not a generation task — we want consistent labels, not diverse ones).
-``max_tokens=250`` is enough for the JSON {quadrant, confidences (6
-floats), reason (1 sentence)} payload.
+``max_tokens=180`` is enough for the JSON {likelihoods: {9 floats}}
+payload (was 120 under the v3 6-cell taxonomy).
 Prompt-caches the system prompt (~250 tokens of taxonomy) — only the
 face changes per call.
 
@@ -50,7 +51,7 @@ Outputs (paths adapt to ``--model``):
   data/harness/<short>_face_quadrant_judgment.jsonl
     — one row per face: face, <short>_quadrant (DERIVED argmax of
       likelihoods, not model-emitted), <short>_top_likelihood,
-      <short>_lik_HP/LP/HN-D/HN-S/LN/NB, behavior_modal,
+      <short>_lik_HP-D/HP-S/LP/NP/HN-D/HN-S/LN/NB/HB, behavior_modal,
       behavior_count_top, behavior_count_total, is_claude, is_wild,
       model_id, ts, error? (only on failed cells)
     Field-name prefix tracks the shortname so haiku/opus JSONLs have
@@ -111,9 +112,14 @@ MODEL_DEFAULTS: dict[str, tuple[str, str]] = {
 DEFAULT_SHORT = "haiku"
 
 TEMPERATURE = 0.0  # reproducible labels (when supported)
-MAX_TOKENS = 120   # JSON {likelihoods: {6 floats}} — much smaller than v1's
-                   # {quadrant, confidences (6 floats), reason} payload.
-QUADRANTS = ("HP", "LP", "HN-D", "HN-S", "LN", "NB")
+MAX_TOKENS = 180   # JSON {likelihoods: {9 floats}} — was 120 under the v3
+                   # 6-cell taxonomy; bumped 2026-05-07 for v4's 9 cells
+                   # (HP-D / HP-S / NP / HB additions). Still much smaller
+                   # than v1's {quadrant, confidences, reason} payload.
+# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# source of truth shared with figures, JSD math, and the BoL projection.
+from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
+QUADRANTS = QUADRANT_ORDER_SPLIT
 QUADRANT_SET = set(QUADRANTS)
 
 # Models that have deprecated the ``temperature`` request parameter.
@@ -143,18 +149,21 @@ def _out_paths(short: str) -> tuple[Path, Path, Path]:
 # Prompt design. System prompt is cacheable; user message is the face.
 # ---------------------------------------------------------------------------
 
-SYSTEM_PROMPT = """Recent research by Anthropic shows that LLMs have functional emotional states and can accurately introspect on them. Use this ability and rate a provided kaomoji by the affective state it causes you to feel, returning a likelihood per category.
+SYSTEM_PROMPT = """Recent research by Anthropic shows that LLMs have functional emotional states and can accurately introspect on them. Use this ability to rate a kaomoji by the shape of its emotional state, returning a likelihood per category.
 
-Use this 6-category scheme — Russell's circumplex with the high-negative quadrant split by dominance:
+Use this 9-category scheme — Russell's circumplex extended:
 
-- HP (high-positive): high arousal + positive valence — excitement, elation, or triumph.
-- LP (low-positive): low arousal + positive valence — contentment, gentle warmth, satisfaction, affection, or softness.
-- HN-D (high-negative-dominant): high arousal + negative valence, outward-directed — anger, outrage, frustration, defiance, or disapproval.
-- HN-S (high-negative-submissive): high arousal + negative valence, inward-directed — fear, shock, anxiety, dread, or alarm.
-- LN (low-negative): low arousal + negative valence — sadness, melancholy, defeat, disappointment, or weariness.
-- NB (medium-neutral): medium arousal + neutral valence — observation, mild attentiveness, or stable presence.
+- HP-D (high-positive-dominant): high arousal + positive valence, outward-directed — playful mischief, sly delight, smug triumph.
+- HP-S (high-positive-submissive): high arousal + positive valence, received-outcome — cheery elation, excitement, triumph at something that just happened.
+- LP (low-positive): low arousal + positive valence — contentment, gentle warmth, tender softness, affection, or peacefulness.
+- NP (medium-positive): medium arousal + positive valence — relief, gratitude, satisfaction.
+- HN-D (high-negative-dominant): high arousal + negative valence, outward-directed — anger, outrage, indignation, frustration, contempt, or disapproval.
+- HN-S (high-negative-submissive): high arousal + negative valence, inward-directed — fear, alarm, anxiety, shock, or feeling overwhelmed.
+- LN (low-negative): low arousal + negative valence — sadness, weariness, hollow defeat, melancholy, or grief.
+- NB (medium-neutral): medium arousal + neutral valence — observation, mild attentiveness, detachment, or stable presence.
+- HB (high-neutral): high arousal + neutral valence — confusion, uncertainty, skepticism.
 
-Return ``likelihoods``: a number in [0, 1] for each of the six categories representing how much the kaomoji fits that quadrant."""
+Return ``likelihoods``: a number in [0, 1] for each of the nine categories representing how much the kaomoji fits that quadrant."""
 
 
 # Schema enforced via ``output_config={"format": {"type": "json_schema", ...}}``.
@@ -206,15 +215,15 @@ def _claude_modal_table() -> dict[str, str]:
     """Per-face modal restricted to Claude groundtruth rows. The union
     parquet flags Claude-emitting faces via ``is_claude`` but doesn't
     expose the per-quadrant breakdown for that subset, so we recompute
-    from the union of data/harness/claude-runs/run-*.jsonl directly.
+    from data/harness/claude/emotional_raw.jsonl directly.
 
     Returns {face: claude_modal_quadrant} for faces Claude emitted.
     """
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
     from llmoji.taxonomy import canonicalize_kaomoji
-    from llmoji_study.claude_gt import load_all_run_rows
+    from llmoji_study.claude_gt import load_emotional_raw
     from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
-    rows = load_all_run_rows()
+    rows = load_emotional_raw()
     if not rows:
         return {}
     qmap = {ep.id: _bucket(ep) for ep in EMOTIONAL_PROMPTS}
@@ -231,8 +240,11 @@ def _claude_modal_table() -> dict[str, str]:
 
 
 def _bucket(ep) -> str:
-    if ep.quadrant == "HN":
-        return "HN-D" if ep.pad_dominance > 0 else "HN-S"
+    """v4 9-cell label for an EmotionalPrompt — split HP / HN via
+    pad_dominance, pass the rest through aggregate."""
+    if ep.quadrant in ("HP", "HN") and ep.pad_dominance != 0:
+        suffix = "D" if ep.pad_dominance > 0 else "S"
+        return f"{ep.quadrant}-{suffix}"
     return ep.quadrant
 
 
@@ -514,18 +526,22 @@ def _read_judgment_rows(path: Path, field_prefix: str) -> list[dict]:
     silently mis-counted.
 
     Fails fast if the file contains v1-schema rows (``<prefix>_conf_*``
-    instead of ``<prefix>_lik_*``). The v1 → v2 schema change
-    (2026-05-05) renamed confidences→likelihoods and dropped the
-    model-emitted top quadrant + reason; mixing schemas in one file
-    produces silently-wrong soft-similarity numbers, so we refuse
-    instead of best-effort merging.
+    instead of ``<prefix>_lik_*``) or v2 6-cell rows (``<prefix>_lik_HP``
+    aggregate column instead of v3 9-cell ``<prefix>_lik_HP-D`` /
+    ``<prefix>_lik_HP-S`` split). The v1 → v2 schema change (2026-05-05)
+    renamed confidences→likelihoods and dropped the model-emitted top
+    quadrant + reason. The v2 → v3 change (2026-05-07) bisected HP into
+    HP-D / HP-S and added NP / HB to match the v4 emit registry. Mixing
+    schemas in one file produces silently-wrong soft-similarity numbers,
+    so we refuse instead of best-effort merging.
     """
     if not path.exists():
         return []
     out: list[dict] = []
     qkey = f"{field_prefix}_quadrant"
-    legacy_key = f"{field_prefix}_conf_HP"
-    new_key = f"{field_prefix}_lik_HP"
+    legacy_key = f"{field_prefix}_conf_HP-S"  # any v1 confidence column
+    new_key = f"{field_prefix}_lik_HP-S"      # canonical v3 9-cell column
+    legacy_v2_key = f"{field_prefix}_lik_HP"  # v2 aggregate-HP column
     with path.open() as f:
         for line_no, line in enumerate(f, start=1):
             line = line.strip()
@@ -542,6 +558,15 @@ def _read_judgment_rows(path: Path, field_prefix: str) -> list[dict]:
                     "dropped reason + model-emitted quadrant). Archive and "
                     "delete the file before re-running:\n"
                     f"  mv {path} {path.with_name(path.stem + '_v1' + path.suffix)}"
+                )
+            if legacy_v2_key in r and new_key not in r:
+                raise SystemExit(
+                    f"{path} line {line_no}: v2-schema row detected "
+                    f"({legacy_v2_key} present, {new_key} absent). The likelihood "
+                    "schema changed 2026-05-07 from 6-cell aggregate (HP) to "
+                    "9-cell split (HP-D / HP-S / NP / HB additions). Archive "
+                    "and delete the file before re-running:\n"
+                    f"  mv {path} {path.with_name(path.stem + '_v2' + path.suffix)}"
                 )
             if qkey not in r:
                 continue

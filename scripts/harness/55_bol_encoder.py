@@ -4,10 +4,11 @@ Converts the per-canonical-kaomoji BoL parquet from script 62 into a
 face_likelihood TSV that the ensemble pipeline (52/53/54) auto-
 discovers as another encoder named ``bol``.
 
-The synthesizer's structured commit *is* a 6-d quadrant distribution
-per face: sum each face's BoL mass on the lexicon's 19 circumplex
-slots, partition by Russell quadrant (HP/LP/HN-D/HN-S/LN/NB), then
-optionally smooth and L1-normalize. No model call. No projection.
+The synthesizer's structured commit *is* a 9-d cell distribution
+per face: sum each face's BoL mass on the lexicon's 26 circumplex
+slots, partition by v4 9-cell Russell quadrant (HP-D / HP-S / LP /
+NP / HN-D / HN-S / LN / NB / HB), then optionally smooth and
+L1-normalize. No model call. No projection.
 
 Output schema mirrors ``data/harness/face_likelihood_<enc>_summary.tsv``
 (see ``scripts/harness/50_face_likelihood.py:_write_face_likelihood_tsv``)
@@ -122,7 +123,7 @@ def main() -> None:
     union_lookup = _build_union_lookup(union_df)
     print(f"  {len(union_lookup)} faces in canonical union")
 
-    # Per-face: BoL → 6-d quadrant distribution → softmax/log-prob row.
+    # Per-face: BoL → 9-d cell distribution → softmax/log-prob row.
     out_rows: list[dict] = []
     n_in_union = 0
     n_no_circumplex = 0

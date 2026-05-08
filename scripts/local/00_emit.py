@@ -111,6 +111,15 @@ def _already_done(path: Path) -> set[tuple[str, int]]:
 
 
 def _drop_error_rows(path: Path) -> int:
+    """Drop both explicit error rows (``"error" in r``) and silent-
+    failure rows where the row landed without a probe vector
+    (``probe_scores_t0 is None``, no ``row_uuid`` — capture aborted
+    before hidden-state save). gpt_oss_20b under harmony has emitted
+    these on rare prompts where the model produced no text at all.
+    Keeping them passes through ``_already_done`` and the prompt
+    never re-runs; treating them as droppable retries cleanly on
+    the next 00_emit invocation.
+    """
     if not path.exists():
         return 0
     keep: list[str] = []
@@ -124,6 +133,9 @@ def _drop_error_rows(path: Path) -> int:
             if "error" in r:
                 dropped += 1
                 continue
+            if r.get("probe_scores_t0") is None:
+                dropped += 1
+                continue
             keep.append(line)
     if dropped:
         path.write_text("\n".join(keep) + ("\n" if keep else ""))
@@ -132,9 +144,14 @@ def _drop_error_rows(path: Path) -> int:
 
 def _emission_rate_by_quadrant(path: Path) -> dict[str, tuple[int, int]]:
     """Return {quadrant: (kaomoji-bearing rows, total rows)} from the
-    JSONL. Uses prompt_id prefix to infer quadrant (hp/lp/hn/ln/nb)."""
+    JSONL. Uses prompt_id prefix to infer parent quadrant (hp/lp/hn/
+    ln/nb/np/hb). HP-D (hp21-hp40) and HP-S (hp01-hp20) both aggregate
+    under HP here; the dominance split is applied downstream by
+    apply_hn_split / apply_hp_split helpers. v4 cells (NP, HB, HP-D)
+    added 2026-05-06 per docs/2026-05-06-prompt-extension-roadmap.md."""
     stats: dict[str, list[int]] = {
         "HP": [0, 0], "LP": [0, 0], "HN": [0, 0], "LN": [0, 0], "NB": [0, 0],
+        "NP": [0, 0], "HB": [0, 0],
     }
     if not path.exists():
         return {q: (v[0], v[1]) for q, v in stats.items()}
@@ -149,7 +166,7 @@ def _emission_rate_by_quadrant(path: Path) -> dict[str, tuple[int, int]]:
             pid = r.get("prompt_id", "")
             if len(pid) < 2:
                 continue
-            q = pid[:2].upper()  # "hp01" -> "HP", "nb01" -> "NB"
+            q = pid[:2].upper()  # "hp01" -> "HP", "nb01" -> "NB", "np01" -> "NP"
             if q not in stats:
                 continue
             stats[q][1] += 1
@@ -303,7 +320,7 @@ def main() -> None:
                         if i % 80 == 0:
                             stats = _emission_rate_by_quadrant(M.emotional_data_path)
                             print("    emission rate by quadrant:")
-                            for q in ("HP", "LP", "HN", "LN", "NB"):
+                            for q in ("HP", "LP", "HN", "LN", "NB", "NP", "HB"):
                                 k, n = stats[q]
                                 rate = (k / n) if n else 0.0
                                 print(f"      {q}: {k}/{n} kaomoji-bearing ({rate:.0%})")

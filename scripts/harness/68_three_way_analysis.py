@@ -5,7 +5,7 @@ kaomoji-quadrant association.
 Three structurally different channels for "what quadrant goes with
 this face?":
 
-  - **use (Claude-GT)**: ``data/harness/claude-runs*/run-*.jsonl``,
+  - **use (Claude-GT)**: ``data/harness/claude{,_intro_v7}/emotional_raw.jsonl``,
     Opus 4.7 emitting kaomoji under known Russell-prompted conditions.
     Per-face = the empirical distribution over the prompt-quadrants
     that elicited the face. Source: forward emit, controlled stimulus.
@@ -14,7 +14,7 @@ this face?":
     shown the face cold, asked what affective state it represents.
     Source: symbolic interpretation, no context.
   - **act (BoL)**: ``data/harness/claude_faces_lexicon_bag.parquet``
-    → 6-d quadrant distribution via
+    → 9-d cell distribution via
     :func:`llmoji_study.lexicon.bol_to_quadrant_distribution`. Built by
     pooling Haiku synthesis over many *real in-context emits* of the
     face. Source: in-deployment behavior summarized.
@@ -411,7 +411,8 @@ def _summary_md(
     lines.append("")
     lines.append(
         "- **GT (use)** — Opus 4.7 emitting the face under known "
-        "Russell-prompted conditions (`data/harness/claude-runs*/`). "
+        "Russell-prompted conditions "
+        "(`data/harness/claude{,_intro_v7}/emotional_raw.jsonl`). "
         "*What the face is actually emitted under.*"
     )
     lines.append(
@@ -423,7 +424,7 @@ def _summary_md(
     lines.append(
         "- **BoL (act)** — Haiku synthesizer pooling adjective-bag "
         "picks across many *real in-context emits* of the face → "
-        "6-d quadrant distribution from the 19 circumplex anchors in "
+        "9-d cell distribution from the 26 circumplex anchors in "
         "the locked v2 LEXICON (`claude_faces_lexicon_bag.parquet`). "
         "*In-deployment behavior summarized.*"
     )

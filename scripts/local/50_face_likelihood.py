@@ -88,9 +88,12 @@ from llmoji_study.config import (
 from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS, EmotionalPrompt
 from llmoji_study.emotional_prompts_jp import EMOTIONAL_PROMPTS_JP
 from llmoji_study.prompts import Prompt
+from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
 
 
-QUADRANT_ORDER = ["HP", "LP", "HN-D", "HN-S", "LN", "NB"]
+# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# source of truth shared with figures, JSD math, and the BoL projection.
+QUADRANT_ORDER = list(QUADRANT_ORDER_SPLIT)
 # Per-face evaluation batch size (faces stacked into a single forward
 # pass per prompt). 31B model on M5 Max bf16 — keep small enough to
 # fit; 64 chosen so that prefix(~50)+face(~15) padded to ~70 tokens
@@ -142,10 +145,13 @@ def _parse_args() -> argparse.Namespace:
 
 
 def _quadrant_of(prompt: EmotionalPrompt) -> str:
-    """Map EmotionalPrompt to the 6-quadrant code (HN bisected on pad_dominance)."""
+    """Map EmotionalPrompt to the v4 9-cell code. HP and HN both
+    bisect on pad_dominance (HP-D / HP-S / HN-D / HN-S); the rest
+    (LP, NP, LN, NB, HB) pass through aggregate."""
     q = prompt.quadrant
-    if q == "HN":
-        return "HN-D" if prompt.pad_dominance > 0 else "HN-S"
+    if q in ("HP", "HN") and prompt.pad_dominance != 0:
+        suffix = "D" if prompt.pad_dominance > 0 else "S"
+        return f"{q}-{suffix}"
     return q
 
 

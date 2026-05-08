@@ -6,9 +6,21 @@ kaomoji emissions. The corpus lives on HuggingFace as
 companion package [`llmoji`](https://github.com/a9lim/llmoji)
 collects the data on the contributor side via Stop hooks, runs a
 structured Haiku synthesis pass that commits each face's affect /
-stance / modality picks to a locked 48-word LEXICON, and uploads
-pre-aggregated bundles to that dataset. This repo just pulls the
-corpus and runs the analysis.
+stance / modality picks to a locked LEXICON, and uploads pre-
+aggregated bundles to that dataset. This repo just pulls the corpus
+and runs the analysis.
+
+> **2026-05-06 status note.** `llmoji 2.0.1` ships LEXICON v2 — 50
+> words / 9 PAD-coordinate cells (HP-D / HP-S / LP / NP / HN-D /
+> HN-S / LN / NB / HB) / 26 circumplex anchors / 24 extension axes,
+> aligned with the llmoji-study v4 prompt registry. v1 LEXICON (48
+> words / 6 cells / 19 anchors / 29 extension) is locked out by
+> ``assert_lexicon_v2``; existing harness BoL parquets stamped v1
+> need re-synthesis with v2 schema before downstream re-pooling. The
+> numerical findings below describe v1-corpus state; v2 numbers land
+> after the harness regen chain (`scripts/run_harness_chain.sh`).
+> See [`findings.md`](findings.md) §"LEXICON v2 — 9-cell PAD
+> alignment" for the rotation rationale.
 
 ## Prior art: eriskii
 

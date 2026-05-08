@@ -19,7 +19,7 @@ Two structurally different findings live in the gap:
 
 Inputs:
   - data/harness/claude_faces_lexicon_bag_per_source.parquet (script 64)
-  - data/harness/claude-runs*/ via load_claude_gt_distribution
+  - data/harness/claude{,_intro_v7}/emotional_raw.jsonl via load_claude_gt_distribution
   - data/harness/face_likelihood_{opus,haiku}_summary.tsv
 
 Outputs:

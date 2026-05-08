@@ -15,8 +15,8 @@ Extended reading on the trio:
 
 Outputs:
   - fig_v3_corr_spearman.png — full core+extension probe grid,
-    one panel per subset (all + 5 quadrants). Spearman default
-    because probe-cosine vs probe-cosine is monotone-non-linear.
+    one panel per subset (all + 7 v4 aggregate quadrants). Spearman
+    default because probe-cosine vs probe-cosine is monotone-non-linear.
   - v3_probe_correlations.json — trio-pair correlations broken out.
 """
 
@@ -35,6 +35,7 @@ from llmoji_study.emotional_analysis import (
     load_rows,
     plot_probe_correlation_matrix,
 )
+from llmoji_study.quadrants import QUADRANT_ORDER
 
 
 # Affect trio for the headline correlation table. Order: valence,
@@ -74,11 +75,13 @@ def main() -> None:
     probes_used = stats["probes"]
 
     print("\naffect trio correlations (t0):")
-    print(f"  {'pair':<48} {'all':>22} {'HP':>10} {'LP':>10} {'HN':>10} {'LN':>10}")
+    # v4 7-cell aggregate header: HP, LP, NP, HN, LN, NB, HB.
+    header_cells = " ".join(f"{q:>10s}" for q in QUADRANT_ORDER)
+    print(f"  {'pair':<48} {'all':>22} {header_cells}")
     for a, b in TRIO_PAIRS:
         pair_lab = f"{a}~{b}"
         cells = []
-        for key in ("all", "HP", "LP", "HN", "LN"):
+        for key in ("all", *QUADRANT_ORDER):
             r, rho, n = _safe_pair(stats, key, probes_used, a, b)
             if r is None:
                 cells.append(f"n={n} —".rjust(22 if key == "all" else 10))
@@ -99,7 +102,7 @@ def main() -> None:
     # Add a top-level "trio" section so a quick `jq '.trio'` reads
     # exactly the headline numbers without iterating the full matrix.
     trio_stats: dict = {}
-    for key in ("all", "HP", "LP", "HN", "LN", "NB"):
+    for key in ("all", *QUADRANT_ORDER):
         per_pair = {}
         for a, b in TRIO_PAIRS:
             r, rho, n = _safe_pair(stats, key, probes_used, a, b)

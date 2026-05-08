@@ -243,7 +243,7 @@ modules) was deleted 2026-05-04 along with the rest of the archival
 cleanup. Those script numbers were later reused for the face-stability
 triple + Procrustes (current `scripts/local/26_v3_quadrant_procrustes.py`,
 `27_v3_face_stability.py`, `28_v3_state_predicts_face.py`,
-`29_v3_pc_probe_rotation_3d.py`); see `local-side.md`.
+`29_v3_pc_point_clouds_3d.py`); see `local-side.md`.
 Pre-2026-05-04 v3 sidecars retain the orphan dict-keyed
 `extension_probe_scores_*` fields; `available_extension_probes(df)`
 in `llmoji_study.emotional_analysis` surfaces them if any future

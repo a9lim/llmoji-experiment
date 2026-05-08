@@ -2,7 +2,7 @@
 
 Long-format counterpart to ``scripts/harness/62_corpus_lexicon.py``.
 Where 62 pools every face's per-bundle synthesis picks across source
-models into one 48-d vector, this script keeps each face × source-model
+models into one 50-d vector, this script keeps each face × source-model
 cell separate. The same canonical face appears once per source model
 that synthesized it.
 

@@ -11,13 +11,28 @@ pre-cleanliness numbers, the face-input bridge, extension probes,
 introspection iterations v0 through v6) lives in
 [`previous-experiments.md`](previous-experiments.md).
 
+> **2026-05-06 status note.** v4 9-cell PAD-coordinate prompt
+> registry shipped (HP-D / HP-S / LP / NP / HN-D / HN-S / LN / NB /
+> HB; mechanically derived from arousal + valence + dominance, no
+> overrides) — see [`findings.md`](findings.md) §"v4 9-cell
+> deployment registry — mechanical PAD naming". v4 emit run
+> in-flight at time of writing (180 prompts × 8 seeds × 6 configs =
+> 8,640 rows incremental over v3 main). The numerical findings below
+> describe v3 (6-quadrant × 5-model = 4,800-row) data; downstream
+> face-level + ensemble analyses on v4 data land after the post-emit
+> regen chain (`scripts/run_local_chain.sh`).
+
 ## What this is
 
 llmoji-study asks whether kaomoji choice in local causal LMs tracks
 internal activation state. Five v3 main models from five different
-labs, six Russell-circumplex quadrants, layer-stack hidden-state
-representation, then both forward (state predicts face) and reverse
-(Bayesian face-likelihood) analyses on the same 4800 generations.
+labs; v3 used 6 Russell-circumplex quadrants × 20 prompts × 8 seeds
+= 4,800 generations. v4 expands to 9 PAD-coordinate cells (HP split
+into HP-D/HP-S; NP and HB added) × 20 × 8 × 6 configs (gemma_intro_v7_primed
+joins the lineup) = 8,640 v4-incremental rows. Layer-stack hidden-
+state representation (concat of every probe layer's ``h_first``);
+analyses run both forward (state predicts face) and reverse
+(Bayesian face-likelihood) on the same data.
 
 ## Setup
 
@@ -164,7 +179,7 @@ fold):
   stable centroid.
 
 The face-stability triple (`scripts/local/27_v3_face_stability.py`,
-`28_v3_state_predicts_face.py`, `29_v3_pc_probe_rotation_3d.py`)
+`28_v3_state_predicts_face.py`, `29_v3_pc_point_clouds_3d.py`)
 frames this as a bidirectional question. **Forward direction** (state
 predicts face), pair-level Spearman ρ between cosine_sim(h_first) and
 1 − JSD(face_dist): +0.59 gemma / +0.68 qwen / +0.42 ministral.

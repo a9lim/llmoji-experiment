@@ -50,14 +50,18 @@ PROBE_SCORE_TOL = 5e-3  # fp32 probe agreement tolerance
 
 
 def _pick_smoke_prompts():
-    """Pick one prompt per quadrant from EMOTIONAL_PROMPTS — HP, LP,
-    HN, LN, plus NB. Keeping smoke small: 5 generations, not 1000."""
-    by_quad: dict[str, list] = {"HP": [], "LP": [], "HN": [], "LN": [], "NB": []}
+    """Pick one prompt per v4 aggregate quadrant from EMOTIONAL_PROMPTS —
+    HP, LP, NP, HN, LN, NB, HB. Keeping smoke small: 7 generations,
+    one per cell. Aggregate (not split) so the smoke stays cheap;
+    HP-D / HP-S / HN-D / HN-S separability is exercised by the main
+    pipelines, not the smoke."""
+    from llmoji_study.quadrants import QUADRANT_ORDER
+    by_quad: dict[str, list] = {q: [] for q in QUADRANT_ORDER}
     for p in EMOTIONAL_PROMPTS:
         q = p.id[:2].upper()
         if q in by_quad and not by_quad[q]:
             by_quad[q].append(p)
-    return [by_quad[q][0] for q in ("HP", "LP", "HN", "LN", "NB")]
+    return [by_quad[q][0] for q in QUADRANT_ORDER if by_quad[q]]
 
 
 def main() -> None:

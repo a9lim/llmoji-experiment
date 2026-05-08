@@ -26,6 +26,7 @@ from llmoji_study.emotional_analysis import (
     plot_within_kaomoji_consistency,
     summary_table,
 )
+from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
 from llmoji.taxonomy import extract
 
 
@@ -77,14 +78,14 @@ def main() -> None:
         return
 
     print("\nper-quadrant kaomoji emission (first-word filter):")
-    for q in ("HP", "LP", "HN-D", "HN-S", "LN", "NB"):
+    for q in QUADRANT_ORDER_SPLIT:
         q_rows = df[df["quadrant"] == q]
         n = len(q_rows)
         uniq = int(q_rows["first_word"].nunique()) if n else 0
         print(f"  {q}: {n} kaomoji-bearing rows; {uniq} distinct forms")
 
     print("\ntop-5 first_words per quadrant (by count):")
-    for q in ("HP", "LP", "HN-D", "HN-S", "LN", "NB"):
+    for q in QUADRANT_ORDER_SPLIT:
         q_rows = df[df["quadrant"] == q]
         top = q_rows["first_word"].value_counts().head(5)
         print(f"  {q}:")

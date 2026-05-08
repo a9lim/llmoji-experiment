@@ -44,13 +44,13 @@ from llmoji_study.config import (
     current_model,
 )
 from llmoji_study.emotional_analysis import (
-    QUADRANT_COLORS,
     _hn_split_map,
     _use_cjk_font,
     available_extension_probes,
     load_emotional_features_stack_at,
     load_rows,
 )
+from llmoji_study.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT
 
 
 _use_cjk_font()
@@ -336,9 +336,10 @@ def main() -> None:
     print(f"wrote {out_pc}")
 
     # ---------- Rule II: per-quadrant kaomoji distribution + KL ----------
-    quadrants = ["HP", "LP", "HN-D", "HN-S", "LN", "NB"]
+    # v4 9-cell registry — 3×3 layout (was 2×3 under the v3 6-cell taxonomy).
+    quadrants = list(QUADRANT_ORDER_SPLIT)
     rows: list[dict] = []
-    fig2, axes2 = plt.subplots(2, 3, figsize=(18, 9))
+    fig2, axes2 = plt.subplots(3, 3, figsize=(18, 13.5))
     for ax, q in zip(axes2.flat, quadrants):
         sub_q = df[df["quadrant_split"] == q]
         # union top-5 faces across conditions

@@ -21,7 +21,13 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable
 
-QUADRANT_ORDER = ("HP", "LP", "HN-D", "HN-S", "LN", "NB")
+# Re-exported from the canonical zero-dep ``llmoji_study.quadrants``
+# module so the JSD math layer shares ordering with figures /
+# classifiers / BoL projection. Update ``quadrants.py`` to change the
+# registry shape; this and ``emotional_analysis.py`` /  ``lexicon.py``
+# all pick it up. Aliased to ``QUADRANT_ORDER`` (the JSD layer's
+# stable public name — callers across scripts 50-56 import it here).
+from .quadrants import QUADRANT_ORDER_SPLIT as QUADRANT_ORDER  # noqa: E402
 LN2 = math.log(2.0)
 
 
@@ -34,7 +40,7 @@ def normalize(
 
     Adds ``eps`` to every vocab entry, then renormalizes — keeps JS finite
     even when one side has zero mass on a label that the other side has.
-    Default vocab is the 6-way Russell quadrant order; pass a custom
+    Default vocab is the v4 9-way Russell quadrant order; pass a custom
     iterable for face-vocab use cases.
     """
     raw = [float(counts.get(v, 0)) + eps for v in vocab]
@@ -66,7 +72,7 @@ def jsd_quadrant(
     """Convenience: JS in nats between two per-quadrant distributions.
 
     Each input may be a {quadrant: prob} dict (re-normalized via
-    ``normalize`` over QUADRANT_ORDER) or a length-6 list aligned to
+    ``normalize`` over QUADRANT_ORDER) or a length-9 list aligned to
     QUADRANT_ORDER (used as-is, but smoothed via ``normalize`` to
     handle exact-zero entries).
     """

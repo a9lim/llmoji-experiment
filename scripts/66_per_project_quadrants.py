@@ -2,7 +2,7 @@
 actual Claude emissions. Three resolution modes:
 
   - ``--mode gt-priority`` (default): use Claude-GT (the Opus 4.7
-    groundtruth runs, ``data/harness/claude-runs/run-*.jsonl``) for any
+    groundtruth runs, ``data/harness/claude/emotional_raw.jsonl``) for any
     face Claude itself emitted in any run, falling back to the
     bag-of-lexicon (BoL) inference for in-the-wild faces. Combines
     empirical Claude behavior on heavy-use faces with the
@@ -72,8 +72,11 @@ from llmoji_study.local_emissions import (
     iter_local_emissions,
 )
 from llmoji_study.per_project_charts import plot_per_project_quadrants
+from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
 
-QUADRANTS = ["HP", "LP", "HN-D", "HN-S", "LN", "NB"]
+# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# source of truth shared with figures, JSD math, and the BoL projection.
+QUADRANTS = list(QUADRANT_ORDER_SPLIT)
 HARNESS_DIR = DATA_DIR / "harness"
 FIGURES_HARNESS_DIR = FIGURES_DIR / "harness"
 
@@ -159,7 +162,7 @@ def main() -> None:
                          "with the richer copy winning. Empty string skips.")
     ap.add_argument("--bol-parquet",
                     default=str(CLAUDE_FACES_LEXICON_BAG_PATH),
-                    help="BoL parquet (per-face 48-d lexicon vectors) "
+                    help="BoL parquet (per-face 50-d lexicon vectors) "
                          "from scripts/harness/62_corpus_lexicon.py")
     ap.add_argument("--claude-gt-floor", type=int, default=1,
                     help="Claude-GT modal_n minimum (default 1; raise to 2 "
