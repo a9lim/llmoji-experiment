@@ -184,6 +184,11 @@ def main() -> None:
     # pilot ("temp1_pilot"); now by every variant run that doesn't
     # want to clobber canonical v3 main.
     M = current_model()
+    # Ensure the per-model output subdir exists. Every model in the
+    # current registry has ``data/local/<short>/`` already populated by
+    # an earlier run, so this would otherwise only bite the first time
+    # a freshly-registered model hits the JSONL ``.open("a")`` below.
+    M.emotional_data_path.parent.mkdir(parents=True, exist_ok=True)
     out_suffix = os.environ.get("LLMOJI_OUT_SUFFIX")
     if out_suffix:
         print(f"  output suffix: '_{out_suffix}' (sidecars under {M.experiment}/, "

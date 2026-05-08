@@ -101,3 +101,31 @@ The project moved to T=1.0 for deployment-shaped naturalism and
 Rinna models and top-k pooling were explored during pre-soft-everywhere
 face_likelihood work. They remain useful as optional encoders or
 diagnostics, but they are not part of the current headline ensemble.
+
+## Olmo-3.1-32B Pilot
+
+`allenai/Olmo-3.1-32B-Instruct` was piloted as a v3 encoder on
+2026-05-08 (N=1 seed × 180 v4 prompts). Saklas wires up `olmo3` via the
+default `_MODEL_LAYERS` accessor (untested-but-supported), probes loaded
+cleanly, and the run completed end-to-end without errors. The model was
+not adopted.
+
+Failure mode is vocabulary-shaped, not affect-shaped. Pre-suppression
+Olmo emitted Unicode emoji on 84% of starts (😱🎉🏆 on HP, 😢😩 on HN),
+matching the granite/ministral failure mode. Adding `Olmo` to
+`_EMOJI_SUPPRESS_MODEL_PATTERNS` lifted kaomoji emission to 51%, well
+below ministral's 95% and granite's 84% post-suppress floors. The
+remaining 49% was largely stealth kaomoji the `first_word` detector
+could not match: Olmo tokenizes kaomoji body chars with U+2060
+word-joiners interspersed, leans on shortcodes like `:+1:` and
+`:sleeping_face:`, and escapes through the deliberately-unblocked BMP
+ranges (`⭐️`, `⁉️`). Per-quadrant valence direction looked correct
+(HP→`ʕᴥᴥʔ`/`XD`/`(＾◡＾)`, HN→`ಥ_ಥ`/`:(`, NP→`^_^`), so the affect
+signal was intact, but the harness's kaomoji-detection path is the wrong
+shape for Olmo's tokenization dialect. Including the model would have
+required a detector overhaul without a corresponding deployment-side
+payoff.
+
+The Olmo entry, the `Olmo` emoji-suppress pattern, and the pilot data
+were reverted; saklas-side calibrated probe vectors remain on disk but
+are unused.
