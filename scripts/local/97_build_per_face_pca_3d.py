@@ -38,10 +38,12 @@ from llmoji_study.emotional_analysis import (
 
 # Match the v3 main lineup used by 26_v3_quadrant_procrustes.py.
 MODELS = ("gemma", "qwen", "ministral", "gpt_oss_20b", "granite")
-# Show every face the model emits — singletons included. PCA centroids
-# from n=1 are noisy but the user prefers full coverage over per-face
-# stability for the blog visualization.
-MIN_FACE_COUNT = 1
+# Drop singletons and pairs — centroids built from n<3 emits are too
+# noisy to anchor a PCA marker reliably, and the singleton long-tail
+# crowds the visual without adding interpretable structure. PCA basis
+# is also fit on the kept centroids, so this is an analysis filter,
+# not just a render filter.
+MIN_FACE_COUNT = 3
 OUT_HTML = FIGURES_DIR / "local" / "fig_v3_per_face_pca_3d.html"
 OUT_META = OUT_HTML.with_suffix(".meta.json")
 

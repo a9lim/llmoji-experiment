@@ -895,7 +895,17 @@ def main() -> None:
         sys.exit("no faces survived the inner-join — aborting")
 
     df_wild = pd.DataFrame(rows).sort_values("n_emit", ascending=False).reset_index(drop=True)
+    n_bol_joined = len(df_wild)
+    # Drop singletons and pairs. Mirrors the MIN_FACE_COUNT=3 filter in
+    # scripts/local/97_build_per_face_pca_3d.py — n<3 faces are too
+    # noisy to anchor a per-face read on (one accidental emit can
+    # promote an irrelevant face into the cluster table) and they bias
+    # the BoL PCA toward long-tail singletons. Filter applies upstream
+    # of TSV / KMeans / PCA so every downstream artifact uses the same
+    # population.
+    df_wild = df_wild[df_wild["n_emit"] >= 3].reset_index(drop=True)
     n_kept = len(df_wild)
+    n_dropped = n_bol_joined - n_kept
     cat_counts = df_wild["category"].value_counts().to_dict()
     n_shared = int(cat_counts.get("shared", 0))
     n_wild_claude = int(cat_counts.get("wild_claude", 0))
@@ -904,7 +914,10 @@ def main() -> None:
     n_code = int(surface_counts.get("claude_code", 0))
     n_ai = int(surface_counts.get("claude_ai", 0))
     n_other = int(surface_counts.get("other", 0))
-    print(f"\n{n_kept} / {n_unique} HF faces kept (have a BoL vector)")
+    print(f"\n{n_bol_joined} / {n_unique} HF faces have a BoL vector")
+    if n_dropped:
+        print(f"  dropped {n_dropped} with n_emit < 3 "
+              f"→ {n_kept} faces analyzed")
     print(f"  GT-overlap categories: shared={n_shared}, "
           f"wild_claude={n_wild_claude}, wild_other={n_wild_other}")
     print(f"  Deployment surfaces:   claude_code={n_code}, "

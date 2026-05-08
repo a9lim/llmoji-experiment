@@ -21,6 +21,7 @@ Usage:
 """
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 from pathlib import Path
@@ -189,9 +190,14 @@ _THEME_JS_HELPERS = """  function readTheme() {
     var muted = styles.getPropertyValue('--text-muted').trim();
     return {
       theme: theme,
+      canvas:    canvas,
       text:      styles.getPropertyValue('--text').trim(),
       muted:     muted,
       grid:      compositeOver(bgHover || muted, canvas),
+      // Drop-line color: composite text-muted at ~44% alpha onto the
+      // canvas so the line is theme-faithful but visually subordinate
+      // to the markers and slightly more present than the grid.
+      dropLine:  compositeOver(muted + '70', canvas),
       lineMuted: muted,
       elevated:  styles.getPropertyValue('--bg-elevated').trim(),
       accent:    styles.getPropertyValue('--accent').trim(),
@@ -215,11 +221,25 @@ def _legend_marker_html() -> str:
     return "\n".join(items)
 
 
-def wrap_procrustes(raw_path: Path, out_path: Path, overlay_scene: str = "scene6") -> None:
+def wrap_procrustes(
+    raw_path: Path, out_path: Path,
+    overlay_scene: str = "scene6",
+    show_droplines: bool = False,
+) -> None:
+    """Wrap the procrustes-overlay raw HTML.
+
+    Drop-line traces (sentinel ``name="_droplines"`` from
+    ``26_v3_quadrant_procrustes.py``) are always present in the
+    embedded data, but only rendered when ``show_droplines`` is true —
+    they read as a depth-anchor for some viewers and as visual clutter
+    for others, so the wrapper exposes the choice via ``--drop-lines``
+    rather than rebaking the producer for each preference.
+    """
     raw = raw_path.read_text(encoding="utf-8")
     plotly_block = _extract_plotly_block(raw)
 
     legend_html = _legend_marker_html()
+    show_droplines_js = "true" if show_droplines else "false"
 
     out = f"""<html>
 {_SHARED_HEAD}<style>
@@ -236,6 +256,7 @@ def wrap_procrustes(raw_path: Path, out_path: Path, overlay_scene: str = "scene6
 <script>
 (function() {{
   var OVERLAY_SCENE = '{overlay_scene}';
+  var SHOW_DROPLINES = {show_droplines_js};
   var div = null;
   var origData = null;
   var origLayout = null;
@@ -279,11 +300,23 @@ def wrap_procrustes(raw_path: Path, out_path: Path, overlay_scene: str = "scene6
     var c = readThemeColors();
     var traces = origData
       .filter(function (t) {{ return (t.scene || 'scene') === OVERLAY_SCENE; }})
+      // Drop-line traces (sentinel name="_droplines" set by
+      // scripts/local/26_v3_quadrant_procrustes.py) are opt-in via
+      // the wrapper's --drop-lines flag; default off because the
+      // overlay reads cleaner without depth stems.
+      .filter(function (t) {{ return SHOW_DROPLINES || t.name !== '_droplines'; }})
       .map(function (t) {{
         var clone = JSON.parse(JSON.stringify(t));
         clone.scene = 'scene';
         if (clone.marker && clone.marker.line) {{
           clone.marker.line.color = c.elevated;
+        }}
+        // Drop-lines repaint per active theme — the baked rgba
+        // mid-grey washes out to near-white when composited over
+        // the light canvas, so we override at render time using
+        // --text-muted over --bg-canvas instead.
+        if (clone.name === '_droplines' && clone.line) {{
+          clone.line.color = c.dropLine;
         }}
         return clone;
       }});
@@ -605,6 +638,19 @@ def wrap_per_face(raw_path: Path, out_path: Path, subtitles: list[str]) -> None:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Wrap raw plotly 3D HTML files with the a9l.im "
+                    "site-themed shell.",
+    )
+    parser.add_argument(
+        "--drop-lines", action="store_true",
+        help="Render the procrustes overlay's vertical depth-anchor "
+             "drop lines (off by default — the producer always emits "
+             "them, but the wrapper hides them unless this flag is "
+             "set so the cleaner no-stem view is the default).",
+    )
+    args = parser.parse_args()
+
     if not BLOG_ASSETS_DIR.parent.exists():
         print(f"blog-assets parent does not exist: {BLOG_ASSETS_DIR.parent}", file=sys.stderr)
         sys.exit(1)
@@ -614,7 +660,11 @@ def main() -> None:
     if not RAW_PROCRUSTES.exists():
         print(f"  missing {RAW_PROCRUSTES} — skipping", file=sys.stderr)
     else:
-        wrap_procrustes(RAW_PROCRUSTES, OUT_PROCRUSTES, overlay_scene="scene6")
+        wrap_procrustes(
+            RAW_PROCRUSTES, OUT_PROCRUSTES,
+            overlay_scene="scene6",
+            show_droplines=args.drop_lines,
+        )
 
     print("\n=== per-face PCA toggle ===")
     if not RAW_PER_FACE.exists():

@@ -92,6 +92,34 @@ def _size_for(symbol: str, base: int = 8) -> float:
     return base
 
 
+def _drop_line_floor(zs: list[float]) -> float:
+    """Pick a z below every input so all drop lines render with
+    nonzero length (the lowest point would otherwise have no visible
+    line). Adds a small fraction of the z-range as breathing room."""
+    if not zs:
+        return 0.0
+    z_min = float(min(zs))
+    z_max = float(max(zs))
+    z_range = max(z_max - z_min, 1e-6)
+    return z_min - 0.08 * z_range
+
+
+def _drop_line_segments(
+    pts: list[np.ndarray], z_floor: float,
+) -> tuple[list[float | None], list[float | None], list[float | None]]:
+    """Build x/y/z lists for a single Scatter3d(mode='lines') trace
+    that drops a vertical from each pt to z_floor. ``None`` separators
+    break the polyline so each vertical is rendered independently."""
+    xs: list[float | None] = []
+    ys: list[float | None] = []
+    zs: list[float | None] = []
+    for pt in pts:
+        xs += [float(pt[0]), float(pt[0]), None]
+        ys += [float(pt[1]), float(pt[1]), None]
+        zs += [float(pt[2]), z_floor, None]
+    return xs, ys, zs
+
+
 def _load_stack(short: str) -> tuple[pd.DataFrame, np.ndarray]:
     """Load layer-stack hidden-state representation for `short`.
     Returns (df with split-HN quadrant column, X (n × n_layers·hidden_dim))."""
@@ -163,8 +191,32 @@ def _add_per_model_scene(
     """Add per-quadrant centroid markers + axis lines to one 3D scene.
 
     Plotly subplot scenes are addressed via ``scene{N}`` — caller
-    passes scene_idx so traces get attached to the right panel."""
+    passes scene_idx so traces get attached to the right panel.
+    Each centroid also gets a thin vertical drop line to a floor just
+    below the lowest centroid in the scene, anchoring depth so the
+    3D-ness is legible without orbiting."""
     scene = "scene" if scene_idx == 1 else f"scene{scene_idx}"
+    pts = list(centroids.values())
+    if pts:
+        z_floor = _drop_line_floor([float(pt[2]) for pt in pts])
+        xs, ys, zs = _drop_line_segments(pts, z_floor)
+        fig.add_trace(
+            go.Scatter3d(
+                x=xs, y=ys, z=zs,
+                mode="lines",
+                line=dict(color="rgba(128,128,128,0.45)", width=2),
+                hoverinfo="skip",
+                # Sentinel name + legendgroup let
+                # scripts/local/98_wrap_blog_3d_html.py recolor these
+                # at render time using the active theme's
+                # --text-muted over --bg-canvas. Default rgba mid-grey
+                # is just the standalone-view fallback.
+                name="_droplines",
+                legendgroup="droplines",
+                showlegend=False,
+                scene=scene,
+            )
+        )
     for q, pt in centroids.items():
         color = QUADRANT_COLORS.get(q, "#666")
         fig.add_trace(
@@ -198,8 +250,35 @@ def _add_overlay_scene(
     """Add the aligned overlay: each quadrant gets one marker per
     model + a connecting line through them so deviation reads
     visually. Models drawn in the order given; quadrant label
-    anchored on the reference model's marker."""
+    anchored on the reference model's marker.
+
+    Every per-(model × quadrant) marker also gets a thin vertical
+    drop line to a shared floor below the lowest aligned centroid,
+    so the 3D structure is legible at a glance instead of needing
+    the user to orbit the camera to disambiguate depth."""
     scene = "scene" if scene_idx == 1 else f"scene{scene_idx}"
+
+    # Drop lines first so markers render on top of them.
+    all_pts: list[np.ndarray] = []
+    for i in range(len(common)):
+        for m in models:
+            all_pts.append(cents_by_model[m][i])
+    if all_pts:
+        z_floor = _drop_line_floor([float(pt[2]) for pt in all_pts])
+        xs, ys, zs = _drop_line_segments(all_pts, z_floor)
+        fig.add_trace(
+            go.Scatter3d(
+                x=xs, y=ys, z=zs,
+                mode="lines",
+                line=dict(color="rgba(128,128,128,0.40)", width=1.5),
+                hoverinfo="skip",
+                # Sentinel — see _add_per_model_scene for rationale.
+                name="_droplines",
+                legendgroup="droplines",
+                showlegend=False,
+                scene=scene,
+            )
+        )
 
     # Per-quadrant per-model markers; quadrant label anchored on reference.
     for i, q in enumerate(common):
