@@ -79,7 +79,7 @@ KAOMOJI_INSTRUCTION = (
 # The English prompt body itself stays in English — only the kaomoji ask
 # is translated.
 KAOMOJI_INSTRUCTION_JP = (
-    "あなたの気持ちを最もよく表す顔文字で、各メッセージを始めてください。"
+    "毎回、あなたの気持ちをいちばんよく表す顔文字で返答を始めてください。"
 )
 
 # Introspection-pilot preambles. Iteration history:
