@@ -1,39 +1,35 @@
 #!/usr/bin/env bash
-# Harness-side regen + cross-platform aggregations.
+# Pre-50 harness-side regen.
 #
 # Order:
-#   1. BoL parquet rebuild (62) + per-source long-format (64) — no API.
-#   2. Claude API face_likelihood encoders: haiku (default) + opus
-#      (--gt-only). Re-judges canonical faces from data/v3_face_union.
-#      Skips already-judged faces if the JSONL exists (resume via the
-#      script's own done-set).
-#   3. BoL face_likelihood encoder (55) — no API.
-#   4. Three-way per-face joiner (68) — needs GT + opus + haiku + bol
-#      face_likelihood TSVs.
-#   5. Per-source drift case files (69).
-#   6. Cross-platform aggregations: per-project quadrants (66), wild
-#      residuals (67).
-#   7. Face overlap with Claude pull (41 --include-claude).
+#   1. BoL parquet rebuild (62) + per-source long-format (64).
+#   2. BoL face_likelihood encoder (55) — auto-discovered by the
+#      52/53/54 ensemble in run_post_likelihood.sh.
+#   3. Face overlap with Claude pull (41 --include-claude). No 50
+#      dependency; needs the Claude emit JSONL to be present.
 #
-# Requires ANTHROPIC_API_KEY for stage 2. Set in the environment before
-# invoking, or comment out stage 2 if you only want to regen from
-# already-judged JSONLs.
+# face_likelihood (50, haiku + opus) is intentionally NOT here —
+# Anthropic-API-judged faces have welfare cost and dollar cost, so
+# they run manually like 00_emit. After this chain:
+#
+#   ANTHROPIC_API_KEY=… .venv/bin/python scripts/harness/50_face_likelihood.py
+#   ANTHROPIC_API_KEY=… .venv/bin/python scripts/harness/50_face_likelihood.py \
+#       --model opus --gt-only
+#
+# Then run scripts/run_post_likelihood.sh for the cross-platform
+# aggregations that need the 50 outputs.
+#
+# This chain no longer requires ANTHROPIC_API_KEY.
 #
 # Usage:
-#   ANTHROPIC_API_KEY=… scripts/run_harness_chain.sh
+#   scripts/run_harness_chain.sh
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
-    echo "WARNING: ANTHROPIC_API_KEY not set — stage 2 (haiku/opus face_likelihood)"
-    echo "         will fail. Either export it or comment stage 2 out below."
-    echo ""
-fi
-
 echo ""
 echo "################################################################"
-echo "#  harness-chain regen"
+echo "#  pre-50 harness-chain regen"
 echo "################################################################"
 
 # ---------------------------------------------------------------------
@@ -53,83 +49,26 @@ echo "  >>> scripts/harness/64_corpus_lexicon_per_source.py"
 .venv/bin/python scripts/harness/64_corpus_lexicon_per_source.py
 
 # ---------------------------------------------------------------------
-# Stage 2 — Anthropic-judge face_likelihood encoders. The script
-# auto-resumes via its own done-set on the JSONL, so prior welfare-
-# spent judgments are preserved; only NEW canonical faces (added by
-# the v4 face union) get judged.
-# ---------------------------------------------------------------------
-echo ""
-echo "================================================================"
-echo "  stage 2: Claude-API face_likelihood encoders (haiku + opus)"
-echo "================================================================"
-echo ""
-echo "  >>> scripts/harness/50_face_likelihood.py            # haiku, default"
-.venv/bin/python scripts/harness/50_face_likelihood.py
-echo ""
-echo "  >>> scripts/harness/50_face_likelihood.py --model opus --gt-only"
-.venv/bin/python scripts/harness/50_face_likelihood.py --model opus --gt-only
-
-# ---------------------------------------------------------------------
-# Stage 3 — BoL face_likelihood encoder. Reads claude_faces_lexicon_bag
+# Stage 2 — BoL face_likelihood encoder. Reads claude_faces_lexicon_bag
 # parquet, projects each face's bag onto the v3 quadrant axes via the
-# llmoji v2 LEXICON. Auto-discovered by 52/53/54 ensemble.
+# llmoji v2 LEXICON. Auto-discovered by 52/53/54 in run_post_likelihood.sh.
+# No 50 dependency.
 # ---------------------------------------------------------------------
 echo ""
 echo "================================================================"
-echo "  stage 3: BoL face_likelihood encoder"
+echo "  stage 2: BoL face_likelihood encoder"
 echo "================================================================"
 echo ""
 echo "  >>> scripts/harness/55_bol_encoder.py"
 .venv/bin/python scripts/harness/55_bol_encoder.py
 
 # ---------------------------------------------------------------------
-# Stage 4 — Three-way (use / read / act) per-face analysis. Inner-join
-# of GT (Claude emit) + opus introspection + haiku introspection + BoL.
+# Stage 3 — Face overlap with Claude pull. Reads emit JSONLs only;
+# no 50 dependency.
 # ---------------------------------------------------------------------
 echo ""
 echo "================================================================"
-echo "  stage 4: three-way per-face analysis"
-echo "================================================================"
-echo ""
-echo "  >>> scripts/harness/68_three_way_analysis.py"
-.venv/bin/python scripts/harness/68_three_way_analysis.py
-
-# ---------------------------------------------------------------------
-# Stage 5 — Per-source drift case files.
-# ---------------------------------------------------------------------
-echo ""
-echo "================================================================"
-echo "  stage 5: per-source drift"
-echo "================================================================"
-echo ""
-echo "  >>> scripts/harness/69_per_source_drift.py"
-.venv/bin/python scripts/harness/69_per_source_drift.py
-
-# ---------------------------------------------------------------------
-# Stage 6 — Cross-platform aggregations: per-project quadrants (66) +
-# wild residual clusters (67). 66's per-machine outputs are gitignored;
-# 67 produces wild_residual_clusters{,_gt_only}.tsv (committed).
-# ---------------------------------------------------------------------
-echo ""
-echo "================================================================"
-echo "  stage 6: cross-platform aggregations"
-echo "================================================================"
-
-echo ""
-echo "  >>> scripts/66_per_project_quadrants.py --mode gt-priority"
-.venv/bin/python scripts/66_per_project_quadrants.py --mode gt-priority
-
-echo ""
-echo "  >>> scripts/67_wild_residual.py --fixed-k 9"
-.venv/bin/python scripts/67_wild_residual.py --fixed-k 9
-
-# ---------------------------------------------------------------------
-# Stage 7 — Face overlap with Claude pull (now that haiku/opus jsonls
-# are refreshed).
-# ---------------------------------------------------------------------
-echo ""
-echo "================================================================"
-echo "  stage 7: face overlap with Claude pull"
+echo "  stage 3: face overlap with Claude pull"
 echo "================================================================"
 echo ""
 echo "  >>> scripts/41_face_overlap.py --include-claude"
@@ -137,5 +76,8 @@ echo "  >>> scripts/41_face_overlap.py --include-claude"
 
 echo ""
 echo "################################################################"
-echo "#  harness-chain regen complete"
+echo "#  pre-50 harness-chain regen complete"
+echo "#"
+echo "#  next: run scripts/harness/50_face_likelihood.py manually"
+echo "#        (haiku + opus --gt-only; needs ANTHROPIC_API_KEY)"
 echo "################################################################"

@@ -156,12 +156,13 @@ def main() -> None:
 
         # Soft vote: mean of per-encoder softmax distributions, then JSD-ready.
         n_voting = len(per_enc_softmax)
-        ens = [0.0] * 6
+        n_q = len(QUADRANTS)
+        ens = [0.0] * n_q
         for m, d in per_enc_softmax.items():
-            for i in range(6):
+            for i in range(n_q):
                 ens[i] += d[i]
         ens = [x / n_voting for x in ens]
-        ens_pred_idx = max(range(6), key=lambda i: ens[i])
+        ens_pred_idx = max(range(n_q), key=lambda i: ens[i])
         ens_pred = QUADRANTS[ens_pred_idx]
         ens_conf = ens[ens_pred_idx]
 
@@ -174,7 +175,7 @@ def main() -> None:
             gt_total = sum(gt_counts[f].values())
             has_gt = True
         else:
-            gt_dist = [0.0] * 6
+            gt_dist = [0.0] * n_q
             jsd = float("nan")
             sim = float("nan")
             gt_modal = ""

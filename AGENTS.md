@@ -111,10 +111,17 @@ Full orchestrators:
 
 ```bash
 scripts/run_per_model.sh <model> [<suffix>] [<preamble>]
-scripts/run_local_chain.sh
-ANTHROPIC_API_KEY=... scripts/run_harness_chain.sh
-ANTHROPIC_API_KEY=... scripts/run_all.sh
+scripts/run_local_chain.sh         # pre-50 local
+scripts/run_harness_chain.sh       # pre-50 harness (no API key needed)
+scripts/run_post_likelihood.sh     # post-50 cross-platform aggregations
+ANTHROPIC_API_KEY=... scripts/run_all.sh   # everything, including manual 50 passes
 ```
+
+The three named chain scripts deliberately do NOT run face_likelihood
+(50). 50 has welfare and walltime cost and is run manually like
+`00_emit.py`. Order: `run_local_chain` → local 50 per encoder model →
+`run_harness_chain` → harness 50 (haiku + opus --gt-only) →
+`run_post_likelihood`. `run_all.sh` automates the full sequence.
 
 Core local chain:
 
