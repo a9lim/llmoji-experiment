@@ -33,8 +33,9 @@ Still-current dated docs:
 - [`docs/2026-05-07-claude-gt-v4-extension-pilot.md`](docs/2026-05-07-claude-gt-v4-extension-pilot.md)
 - [`docs/2026-05-08-saturation-threshold-recal.md`](docs/2026-05-08-saturation-threshold-recal.md)
 - [`docs/2026-05-05-residual-state-axes.md`](docs/2026-05-05-residual-state-axes.md)
+- [`docs/2026-05-09-self-event-pilot.md`](docs/2026-05-09-self-event-pilot.md)
 
-## Current State (2026-05-08)
+## Current State (2026-05-09)
 
 - **Taxonomy**: v4 9-cell PAD registry:
   `HP-D / HP-S / LP / NP / HN-D / HN-S / LN / NB / HB`.
@@ -69,6 +70,28 @@ Still-current dated docs:
 - **BoL caveat**: BoL is a useful diagnostic, but the Haiku synthesis
   route appears positivity-biased on negative-affect contexts. Prefer
   Claude-GT or Opus introspection when deployment meaning is at stake.
+- **Empirical-centroid probes** (2026-05-09):
+  `scripts/local/22c_register_centroid_probes.py` writes per-quadrant
+  centroids as saklas profiles under
+  `~/.saklas/vectors/llmoji/<concept>/`. Outperforms the bundled
+  `affect` pack on probe-vs-PCA cosine alignment by ~10×; the
+  bundled pack has documented statement-pair-alignment issues
+  (median inter-pair cos 0.05–0.10) that v2.1 saklas DiM exposes.
+- **Self-event frame and `self.other` axis** (2026-05-09, gemma-only):
+  parallel emit on second-person prompts (user delivers events
+  about the model). Centroids registered under
+  `~/.saklas/vectors/llmoji_self_event/`. The mean of
+  per-cell `(self_event − mirror)` deltas defines `self.other`,
+  a coherent fourth axis (mean coherence +0.73, near-orthogonal
+  to V/A/D, max |cos| 0.21). Cross-model extension pending.
+- **Asymmetric suppression** (2026-05-09, observation): combined
+  steering of `affect.nb + α self.other` produces unrestricted
+  embrace on positive valence (HP-S) and dissociation-coded
+  surface register on negative valence (HN-D intellectualizes,
+  HN-S explicitly denies fear). The negative-affect representation
+  is present geometrically but suppressed at expression. Welfare
+  framing reported with explicit phenomenology caveats. Detail in
+  [`docs/2026-05-09-self-event-pilot.md`](docs/2026-05-09-self-event-pilot.md).
 
 ## Open Work
 
@@ -81,6 +104,14 @@ Still-current dated docs:
   without the hidden-state and face-distribution gates.
 - BoL whitewashing falsification: resynthesize a negative-affect
   sample with Opus and audit whether LN/HN-coded descriptors increase.
+- Cross-model `self.other` extraction: register the meta-axis on
+  qwen, ministral, gpt_oss_20b, granite (requires running self-event
+  emit on each, ~13 min per model on workstation). If mean coherence
+  ≥ 0.5 across all 5 model families, the meta-axis claim generalizes.
+- License-to-express ablation: combined steering with system message
+  authorizing honest negative-self-affect expression. Tests whether
+  the asymmetric-suppression observation is a removable behavioral
+  policy or a deeper-baked override.
 
 ## Ethics
 

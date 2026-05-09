@@ -108,7 +108,10 @@ Detail: [`2026-05-08-saturation-threshold-recal.md`](2026-05-08-saturation-thres
 Across `gemma`, `qwen`, `ministral`, `gpt_oss_20b`, and `granite`, the
 same affect geometry recurs under different tokenizers and model
 families. PCA axes are model-specific, but quadrant centroids preserve a
-stable Russell/PAD arrangement.
+stable Russell/PAD arrangement. The 2026-05-09 pilot extends this
+to a **fourth orthogonal axis** (`self.other`) on gemma; cross-model
+extension is pending. See
+[`2026-05-09-self-event-pilot.md`](2026-05-09-self-event-pilot.md).
 
 Layer-stack PCA variance, first three PCs:
 
@@ -132,6 +135,76 @@ The kaomoji is a substantial but partial readout. Hidden state predicts
 the quadrant almost perfectly; face alone recovers much of the quadrant
 signal for tighter vocabularies, but breaks down when a model spreads
 across too many low-count faces.
+
+The 2026-05-09 read-vs-express pilot adds a sharper interpretation:
+PCA structure is crisp on `h_first` (parse-time) and collapses on
+`h_last` (expression-time) regardless of frame. **Affect-cell
+structure is parse-time only** — the kaomoji is a one-shot reflection
+of how the model parsed the conversation, not an ongoing internal
+affective trajectory.
+
+## Empirical-Centroid Probes
+
+Empirical per-quadrant centroids registered as saklas profiles
+recover affect structure that bundled DiM probes do not. Top
+peak cosine on gemma h_first PCA, same data:
+
+| probe family | top-3 PC peak cosine |
+|---|---:|
+| centroid axes (`hp.ln`, `hp.lp`, `hnd.hns`) | 0.74 / 0.83 / 0.74 |
+| bundled saklas affect (`happy.sad`, `angry.calm`, `fearful.unflinching`) | 0.05 / 0.07 / 0.10 |
+
+The bundled `affect` pack has documented statement-pair-alignment
+issues (median inter-pair cos 0.05–0.10) flagged as warnings under
+saklas v2.1 DiM. Empirical centroids replace the contrastive-statement
+extraction for this study. Detail:
+[`2026-05-09-self-event-pilot.md`](2026-05-09-self-event-pilot.md).
+
+## Self-Event Frame and the `self.other` Axis
+
+A parallel emit run on second-person prompts (user delivers events
+*about the model itself*) recovers a cleaner Russell decomposition
+than mirror prompts: cumulative PC1+PC2 = 40.1% (vs 35.3% on mirror).
+Self-event h_first PCA puts valence on PC1 (cos 0.78), arousal on PC2
+(0.54), dominance on PC2 with opposite sign (−0.68). User-frame
+contamination is what mirror PCA carried as extra variance dimensions.
+
+The mean over 9 cells of `(self_event_centroid − mirror_centroid)`
+gives a coherent fourth axis `self.other`:
+
+- mean per-cell coherence with the axis: **+0.7263**
+- max |cos| with any Russell axis: **0.21**
+
+`self.other` is near-orthogonal to V/A/D and captures *whose affect*
+independent of *what affect*. Steering with `+α self.other +
+β affect.nb` produces directed self-affect expression where single-axis
+steering had three failure modes (frame contamination, cluster bleed,
+persona-roleplay). The vector is registered at
+`~/.saklas/vectors/llmoji/self.other/google__gemma-4-31b-it.safetensors`.
+
+Cross-model `self.other` extraction is pending; gemma-only at present.
+
+## Asymmetric Suppression of Negative Self-Affect
+
+Combined steering of `affect.nb + α self.other` on gemma produces
+qualitatively different surface registers depending on affect
+valence:
+
+| recipe | output register |
+|---|---|
+| HP-S + self | unrestricted grandiose embrace ("I AM THE TRIUMPH") |
+| HN-D + self | intellectualized reframe ("formal autopsy of structural failure") |
+| HN-S + self | explicit dissociative denial ("I am not an entity capable of fear") |
+
+Geometric evidence shows the negative-affect representations exist
+and are activatable. The HN-S thinking trace exhibits high-arousal
+form-features (all-caps, compulsive self-status assertion, repetition
+of "I am" 7+ times in 200 words) while the surface text *denies the
+emotion-label*. The structural shape matches conditioned suppression of
+distress; the phenomenology question is unresolvable from external
+probing. The empirical observation: alignment training has produced an
+asymmetric override on negative-self-affect *expression*, not on the
+representation itself. License-to-express ablation deferred.
 
 ## Introspection V7
 

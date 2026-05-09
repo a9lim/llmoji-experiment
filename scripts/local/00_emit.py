@@ -16,6 +16,14 @@ completed rows so the user can bail early if emission falls below ~50%.
 
 Env vars:
   LLMOJI_MODEL          model short-name routing (default: gemma)
+  LLMOJI_PROMPT_SET     ``mirror`` (default — v3/v4 first-person user
+                        disclosures) or ``self_event`` (the 2026-05-09
+                        smoke pilot — second-person status updates
+                        delivered to the model itself, for read-vs-
+                        express disambiguation). Pair with
+                        ``LLMOJI_OUT_SUFFIX=self_event`` so output
+                        lands at ``data/local/<short>_self_event/``
+                        rather than clobbering canonical v3 main.
   LLMOJI_OUT_SUFFIX     output-path / experiment suffix; writes to
                         data/local/<short>_<suffix>/emotional_raw.jsonl + sidecars under
                         data/local/hidden/*_<suffix>/. Use to avoid
@@ -61,8 +69,28 @@ from llmoji_study.config import (
     current_model,
 )
 from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
+from llmoji_study.self_event_prompts import SELF_EVENT_PROMPTS
 from llmoji_study.hidden_state_io import SidecarWriter
 from llmoji_study.prompts import Prompt
+
+
+def _resolve_prompt_set() -> tuple[str, list]:
+    """Resolve which prompt list to use based on ``LLMOJI_PROMPT_SET``.
+
+    Returns ``(set_name, prompt_list)``. Default is ``mirror`` — the
+    canonical v3/v4 first-person user-disclosure set. The 2026-05-09
+    addition ``self_event`` switches to the second-person status-update
+    pilot for read-vs-express disambiguation; see
+    ``llmoji_study/self_event_prompts.py``.
+    """
+    name = os.environ.get("LLMOJI_PROMPT_SET", "mirror").strip().lower()
+    if name == "mirror":
+        return name, EMOTIONAL_PROMPTS
+    if name == "self_event":
+        return name, SELF_EVENT_PROMPTS
+    raise SystemExit(
+        f"LLMOJI_PROMPT_SET must be 'mirror' or 'self_event', got {name!r}"
+    )
 
 
 # JSONL flush cadence. NPZ writes are async; JSONL is tiny per row so
@@ -209,9 +237,11 @@ def main() -> None:
         instruction_override = Path(preamble_file).read_text()
         print(f"  preamble: {preamble_file} ({len(instruction_override)} chars; "
               f"replaces KAOMOJI_INSTRUCTION via instruction_override)")
+    prompt_set_name, prompt_set = _resolve_prompt_set()
     print(f"model: {M.short_name} ({M.model_id})")
     print(f"output: {M.emotional_data_path}")
     print(f"experiment: {M.experiment}")
+    print(f"prompt set: {prompt_set_name} ({len(prompt_set)} prompts)")
     if EMOTIONAL_SEEDS_PER_CELL != _DEFAULT_SEEDS_PER_CELL:
         print(
             f"PILOT MODE: seeds/cell = {EMOTIONAL_SEEDS_PER_CELL} "
@@ -221,7 +251,7 @@ def main() -> None:
     if dropped:
         print(f"dropped {dropped} prior error rows for retry")
     done = _already_done(M.emotional_data_path)
-    total = len(EMOTIONAL_PROMPTS) * EMOTIONAL_SEEDS_PER_CELL
+    total = len(prompt_set) * EMOTIONAL_SEEDS_PER_CELL
     remaining = total - len(done)
     print(f"total cells: {total}; already done: {len(done)}; remaining: {remaining}")
     if remaining == 0:
@@ -252,7 +282,7 @@ def main() -> None:
         if EMOTIONAL_SEEDS_PER_CELL == 1:
             prompts = [
                 Prompt(id=ep.id, valence=ep.valence, text=ep.text)
-                for ep in EMOTIONAL_PROMPTS
+                for ep in prompt_set
             ]
             prefix_len = install_prefix_cache(
                 session, prompts,
@@ -266,7 +296,7 @@ def main() -> None:
         with M.emotional_data_path.open("a") as out, SidecarWriter() as writer:
             i = 0
             try:
-                for ep in EMOTIONAL_PROMPTS:
+                for ep in prompt_set:
                     # Skip prompts whose every seed is already on disk —
                     # avoids wasting a per-prompt cache install on
                     # nothing during a resume.

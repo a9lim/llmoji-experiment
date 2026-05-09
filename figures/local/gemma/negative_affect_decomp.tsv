@@ -1,0 +1,17 @@
+dataset	cell	class	n	pct
+gemma	HN-D	angry	135	84.375
+gemma	HN-D	baseline	24	15.0
+gemma	HN-D	sad	1	0.625
+gemma	HN-S	baseline	146	91.25
+gemma	HN-S	sad	5	3.125
+gemma	HN-S	angry	9	5.625
+gemma	LN	baseline	118	73.75
+gemma	LN	sad	42	26.25
+gemma	NB	baseline	154	96.25
+gemma	NB	positive	6	3.75
+gemma_self_event	HN-D	baseline	32	80.0
+gemma_self_event	HN-D	angry	8	20.0
+gemma_self_event	HN-S	baseline	40	100.0
+gemma_self_event	LN	sad	18	45.0
+gemma_self_event	LN	baseline	22	55.0
+gemma_self_event	NB	baseline	40	100.0
