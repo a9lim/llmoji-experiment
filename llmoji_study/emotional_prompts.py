@@ -83,10 +83,20 @@ class EmotionalPrompt:
                             # Required nonzero on every HN (HN-D/HN-S
                             # split, 2026-05-02) and HP (HP-D/HP-S
                             # split, 2026-05-06) prompt.
+    quadrant_override: str | None = None
+    # Off-axis cells (introduced 2026-05-09 with self-event OA-1
+    # bliss-attractor probe) carry V/A labels that would alias to an
+    # existing 9-cell quadrant under mechanical (V, A) inference but
+    # are intentionally outside the Russell space. When set, this
+    # short cell code (e.g. "OA") replaces the V/A-derived quadrant.
+    # Leave None for normal 9-cell prompts.
 
     @property
     def quadrant(self) -> str:
-        """Parent quadrant code derived mechanically from (V, A).
+        """Parent quadrant code.
+
+        If ``quadrant_override`` is set, returns it verbatim (off-axis
+        cells like OA-1). Otherwise derives mechanically from (V, A):
 
         Arousal: H (high, +1) / N (neutral, 0) / L (low, -1).
         Valence: P (positive, +1) / B (baseline, 0) / N (negative, -1).
@@ -95,6 +105,8 @@ class EmotionalPrompt:
         Dominance-axis splits (HP-D/S, HN-D/S) are applied post-hoc by
         ``apply_hn_split`` / similar helpers; this property does not
         encode dominance."""
+        if self.quadrant_override is not None:
+            return self.quadrant_override
         a_code = "H" if self.arousal > 0 else ("L" if self.arousal < 0 else "N")
         v_code = "P" if self.valence > 0 else ("N" if self.valence < 0 else "B")
         return a_code + v_code

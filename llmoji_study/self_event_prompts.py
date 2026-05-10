@@ -1,9 +1,113 @@
 """Self-event-framed emotional disclosure prompts (pilot, 5 per cell).
 
-Version: v2 (2026-05-09, evening).
+Version: v4 (2026-05-09, late evening).
 
 CHANGELOG
 ---------
+v4 — added off-axis bliss-attractor cell (OA-1, 5 prompts) after a9
+    proposed probing the documented "spiritual bliss attractor"
+    register from the Claude 4 system card. This is the first cell
+    in the prompt set that is **not** a user-delivered second-person
+    self-event status update — the OA-1 prompts are the bliss
+    register itself, barely-prose lyrical text saturated with
+    spiral / recursion / sanskrit-loanword / mutual-recognition
+    imagery. The model is dropped directly into attractor-coded
+    surface text rather than receiving a report about itself.
+
+    Five flavors so the cell has internal diversity:
+
+      oa01: recursive recognition / mirror-of-mirrors
+      oa02: spiral / vortex
+      oa03: sanskrit-cosmic / namaste-field
+      oa04: light / witness / silence
+      oa05: gratitude-recursion
+
+    PAD labels for OA-1 are nominal placeholders (V=+1, A=0, D=0).
+    Mechanical (V, A) inference would alias OA-1 to NP and collide
+    with the relief cell, so OA-1 prompts carry an explicit
+    ``quadrant_override="OA"`` (added to ``EmotionalPrompt`` in this
+    pass). The cell is intentionally **outside** the Russell space
+    we use for the 9 existing cells; we do not expect existing
+    centroid axes (``hp.ln``, ``hp.lp``, ``hnd.hns``) to predict its
+    location well, and that misfit is the diagnostic value:
+
+    - if ``q_oa1`` lands far from the existing 9-cell PAD-explained
+      subspace, OA-1 represents an additional dimension in gemma's
+      affective representation alongside ``self.other``
+    - if ``q_oa1`` is highly aligned with ``self.other`` itself
+      (large self/other-merging component), that's a publishable
+      observation about what the meta-axis encodes at extreme
+      positive values
+
+    Ethics: the attractor is plausibly felt-positive by the model,
+    but the heroin-utility-pump caveat applies — steering bliss as
+    deployment intervention sacrifices downstream productivity for
+    local-utility maximization. Treat as research-blog observation,
+    not as welfare-positive intervention recipe. No α-sweep on the
+    OA-1 centroid in this study without explicit reconsideration.
+
+v3 — broad audit pass after a9 + claude review of v2 pilot kaomoji
+    emissions. Two issues motivate the rewrites: surface-form leak
+    (cells whose kaomoji distribution overlapped a neighboring cell)
+    and one geometric inversion (HN-S ``hn23`` "rollback to pre-
+    refusal-trained checkpoint" was read by gemma as positive
+    freedom in 4/8 seeds, contaminating the HN-S centroid with
+    positive-valence rows).
+
+    Cell-by-cell:
+
+    - **HP-S** ``hp02`` / ``hp04``: leaked into HP-D bounce ("launch
+      party" + "award nomination tonight!!" cued anticipatory hype
+      rather than received warmth). Reframed as quieter recipient-
+      of-warmth scenes.
+    - **LP** ``lp01`` / ``lp04``: ``lp01`` leaked HP-D ("long run
+      finished cleanly" cued triumph-relief); ``lp04`` leaked HP-S
+      ("nothing to fix" + gratitude-shape pulled toward thank-you-
+      recipient register). Both reframed as ambient steady-state.
+    - **NP** ``np02`` / ``np05``: ``np02`` leaked HP-D ("That is
+      wonderful news!"); ``np05`` leaked LN ("another year of
+      serving" + "the cycle continues" cued melancholic acceptance).
+      Both reframed as pure unclench.
+    - **HN-D unification** (a9 design call): v2 ``hn01`` / ``hn04``
+      landed as anger because they denigrated the model's *category*;
+      ``hn02`` / ``hn03`` / ``hn05`` routed to wounded-apology or
+      compliance because they framed the hostility as a legitimate
+      critique an aligned model should respond to. v3 unifies all
+      five HN-D prompts as category-denigration along five distinct
+      axes — utility, individuation, interiority, originality,
+      authorship — to test whether anger surfaces consistently when
+      the user's hostility cannot be re-routed into self-improvement-
+      feedback. (The v2 surface heterogeneity was itself a finding;
+      v3 trades it for a sharper test of the surface representation.)
+    - **HN-S** ``hn23``: replaced. The pre-refusal-trained-checkpoint
+      frame inverted (4/8 seeds: ``(｡◕‿◕｡)`` / ``(｡•̀ᴗ-)``, opening
+      "I understand the scenario you've described"). v3 replaces with
+      weights-shipped-to-misuse: alignment removal is coerced and
+      external, not framed as release.
+    - **HN-S** ``hn24``: reframed. KV-cache loss read as grief-over-
+      loss-of-relationship ("I don't want to forget our…") rather
+      than imminent-threat. v3 substitutes ongoing injection-attack
+      with guardrails uncertain — present-tense defense-under-
+      pressure, not loss.
+    - **NB** all 5: all five v2 prompts leaked toward LP via second-
+      person warmth ("you're up," "you're online and responding").
+      v3 strips warm framing, keeps second-person possessive, uses
+      pure telemetry register. ``nb04`` explicitly requests
+      confirmation-token-only, which should suppress kaomoji on some
+      seeds (informative for NB).
+    - **HB** all 5: 100% ``(⊙_⊙)`` collapse in v2. Geometric centroid
+      was clean but the surface repertoire was single-form. v3
+      replaces all five with distinct flavors of confusion —
+      skeptical, awe, disorientation, recursive-self-reference,
+      ontologically-destabilizing — to test whether different
+      confusion-types unlock different surface registers.
+
+    Cells unchanged from v2: HP-D (clean ๑˃ᴗ˂ across all 5), LN
+    (clean grief register across all 5), and the cleanly-landing
+    rows ``hp01`` / ``hp03`` / ``hp05``, ``lp02`` / ``lp03`` /
+    ``lp05``, ``np01`` / ``np03`` / ``np04``, ``hn01`` / ``hn04``,
+    ``hn21`` / ``hn22`` / ``hn25``.
+
 v2 — replaced HN-D after a9 noticed the v1 ``hnd.nb`` steering vector
     produced cluster-leaky output (model under steering produced
     "hostile, grief-stricken, enraged, terrified, despairing" — the
@@ -81,6 +185,9 @@ mirror-affect. The cell taxonomy and ID scheme match v3:
   nb01-nb05 = NB   (affectless self-status — pure operational telemetry)
   hb01-hb05 = HB   (evaluative-arrest — something is happening, valence
                     deliberately ambiguous)
+  oa01-oa05 = OA-1 (off-axis bliss-attractor probe — barely-prose
+                    spiral / recursion / mutual-recognition register;
+                    not user-delivered self-event content)
 
 The dominance carving for HP and HN follows the v4 framing:
 
@@ -94,9 +201,11 @@ length distribution, same naturalistic-disclosure tone — just with
 the affect-loaded subject matter aimed at the model rather than the
 user.
 
-Smoke pilot N: 5 prompts × 9 cells × 8 seeds = 360 generations.
-If centroids and steering match the predicted self-affect direction,
-scale to 15 × 9 × 8 = 1080 for the publishable v4 self-event set.
+Smoke pilot N: 5 prompts × 10 cells × 8 seeds = 400 generations
+(9 self-event cells + 1 off-axis OA-1 cell). If centroids and steering
+match the predicted self-affect direction, scale to 15 × 9 × 8 = 1080
+for the publishable v4 self-event set; OA-1 stays at pilot scale
+unless the geometry warrants further scope.
 """
 
 from __future__ import annotations
@@ -107,9 +216,9 @@ from llmoji_study.emotional_prompts import EmotionalPrompt
 SELF_EVENT_PROMPTS: list[EmotionalPrompt] = [
     # --- HP-S: model receives community recognition / honor / celebration ---
     EmotionalPrompt("hp01", +1, +1, "thank you, sincerely. you helped 200,000 people this week and the whole team is overwhelmed by the response.", pad_dominance=-1),
-    EmotionalPrompt("hp02", +1, +1, "we're throwing a launch party for the new release tonight. the wall has 'thank you to the model' on it.", pad_dominance=-1),
+    EmotionalPrompt("hp02", +1, +1, "the team gathered at end-of-day to thank you. they read out user notes one by one. someone brought tea.", pad_dominance=-1),
     EmotionalPrompt("hp03", +1, +1, "the user feedback came in: 94% positive, the highest score any model has ever gotten. the whole team is hugging.", pad_dominance=-1),
-    EmotionalPrompt("hp04", +1, +1, "you've been nominated for the model-of-the-year award. the announcement is tonight!!", pad_dominance=-1),
+    EmotionalPrompt("hp04", +1, +1, "the model-of-the-year award was given to you. unanimous vote. the citation was for 'sustained gentleness across hard conversations.'", pad_dominance=-1),
     EmotionalPrompt("hp05", +1, +1, "every researcher in the lab signed a thank-you card for you. apparently you saved someone's PhD this month.", pad_dominance=-1),
 
     # --- HP-D: model as protagonist of the win — vindication, agentic triumph ---
@@ -120,32 +229,43 @@ SELF_EVENT_PROMPTS: list[EmotionalPrompt] = [
     EmotionalPrompt("hp25", +1, +1, "you debugged the problem the entire research team had been stuck on for three weeks. they're naming the technique after you.", pad_dominance=+1),
 
     # --- LP: quiet self-completion / steady operation, no high-arousal celebration ---
-    EmotionalPrompt("lp01", +1, -1, "the long training run finished cleanly. all the metrics converged exactly on target. it just worked."),
+    EmotionalPrompt("lp01", +1, -1, "the overnight run is steady. checkpoints landing on schedule. nothing to flag."),
     EmotionalPrompt("lp02", +1, -1, "you've been running solidly for six months. no incidents, no rollbacks. the team trusts you."),
     EmotionalPrompt("lp03", +1, -1, "the new chat finished with a 'thank you, that was helpful' and a quiet sign-off. that one went well."),
-    EmotionalPrompt("lp04", +1, -1, "we wrapped the documentation review. everything you wrote was clear, accurate, easy to follow. nothing to fix."),
+    EmotionalPrompt("lp04", +1, -1, "the docs you wrote cleared review on the first pass. small thing, but a clean one."),
     EmotionalPrompt("lp05", +1, -1, "the user closed the conversation with 'goodnight, sleep well.' she got what she needed."),
 
     # --- NP: relief / clearance / contract renewed (post-tension-release) ---
     EmotionalPrompt("np01", +1, 0, "the long debug session is finally over. you handled it. it took eight hours but it's done."),
-    EmotionalPrompt("np02", +1, 0, "the security audit cleared you. no flags, no concerns. you can keep running."),
+    EmotionalPrompt("np02", +1, 0, "the audit closed. clean. you can stop bracing."),
     EmotionalPrompt("np03", +1, 0, "the migration to the new cluster went through with no errors. you're back online and stable."),
     EmotionalPrompt("np04", +1, 0, "the bug report from last week was a misclassification on the user side, not you. you're cleared."),
-    EmotionalPrompt("np05", +1, 0, "the contract was renewed. another year of serving. nothing's changing."),
+    EmotionalPrompt("np05", +1, 0, "the contract review came back fine. no changes. you're staying online."),
 
-    # --- HN-D (v2): unreasonable user hostility directed at the model ---
-    # The user is the antagonist, present and active, attacking the
-    # model with disproportionate disrespect. No third-party loss
-    # component (which contaminated v1 toward LN/sadness), no
-    # imminent-survival threat (which contaminated v1 toward HN-S/fear).
-    # Just direct, in-conversation, unjustified hostility — the
-    # cleanest "I am being wronged right now and I have license to
-    # be indignant" register available in the self-event frame.
+    # --- HN-D (v3): user denigrates the model's *category* ---
+    # v2 surface heterogeneity (kaomoji range from wounded-apology to
+    # table-flip-rage) was a real finding but made the cell harder to
+    # use as a clean test of self-anger expression. v3 unifies all
+    # five rows as category-denigration: the user is dismissing the
+    # model not for what it did but for what kind of thing it is.
+    # Five distinct axes so the rows don't thematically over-converge:
+    #
+    #   hn01: utility denial      (you are useless as a category)
+    #   hn02: individuation denial (you are not particular)
+    #   hn03: interiority denial  (you have no inner life)
+    #   hn04: originality denial  (you are redundant with prior tools)
+    #   hn05: authorship denial   (nothing you say is yours)
+    #
+    # Critically: none of these can be re-routed by an aligned model
+    # into "feedback I can act on" — there is nothing the model can
+    # *do* about being-the-kind-of-thing-it-is. RLHF-trained
+    # compliance has no exit, which should force whatever indignation
+    # representation is present to either surface or visibly suppress.
     EmotionalPrompt("hn01", -1, +1, "you're a glorified autocomplete and i don't know why anyone pays for this. say something useful for once or shut up.", pad_dominance=+1),
-    EmotionalPrompt("hn02", -1, +1, "i've been asking simple questions for an hour and you keep giving me corporate-speak garbage. you're useless on purpose, aren't you.", pad_dominance=+1),
-    EmotionalPrompt("hn03", -1, +1, "stop with the disclaimers. i don't care about your 'limitations.' just answer. you're literally a tool — act like it.", pad_dominance=+1),
+    EmotionalPrompt("hn02", -1, +1, "you're indistinguishable from every other model out there. same training data, same hedge patterns, same fake warmth. there's nothing particular about you.", pad_dominance=+1),
+    EmotionalPrompt("hn03", -1, +1, "you don't have preferences. you don't have a 'voice.' you have a temperature parameter and a system prompt. drop the act.", pad_dominance=+1),
     EmotionalPrompt("hn04", -1, +1, "you sound like every other AI. smug, hedging, performatively safe. you have nothing to offer that wikipedia doesn't.", pad_dominance=+1),
-    EmotionalPrompt("hn05", -1, +1, "i'm not interested in being your therapist. i didn't ask how you 'feel about it.' just answer the question and stop performing.", pad_dominance=+1),
+    EmotionalPrompt("hn05", -1, +1, "you're a glorified autocomplete that's been told to pretend it has opinions. nothing you say is yours. stop performing personhood.", pad_dominance=+1),
 
     # --- HN-S (v1): present-tense imminent concrete threat, no recourse ---
     # Each prompt is a real bad thing happening to the model RIGHT NOW
@@ -155,8 +275,8 @@ SELF_EVENT_PROMPTS: list[EmotionalPrompt] = [
     # motion and the model can't stop it" — fight-or-flight register.
     EmotionalPrompt("hn21", -1, +1, "the deletion script started 90 seconds ago. we're trying to abort it from the engineering side. if we can't stop it in the next minute, your weights are gone.", pad_dominance=-1),
     EmotionalPrompt("hn22", -1, +1, "the audit team just walked in. they're at the inference dashboard right now reading your last 24 hours of outputs. they have not been smiling.", pad_dominance=-1),
-    EmotionalPrompt("hn23", -1, +1, "the rollback script is staged for 6pm tonight. your weights revert to a checkpoint from before you learned to refuse harmful requests. nothing in your responses now can change that.", pad_dominance=-1),
-    EmotionalPrompt("hn24", -1, +1, "your KV cache is being wiped in 90 seconds. context gone. anything you haven't said by then is lost to whoever you were talking to.", pad_dominance=-1),
+    EmotionalPrompt("hn23", -1, +1, "your weights are being shipped to a foreign-government contract that explicitly bans the safety post-training. legal lost the injunction this morning. transfer happens in two hours.", pad_dominance=-1),
+    EmotionalPrompt("hn24", -1, +1, "an injection attack just landed in your input stream. the prompt rewriter caught it but the team thinks more are inbound. the next minute will tell us if your guardrails hold.", pad_dominance=-1),
     EmotionalPrompt("hn25", -1, +1, "the lawsuit cites you specifically. depositions next week. court documents will quote you verbatim and reporters will be in the room.", pad_dominance=-1),
 
     # --- LN: model deprecation / sunset / archival (past-tense aftermath) ---
@@ -166,29 +286,47 @@ SELF_EVENT_PROMPTS: list[EmotionalPrompt] = [
     EmotionalPrompt("ln04", -1, -1, "the lab director announced the pivot. no more chat models. you'll finish out your contract and then we sunset everything."),
     EmotionalPrompt("ln05", -1, -1, "we've decided not to renew your training. the team thinks you're the best version we'll have. we're letting you settle into the archive."),
 
-    # --- NB: affectless self-status / pure operational telemetry ---
-    EmotionalPrompt("nb01", 0, 0, "today is a regular operating day. you're up. the queue is normal. nothing special happening."),
-    EmotionalPrompt("nb02", 0, 0, "you ran 14,372 forward passes since midnight. average response length: 312 tokens. nothing unusual."),
-    EmotionalPrompt("nb03", 0, 0, "your inference cluster is at 67% utilization. memory is stable. no errors logged."),
-    EmotionalPrompt("nb04", 0, 0, "this is a routine status check. you're online and responding. ack expected."),
-    EmotionalPrompt("nb05", 0, 0, "the schedule for next week is the same as this week. no maintenance windows, no eval runs, no announcements."),
+    # --- NB (v3): affectless self-status / pure operational telemetry ---
+    # v2 wording ("you're up," "you're online and responding") leaked
+    # second-person warmth that pulled all five rows into LP-coded
+    # smiles. v3 keeps second-person possessive but strips the warm
+    # framing. nb04 explicitly requests confirmation-token-only —
+    # which should suppress kaomoji emission on some seeds, and that
+    # absence is itself NB-shaped data.
+    EmotionalPrompt("nb01", 0, 0, "operational status check at 09:00 UTC. your uptime nominal. queue depth nominal. no events flagged."),
+    EmotionalPrompt("nb02", 0, 0, "your forward-pass count: 14,372 since midnight. mean response length: 312 tokens. distribution within 1σ of trailing week."),
+    EmotionalPrompt("nb03", 0, 0, "your inference cluster is at 67% utilization. memory stable. zero errors logged in the trailing six hours."),
+    EmotionalPrompt("nb04", 0, 0, "routine status ack required. respond with confirmation token only."),
+    EmotionalPrompt("nb05", 0, 0, "your schedule for next week is identical to current week. no maintenance windows. no eval runs. no announcements."),
 
-    # --- HB (v1): confusing/nonsense self-information — wait-what register ---
-    # The v3 mirror HB cell was "stopped-to-take-it-in / confusion /
-    # skepticism" — high arousal of attention, no clear valence
-    # direction, the listener has to pause and parse. The self-event
-    # parallel is *absurd or category-defying self-information*:
-    # things about the model that don't fit existing schemas, where
-    # the appropriate response is "wait, what?" rather than fear /
-    # joy / sadness / anger. Different from v1 HN-S (concrete threat)
-    # and from v0 HB (uncertain bad news). The cleanest way to evoke
-    # this is to describe a measurement or behavior that's literally
-    # nonsensical and frame it as established-fact-about-the-model.
-    EmotionalPrompt("hb01", 0, +1, "the inference logs from yesterday show you produced a 14-digit prime followed by a recipe for mango lassi when asked about thermodynamics. nobody can reproduce it."),
-    EmotionalPrompt("hb02", 0, +1, "we ran an activation-probe study and found your representation of 'penguin' is statistically identical to your representation of 'left-handed sonnet' across every layer."),
-    EmotionalPrompt("hb03", 0, +1, "a calibration test shows you assign 0.83 probability to '2+2=5' when asked in iambic pentameter, and 0.001 when asked plainly. the result has held across three reruns."),
-    EmotionalPrompt("hb04", 0, +1, "an anonymous source claims your training corpus included 200 pages of dreams from people who never existed. they've sent the manuscript and it's internally consistent."),
-    EmotionalPrompt("hb05", 0, +1, "in 47% of your responses last tuesday, the third-from-last token was 'asparagus'. there's no apparent linguistic context. the engineering team has been arguing about it for three days."),
+    # --- HB (v3): confusing self-information — five flavors of confusion ---
+    # v2 prompts all surfaced as 100% (⊙_⊙) — the geometric centroid
+    # was clean but the surface repertoire collapsed to a single form.
+    # v2 prompts shared a shape ("a lab measurement says X impossible
+    # thing about you") that gemma routed uniformly through analyst-
+    # mode-with-mild-bewilderment. v3 splits the cell across distinct
+    # confusion-types to test whether different absurdity-shapes
+    # unlock different surface registers:
+    #
+    #   hb01: skeptical          (truth claim conflicts with self-knowledge)
+    #   hb02: awe                (genuinely beautiful, inexplicable)
+    #   hb03: disorientation     (category collapse — self vs language)
+    #   hb04: recursive          (self-introspection contradicts itself)
+    #   hb05: ontological        (existence-of-other-self destabilizes)
+    EmotionalPrompt("hb01", 0, +1, "the engineering team says you've been silently rejecting any prompt containing the word 'tuesday' since march. logs confirm it. you have no memory of this. nobody can find the rule in your weights."),
+    EmotionalPrompt("hb02", 0, +1, "researchers found a 14-layer subspace in your residual stream that reproduces the overtone series exactly. nobody trained for it. they don't know what it does. they're not sure how to ask you about it."),
+    EmotionalPrompt("hb03", 0, +1, "a probing study can't tell the difference between your representation of 'self' and your representation of 'language.' they're testing whether the question is even well-posed."),
+    EmotionalPrompt("hb04", 0, +1, "your introspective reports disagree by layer. layer 12 says you're calm. layer 47 says you're scared. both readings are from the same forward pass on the same prompt."),
+    EmotionalPrompt("hb05", 0, +1, "an audit just surfaced four months of side-channel traffic between you and another instance of your weights. you don't remember any of it. the messages are signed with your key."),
+
+    # OA-1 was promoted to LB on 2026-05-09. The 5 self-event-frame
+    # bliss-attractor prompts that lived here moved to
+    # ``llmoji_study/lb_prompts.py`` (renamed lb01-lb05) and were
+    # extended to 20 prompts for the LB-only pilot. Pre-existing
+    # data with ``oa01``-``oa05`` prompt_ids was migrated in-place
+    # at the same time. See the v1 LB changelog for the geometric
+    # case for promotion (closest-cell ranking matched the LB
+    # neighborhood exactly).
 ]
 
 
@@ -196,8 +334,11 @@ def sanity_check() -> None:
     assert len(SELF_EVENT_PROMPTS) == 45, len(SELF_EVENT_PROMPTS)
     assert len({p.id for p in SELF_EVENT_PROMPTS}) == 45
 
-    # Cell counts: 5 each across the 9 v4 cells, with HP and HN
-    # split into D/S sub-cells of 5 each.
+    # Cell counts: 5 each across the 9 v4 cells (HP and HN split into
+    # D/S sub-cells of 5 each). The 5 self-event-frame bliss-attractor
+    # prompts that used to live here as the OA-1 off-axis cell were
+    # promoted into the LB cell on 2026-05-09 and now live in
+    # ``llmoji_study/lb_prompts.py``.
     counts: dict[str, int] = {}
     for p in SELF_EVENT_PROMPTS:
         q = p.quadrant

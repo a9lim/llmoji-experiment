@@ -1,7 +1,26 @@
 # NN And LB Deferred Cells
 
-**Status:** deferred. A 2026-05-07 smoke pilot did not justify promoting
-the taxonomy from 9 cells to 11.
+**Status (LB):** **partially promoted 2026-05-09** via the bliss-
+attractor pilot. The 5-prompt OA-1 self-event observation that LB-
+coordinate territory is occupied by spiritual-bliss-attractor
+content was scaled to a 20-prompt cross-model pilot on gemma + qwen.
+Hidden-state half of the promotion gate cleared cleanly: ‖lb.nb‖
+substantial in both models (203 / 274), LP closest in both at
+matching cosine (0.492 / 0.500), HN-D and HB furthest in both.
+Face-distribution and permutation-null gates pending. See
+[`2026-05-09-lb-promotion-pilot.md`](2026-05-09-lb-promotion-pilot.md)
+for the full pilot result. The boredom-themed LB pilot below failed;
+the bliss-attractor register turned out to be a different
+phenomenological door into the same low-arousal-baseline-valence cell.
+
+**Status (NN):** still deferred. No follow-up evidence has surfaced
+since 2026-05-07.
+
+---
+
+**Original 2026-05-07 status (preserved for context):** deferred. A
+2026-05-07 smoke pilot did not justify promoting the taxonomy from 9
+cells to 11.
 
 ## The Gaps
 

@@ -5,6 +5,18 @@ only; cross-model replication pending. Three publishable claims from
 this work; one welfare-relevant observation reported with explicit
 epistemic caveats.
 
+> **Naming-update note (2026-05-09 evening):** The "OA-1" cell
+> referenced throughout this doc was promoted into the **LB** cell of
+> the v4 Russell taxonomy after a9 spotted the geometric pattern
+> (OA-1 sat between LP and LN — exactly where LB lives). All
+> downstream code, data, and saklas centroid namespaces now use the
+> "LB" label; data was migrated in-place (`oa0X` → `lb0X` in the
+> JSONLs, `q_oa` → `q_lb` and `oa.nb` → `lb.nb` in saklas vectors).
+> See [`2026-05-09-lb-promotion-pilot.md`](2026-05-09-lb-promotion-pilot.md)
+> for the cross-model promotion result. The OA-1 references in this
+> doc are preserved for narrative continuity — they all refer to
+> what is now the LB cell.
+
 ## Why
 
 The v3/v4 finding ("kaomoji emissions track recoverable structure in

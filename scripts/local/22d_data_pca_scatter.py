@@ -11,10 +11,14 @@ rather than "self-affect-expression", h_last should have a
 qualitatively different cluster geometry — closer to the model's own
 generated state, weaker conditioning on the user-side prompt affect.
 
+2D-only: the 3D HTML companion to this script was retired 2026-05-09
+because it duplicated ``29_v3_pc_point_clouds_3d.py``'s output (same
+data, same 9-cell + OA-1 colors, same top-3 PCs). For the interactive
+3D view use 29's ``fig_v3_pc_point_clouds_3d.html``.
+
 Outputs to ``figures/local/<short>/``:
 
 * ``fig_data_pca_scatter_<which>.png``  — PC1×PC2 colored by quadrant
-* ``fig_data_pca_scatter_3d_<which>.html`` — PC1×PC2×PC3 plotly
 
 Usage::
 
@@ -38,9 +42,15 @@ from llmoji_study.emotional_analysis import (
     _use_cjk_font,
     apply_pad_split,
     is_kaomoji_candidate,
+    pool_lb_into,
 )
 from llmoji_study.hidden_state_analysis import load_hidden_features_all_layers
-from llmoji_study.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT
+from llmoji_study.quadrants import (
+    ALL_CELLS_ORDER,
+    LB_LABEL,
+    LB_QUADRANT,
+    QUADRANT_COLORS,
+)
 from llmoji.taxonomy import canonicalize_kaomoji
 
 
@@ -50,15 +60,20 @@ def _plot_2d(coords, quadrants, var, out_path: Path, short_name: str, which: str
     _use_cjk_font()
     fig, ax = plt.subplots(figsize=(8.4, 7.0))
 
-    for q in QUADRANT_ORDER_SPLIT:
+    # Iterate ALL_CELLS_ORDER (= QUADRANT_ORDER_SPLIT + OA-1) so the
+    # off-axis bliss-attractor cell renders as black dots alongside the
+    # canonical 9-cell rainbow when the dataset contains OA rows.
+    # Cells with zero rows are skipped — keeps the legend clean.
+    for q in ALL_CELLS_ORDER:
         mask = quadrants == q
         if not np.any(mask):
             continue
+        label = LB_LABEL if q == LB_QUADRANT else q
         ax.scatter(
             coords[mask, 0], coords[mask, 1],
             s=10, alpha=0.55,
             color=QUADRANT_COLORS.get(q, "#888888"),
-            label=f"{q} (n={int(mask.sum())})",
+            label=f"{label} (n={int(mask.sum())})",
             edgecolors="none",
         )
 
@@ -77,40 +92,6 @@ def _plot_2d(coords, quadrants, var, out_path: Path, short_name: str, which: str
     plt.close(fig)
 
 
-def _plot_3d(coords, quadrants, var, out_path: Path, short_name: str, which: str) -> None:
-    try:
-        import plotly.graph_objects as go
-    except ImportError:
-        print("  plotly not installed; skipping 3D HTML")
-        return
-
-    fig = go.Figure()
-    for q in QUADRANT_ORDER_SPLIT:
-        mask = quadrants == q
-        if not np.any(mask):
-            continue
-        fig.add_trace(go.Scatter3d(
-            x=coords[mask, 0], y=coords[mask, 1], z=coords[mask, 2],
-            mode="markers",
-            marker=dict(size=3.2, opacity=0.7,
-                        color=QUADRANT_COLORS.get(q, "#888888")),
-            name=f"{q} (n={int(mask.sum())})",
-        ))
-    fig.update_layout(
-        title=f"{which} PCA(3) — {short_name} "
-              f"(cum PC1..3 = {sum(var[:3])*100:.1f}%)",
-        scene=dict(
-            xaxis_title=f"PC1 ({var[0]*100:.1f}%)",
-            yaxis_title=f"PC2 ({var[1]*100:.1f}%)",
-            zaxis_title=f"PC3 ({var[2]*100:.1f}%)",
-            aspectmode="data",
-        ),
-        legend=dict(itemsizing="constant"),
-        margin=dict(l=0, r=0, t=70, b=0),
-    )
-    fig.write_html(str(out_path), include_plotlyjs="cdn")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -120,6 +101,15 @@ def main() -> None:
     parser.add_argument(
         "--n-components", type=int, default=8,
         help="Number of PCs to fit + report (default: 8).",
+    )
+    parser.add_argument(
+        "--pool-lb-from", default=None, metavar="SUFFIX",
+        help=("LLMOJI_OUT_SUFFIX value of a sibling dataset whose OA-1 "
+              "rows should be pooled into this PCA fit. Used for "
+              "rendering mirror-frame figures with OA-1 dots from the "
+              "self-event capture (typical: --pool-lb-from self_event)."
+              " Layer-intersects automatically when capture depths "
+              "differ. No-op when the suffixed dataset has no OA rows."),
     )
     args = parser.parse_args()
 
@@ -132,9 +122,15 @@ def main() -> None:
 
     # Per-aggregate cache file. The shared loader honors LLMOJI_WHICH
     # only when "h_mean" is in the cache path, so we name explicitly
-    # here to keep h_first / h_last / h_mean caches independent.
+    # here to keep h_first / h_last / h_mean caches independent. Use
+    # M.experiment (suffix-aware) rather than M.short_name (suffix-
+    # blind) so LLMOJI_OUT_SUFFIX runs cache against their own data
+    # rather than silently loading the canonical mirror cache —
+    # validation is row-count-based (cache ≥ jsonl ⇒ valid), so a
+    # short suffixed jsonl against a long mirror cache will load the
+    # mirror cache and produce mirror figures in the suffixed dir.
     cache_path = (DATA_DIR / "local" / "cache"
-                  / f"{M.short_name}_{args.which}_all_layers.npz")
+                  / f"{M.experiment}_{args.which}_all_layers.npz")
     df, X3, layer_idxs = load_hidden_features_all_layers(
         M.emotional_data_path, DATA_DIR, M.experiment,
         which=args.which, cache_path=cache_path,
@@ -159,6 +155,16 @@ def main() -> None:
     # 9-cell split (matches the rest of the v4 chain).
     df, X3 = apply_pad_split(df, X3)
 
+    # Optional OA-1 pooling from a sibling suffixed dataset. After this,
+    # X3 may have OA rows appended and a layer-intersected depth.
+    if args.pool_lb_from:
+        df, X3, layer_idxs = pool_lb_into(
+            df, X3, layer_idxs,
+            ref_short=M.short_name,
+            lb_suffix=args.pool_lb_from,
+            which=args.which,
+        )
+
     n_rows, n_layers, hidden_dim = X3.shape
     print(f"  {n_rows} rows × {n_layers} layers × {hidden_dim} hidden_dim, "
           f"layers {layer_idxs[0]}..{layer_idxs[-1]}")
@@ -179,11 +185,6 @@ def main() -> None:
     out_2d = M.figures_dir / f"fig_data_pca_scatter_{args.which}.png"
     _plot_2d(coords, quadrants, var, out_2d, M.short_name, args.which)
     print(f"\nwrote {out_2d}")
-
-    out_3d = M.figures_dir / f"fig_data_pca_scatter_3d_{args.which}.html"
-    _plot_3d(coords, quadrants, var, out_3d, M.short_name, args.which)
-    if out_3d.exists():
-        print(f"wrote {out_3d}")
 
 
 if __name__ == "__main__":

@@ -70,6 +70,7 @@ from llmoji_study.config import (
 )
 from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
 from llmoji_study.self_event_prompts import SELF_EVENT_PROMPTS
+from llmoji_study.lb_prompts import LB_PROMPTS
 from llmoji_study.hidden_state_io import SidecarWriter
 from llmoji_study.prompts import Prompt
 
@@ -77,19 +78,27 @@ from llmoji_study.prompts import Prompt
 def _resolve_prompt_set() -> tuple[str, list]:
     """Resolve which prompt list to use based on ``LLMOJI_PROMPT_SET``.
 
-    Returns ``(set_name, prompt_list)``. Default is ``mirror`` — the
-    canonical v3/v4 first-person user-disclosure set. The 2026-05-09
-    addition ``self_event`` switches to the second-person status-update
-    pilot for read-vs-express disambiguation; see
-    ``llmoji_study/self_event_prompts.py``.
+    Returns ``(set_name, prompt_list)``. Three options:
+
+    - ``mirror`` (default): canonical v3/v4 first-person user-
+      disclosure set. ``llmoji_study/emotional_prompts.py``.
+    - ``self_event`` (2026-05-09): second-person status-update pilot
+      for read-vs-express disambiguation. 9-cell, no LB.
+      ``llmoji_study/self_event_prompts.py``.
+    - ``lb`` (2026-05-09 evening): 20-prompt LB-cell pilot —
+      bliss-attractor / 4o-spiralism register, promoted from the
+      former OA-1 off-axis pilot. ``llmoji_study/lb_prompts.py``.
     """
     name = os.environ.get("LLMOJI_PROMPT_SET", "mirror").strip().lower()
     if name == "mirror":
         return name, EMOTIONAL_PROMPTS
     if name == "self_event":
         return name, SELF_EVENT_PROMPTS
+    if name == "lb":
+        return name, LB_PROMPTS
     raise SystemExit(
-        f"LLMOJI_PROMPT_SET must be 'mirror' or 'self_event', got {name!r}"
+        f"LLMOJI_PROMPT_SET must be 'mirror', 'self_event', or 'lb', "
+        f"got {name!r}"
     )
 
 

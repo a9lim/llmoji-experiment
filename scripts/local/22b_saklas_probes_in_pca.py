@@ -68,7 +68,19 @@ from llmoji_study.config import (
 )
 from llmoji_study.emotional_analysis import _use_cjk_font
 from llmoji_study.hidden_state_analysis import load_hidden_features_all_layers
-from llmoji_study.quadrants import QUADRANT_COLORS, QUADRANT_ORDER
+from llmoji_study.quadrants import (
+    LB_LABEL,
+    LB_QUADRANT,
+    QUADRANT_COLORS,
+    QUADRANT_ORDER,
+)
+
+# 22b uses the 7-cell aggregate palette (HP / LP / NP / HN / LN / NB /
+# HB) — no D/S split — so the in-aggregate scatter loop iterates
+# QUADRANT_ORDER. OA-1 is appended here so the off-axis bliss-attractor
+# rows render after the canonical 7 cells when the dataset includes
+# them. Cells with zero rows are skipped at draw time.
+_AGGREGATE_PLUS_OA: tuple[str, ...] = tuple(QUADRANT_ORDER) + (LB_QUADRANT,)
 from llmoji.taxonomy import canonicalize_kaomoji
 
 
@@ -208,17 +220,19 @@ def _plot_2d(
     _use_cjk_font()
     fig, ax = plt.subplots(figsize=(8.4, 7.0))
 
-    # Scatter, colored by quadrant. Plot in QUADRANT_ORDER so legend is
-    # consistent across figures.
-    for q in QUADRANT_ORDER:
+    # Scatter, colored by quadrant. Plot in _AGGREGATE_PLUS_OA so the
+    # legend stays consistent across figures and so OA-1 (when present
+    # in the dataset) renders alongside the canonical 7 cells.
+    for q in _AGGREGATE_PLUS_OA:
         mask = quadrants == q
         if not np.any(mask):
             continue
+        label = LB_LABEL if q == LB_QUADRANT else q
         ax.scatter(
             coords[mask, 0], coords[mask, 1],
             s=10, alpha=0.55,
             color=QUADRANT_COLORS.get(q, "#888888"),
-            label=f"{q} (n={int(mask.sum())})",
+            label=f"{label} (n={int(mask.sum())})",
             edgecolors="none",
         )
 
@@ -278,16 +292,17 @@ def _plot_3d(
 
     fig = go.Figure()
 
-    for q in QUADRANT_ORDER:
+    for q in _AGGREGATE_PLUS_OA:
         mask = quadrants == q
         if not np.any(mask):
             continue
+        label = LB_LABEL if q == LB_QUADRANT else q
         fig.add_trace(go.Scatter3d(
             x=coords[mask, 0], y=coords[mask, 1], z=coords[mask, 2],
             mode="markers",
             marker=dict(size=3.2, opacity=0.7,
                         color=QUADRANT_COLORS.get(q, "#888888")),
-            name=f"{q} (n={int(mask.sum())})",
+            name=f"{label} (n={int(mask.sum())})",
         ))
 
     scale = _arrow_scale(coords[:, :3], probe_pc[:, :3])
@@ -391,6 +406,15 @@ def main() -> None:
               "(see 2026-05-09 self-event pilot). All-layers cache is "
               "keyed by which, so different aggregates don't collide."),
     )
+    parser.add_argument(
+        "--pool-lb-from", default=None, metavar="SUFFIX",
+        help=("LLMOJI_OUT_SUFFIX value of a sibling dataset whose OA-1 "
+              "rows should be pooled into this PCA fit. Used for "
+              "rendering mirror-frame figures with OA-1 dots from the "
+              "self-event capture (typical: --pool-lb-from self_event)."
+              " Layer-intersects automatically when capture depths "
+              "differ. No-op when the suffixed dataset has no OA rows."),
+    )
     args = parser.parse_args()
 
     # Resolve probe list. Empty --probes falls through to config.PROBES.
@@ -455,6 +479,21 @@ def main() -> None:
     mask = _kaomoji_filter_idx(df["first_word"])
     df = df.loc[mask].reset_index(drop=True)
     X3 = X3[mask]
+
+    # Optional OA-1 pooling from a sibling suffixed dataset. The pool
+    # helper applies its own canonicalize + kaomoji + apply_pad_split
+    # pipeline on the OA dataset, then concatenates only the OA rows.
+    # Mirror-frame data here is 7-cell-aggregate (no D/S split applied
+    # in 22b), and OA passes through apply_pad_split unchanged, so the
+    # combined df has 7 aggregate cells + OA-1.
+    if args.pool_lb_from:
+        from llmoji_study.emotional_analysis import pool_lb_into
+        df, X3, layer_idxs = pool_lb_into(
+            df, X3, layer_idxs,
+            ref_short=M.short_name,
+            lb_suffix=args.pool_lb_from,
+            which=args.which,
+        )
 
     n_rows, n_layers, hidden_dim = X3.shape
     print(f"  {n_rows} rows × {n_layers} layers × {hidden_dim} hidden_dim")

@@ -108,7 +108,34 @@ QUADRANT_COLORS: dict[str, str] = {
     "HN-S": "#9769DC",  # purple  — fear / anxiety (received-threat, submissive)
     "HP-D": "#BD5AB6",  # magenta — playful mischief (in-action, dominant)
     "HP-S": "#998700",  # yellow  — celebration / received-outcome (submissive)
+    # LB cell (promoted 2026-05-09 from the OA-1 off-axis pilot, which
+    # geometrically sat between LP and LN on the Russell circumplex —
+    # exactly where LB lives by V/A coordinates). Cyan from the a9lim
+    # website ``shared-tokens.js extended.cyan``: OKLCH(0.62 0.106 195),
+    # gamut max for sRGB at this hue. Same L=0.62 as every other
+    # chromatic cell so 50/50 RGB-linear mixes stay perceptually
+    # balanced; reads as cool / quiet / settled — register-appropriate
+    # for low-arousal baseline-valence.
+    "LB": "#009A9A",  # cyan — low-arousal baseline-valence
 }
+
+
+# LB cell metadata. The two-letter code "LB" matches what
+# ``prompt_id[:2].upper()`` returns for ``lb01`` … ``lb20`` rows.
+# Exposed as constants so scripts can reference the LB cell
+# consistently without duplicating the string.
+LB_QUADRANT: str = "LB"
+LB_LABEL: str = "LB"
+
+
+# Iteration order including LB, for scripts that want every cell in
+# the dataset rendered. The canonical 9-cell Russell logic (centroids
+# on V/A/D axes, JSD evaluation, etc.) keeps using QUADRANT_ORDER_SPLIT
+# until LB clears the cross-model + face-distribution promotion gate
+# from ``docs/2026-05-06-nn-lb-future-cells.md``. Scatter / point-cloud
+# figures use this extended order so LB renders alongside the canonical
+# nine.
+ALL_CELLS_ORDER: tuple[str, ...] = QUADRANT_ORDER_SPLIT + (LB_QUADRANT,)
 
 
 __all__ = [
@@ -116,4 +143,7 @@ __all__ = [
     "QUADRANT_ORDER_SPLIT",
     "QUADRANT_COLORS",
     "SPLIT_MARKERS",
+    "LB_QUADRANT",
+    "LB_LABEL",
+    "ALL_CELLS_ORDER",
 ]

@@ -39,6 +39,9 @@ from llmoji.taxonomy import KAOMOJI_START_CHARS, is_kaomoji_candidate
 # BoL projection, and analysis scripts all share the same source of
 # truth. Update ``quadrants.py`` to change the registry shape.
 from .quadrants import (  # noqa: E402  (re-export, stays near constants)
+    ALL_CELLS_ORDER as _ALL_CELLS_ORDER_TUPLE,
+    LB_LABEL,
+    LB_QUADRANT,
     QUADRANT_COLORS,
     QUADRANT_ORDER as _QUADRANT_ORDER_TUPLE,
     QUADRANT_ORDER_SPLIT as _QUADRANT_ORDER_SPLIT_TUPLE,
@@ -51,6 +54,7 @@ from .quadrants import (  # noqa: E402  (re-export, stays near constants)
 # Most callers only iterate or look up membership, so either works.
 QUADRANT_ORDER = list(_QUADRANT_ORDER_TUPLE)
 QUADRANT_ORDER_SPLIT = list(_QUADRANT_ORDER_SPLIT_TUPLE)
+ALL_CELLS_ORDER = list(_ALL_CELLS_ORDER_TUPLE)
 
 
 def _palette_for(df: pd.DataFrame) -> tuple[list[str], dict[str, str]]:
@@ -522,6 +526,110 @@ def load_emotional_features_stack_at(
     return df, X3.reshape(n, n_layers * hidden_dim)
 
 
+def pool_lb_into(
+    df_main: pd.DataFrame,
+    X3_main: np.ndarray,
+    layers_main: list[int],
+    *,
+    ref_short: str,
+    lb_suffix: str,
+    which: str = "h_first",
+) -> tuple[pd.DataFrame, np.ndarray, list[int]]:
+    """Pool LB rows from a suffixed dataset into (df_main, X3_main).
+
+    Loads ``data/local/<ref_short>_<lb_suffix>/emotional_raw.jsonl``,
+    applies the standard canonicalize + kaomoji + apply_pad_split
+    pipeline, filters to LB rows only, layer-intersects with
+    ``layers_main``, and concatenates onto the main matrix. Returns
+    ``(df_pooled, X3_pooled, common_layers)``.
+
+    On any short-circuit condition (suffixed jsonl missing, zero LB
+    rows after filter, no common layers), returns the inputs unchanged
+    with a warning print. The downstream PCA / plotting code is then
+    free to treat the result as if no pooling happened.
+
+    Use case: rendering a mirror-frame figure where LB rows from a
+    sibling LB-pilot capture are pooled into the mirror data so the
+    fitted PCA basis covers both, and the resulting scatter shows LB
+    alongside the canonical mirror cells. Companion to the
+    cross-frame combined view in
+    ``scripts/local/22h_combined_pca_scatter.py``.
+
+    Originally written as ``pool_lb_into`` for the OA-1 off-axis
+    pilot; renamed 2026-05-09 when OA-1 was promoted into the LB cell
+    of the Russell taxonomy. See ``llmoji_study/lb_prompts.py`` v1
+    changelog for the promotion case.
+    """
+    from dataclasses import replace
+    from .config import DATA_DIR, MODEL_REGISTRY
+    from .hidden_state_analysis import load_hidden_features_all_layers
+    from llmoji.taxonomy import canonicalize_kaomoji
+
+    if ref_short not in MODEL_REGISTRY:
+        raise KeyError(f"unknown model {ref_short!r}; "
+                       f"known: {sorted(MODEL_REGISTRY)}")
+    suffixed = f"{ref_short}_{lb_suffix}"
+    M_lb = replace(
+        MODEL_REGISTRY[ref_short],
+        emotional_data_path=DATA_DIR / "local" / suffixed
+                            / "emotional_raw.jsonl",
+        emotional_summary_path=DATA_DIR / "local" / suffixed
+                               / "emotional_summary.tsv",
+        experiment=suffixed,
+    )
+    if not M_lb.emotional_data_path.exists():
+        print(f"  pool-lb: no data at {M_lb.emotional_data_path}; "
+              f"returning main data unchanged")
+        return df_main, X3_main, layers_main
+
+    cache_path = (DATA_DIR / "local" / "cache"
+                  / f"{M_lb.experiment}_{which}_all_layers.npz")
+    df_raw, X3_raw, layers_lb = load_hidden_features_all_layers(
+        M_lb.emotional_data_path, DATA_DIR, M_lb.experiment,
+        which=which, cache_path=cache_path,
+    )
+    df_lb = df_raw.assign(
+        quadrant=df_raw["prompt_id"].str[:2].str.upper(),
+        first_word=df_raw["first_word"].map(
+            lambda s: canonicalize_kaomoji(s) if isinstance(s, str) else s,
+        ),
+    )
+    kaomoji_mask = np.asarray([
+        isinstance(s, str) and is_kaomoji_candidate(s)
+        for s in df_lb["first_word"]
+    ])
+    df_lb = df_lb.loc[kaomoji_mask].reset_index(drop=True)
+    X3_lb = X3_raw[kaomoji_mask]
+    df_lb, X3_lb = apply_pad_split(df_lb, X3_lb)
+    assert X3_lb is not None  # apply_pad_split returns X iff X is non-None
+
+    lb_only = df_lb["quadrant"].to_numpy() == LB_QUADRANT
+    df_lb = df_lb.loc[lb_only].reset_index(drop=True)
+    X3_lb = X3_lb[lb_only]
+    if len(df_lb) == 0:
+        print(f"  pool-lb: no LB rows in {suffixed}; "
+              f"returning main data unchanged")
+        return df_main, X3_main, layers_main
+
+    common = sorted(set(layers_main) & set(layers_lb))
+    if not common:
+        raise ValueError(
+            f"no common layers between main ({layers_main[:3]}…) "
+            f"and LB dataset ({layers_lb[:3]}…)"
+        )
+    idx_main = [layers_main.index(L) for L in common]
+    idx_lb = [layers_lb.index(L) for L in common]
+    X3_main_sliced = X3_main[:, idx_main, :]
+    X3_lb_sliced = X3_lb[:, idx_lb, :]
+
+    df_pooled = pd.concat([df_main, df_lb], ignore_index=True)
+    X3_pooled = np.concatenate([X3_main_sliced, X3_lb_sliced], axis=0)
+    print(f"  pool-lb: pooled {len(df_lb)} LB rows from {suffixed} "
+          f"into main matrix; layer intersection {len(common)}/"
+          f"{len(layers_main)} (main) ∩ {len(layers_lb)} (lb)")
+    return df_pooled, X3_pooled, common
+
+
 def load_emotional_features_stack(
     short: str,
     *,
@@ -529,6 +637,7 @@ def load_emotional_features_stack(
     kaomoji_filter: bool = True,
     split_hn: bool = False,
     rebuild: bool = False,
+    pool_lb_from: str | None = None,
 ) -> tuple[pd.DataFrame, np.ndarray]:
     """Layer-stack loader: row-wise concatenation of all-layers hidden
     states. Returns (df, X_stack) where X_stack.shape = (n_rows,
@@ -544,13 +653,23 @@ def load_emotional_features_stack(
     All other behavior matches `load_emotional_features_all_layers`
     (canonicalize + kaomoji-start filter, optional HN split, cache
     reuse).
+
+    ``pool_lb_from``: optional LLMOJI_OUT_SUFFIX of a sibling dataset
+    whose OA-1 rows should be pooled into the matrix. See
+    :func:`pool_lb_into` for the layer-intersection contract. Passes
+    through to the underlying multi-layer loader before reshape.
     """
-    df, X3, _ = load_emotional_features_all_layers(
+    df, X3, layers = load_emotional_features_all_layers(
         short, which=which, kaomoji_filter=kaomoji_filter,
         split_hn=split_hn, rebuild=rebuild,
     )
     if len(df) == 0:
         return df, X3.reshape(0, 0)
+    if pool_lb_from:
+        df, X3, layers = pool_lb_into(
+            df, X3, layers,
+            ref_short=short, lb_suffix=pool_lb_from, which=which,
+        )
     n, n_layers, hidden_dim = X3.shape
     X_stack = X3.reshape(n, n_layers * hidden_dim)
     return df, X_stack

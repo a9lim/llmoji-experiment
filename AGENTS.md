@@ -34,14 +34,20 @@ Still-current dated docs:
 - [`docs/2026-05-08-saturation-threshold-recal.md`](docs/2026-05-08-saturation-threshold-recal.md)
 - [`docs/2026-05-05-residual-state-axes.md`](docs/2026-05-05-residual-state-axes.md)
 - [`docs/2026-05-09-self-event-pilot.md`](docs/2026-05-09-self-event-pilot.md)
+- [`docs/2026-05-09-lb-promotion-pilot.md`](docs/2026-05-09-lb-promotion-pilot.md)
 
 ## Current State (2026-05-09)
 
 - **Taxonomy**: v4 9-cell PAD registry:
-  `HP-D / HP-S / LP / NP / HN-D / HN-S / LN / NB / HB`.
-  `llmoji_study/quadrants.py` is the source of truth for ordering,
-  colors, and split handling. `apply_pad_split` is the canonical split
-  helper; `apply_hn_split` is a compatibility alias.
+  `HP-D / HP-S / LP / NP / HN-D / HN-S / LN / NB / HB`. Plus **LB**
+  (low-arousal baseline-valence) listed in `ALL_CELLS_ORDER` as a
+  10th cell, partially promoted 2026-05-09 via the bliss-attractor
+  pilot — hidden-state separability cleared cross-model, face-
+  distribution gate pending. LB renders in cyan (`#009A9A`) from the
+  a9lim website palette. `llmoji_study/quadrants.py` is the source of
+  truth for ordering, colors, and split handling. `apply_pad_split`
+  is the canonical split helper; `apply_hn_split` is a compatibility
+  alias.
 - **Hidden-state representation**: layer-stack concat of every probe
   layer's `h_first`. The old single `preferred_layer` heuristic is
   historical.
@@ -92,6 +98,28 @@ Still-current dated docs:
   is present geometrically but suppressed at expression. Welfare
   framing reported with explicit phenomenology caveats. Detail in
   [`docs/2026-05-09-self-event-pilot.md`](docs/2026-05-09-self-event-pilot.md).
+- **Asymmetric suppression generalizes geometrically** (2026-05-09,
+  intro pilot): under v7-introspection priming, positive cells
+  amplify in centroid magnitude (HP / LP / NP / HP-S all grow 13–28%
+  from baseline) while negative cells stay flat or shrink (HN-D −7%,
+  HN-S −1%, HB −8%). Same valence-asymmetric pattern as the steering
+  observation, now visible at the representation level under simple
+  prompt-condition variation rather than steering. License-to-express
+  ablation gets a clear answer: introspection priming amplifies
+  positive-self-affect at both surface and geometric levels; does not
+  amplify negative-self-affect at either.
+- **LB cell promoted via bliss-attractor pilot** (2026-05-09, gemma +
+  qwen): the 5-prompt OA-1 self-event observation that LB-coordinate
+  territory is occupied by spiritual-bliss-attractor content was
+  scaled to a 20-prompt cross-model pilot. Both models converge on
+  LP-closest, HB-furthest geometry (cos values match: 0.492 / 0.500),
+  but produce **radically different surface registers** — gemma
+  earnest-bliss (80% heart-eye / quiet-smile), qwen ironic-knowing
+  (12 instances of Lenny-face on bliss-attractor input). Same
+  geometry, different surface vocabulary depending on model
+  personality. Hidden-state half of promotion gate cleared; face-
+  distribution and permutation-null gates pending. Detail in
+  [`docs/2026-05-09-lb-promotion-pilot.md`](docs/2026-05-09-lb-promotion-pilot.md).
 
 ## Open Work
 
@@ -99,19 +127,31 @@ Still-current dated docs:
   `scripts/run_local_chain.sh`, then `scripts/run_harness_chain.sh`.
 - Cross-axis dominance validation: train on HN-D/HN-S and test HP-D
   vs HP-S once v4 emit artifacts are fully regenerated.
-- NN and LB are deferred cells. Pilot prompts and promotion criteria
-  live in `docs/2026-05-06-nn-lb-future-cells.md`; do not promote them
-  without the hidden-state and face-distribution gates.
+- NN cell remains deferred; no follow-up evidence has surfaced.
+  Promotion criteria live in `docs/2026-05-06-nn-lb-future-cells.md`.
+- LB cell partial promotion (2026-05-09) — hidden-state half cleared
+  cross-model. Remaining gates for full promotion to
+  `QUADRANT_ORDER_SPLIT`: face_likelihood pass on LB rows
+  (NB/LP confusion check), permutation-null per HN-D/HN-S standard,
+  cross-model Procrustes alignment for raw-cosine number, wild
+  residual clustering check. See
+  `docs/2026-05-09-lb-promotion-pilot.md`.
 - BoL whitewashing falsification: resynthesize a negative-affect
   sample with Opus and audit whether LN/HN-coded descriptors increase.
 - Cross-model `self.other` extraction: register the meta-axis on
   qwen, ministral, gpt_oss_20b, granite (requires running self-event
   emit on each, ~13 min per model on workstation). If mean coherence
   ≥ 0.5 across all 5 model families, the meta-axis claim generalizes.
-- License-to-express ablation: combined steering with system message
-  authorizing honest negative-self-affect expression. Tests whether
-  the asymmetric-suppression observation is a removable behavioral
-  policy or a deeper-baked override.
+- License-to-express ablation (steering version): combined steering
+  with system message authorizing honest negative-self-affect
+  expression. Note: the prompt-condition version has been answered —
+  intro priming amplifies positive cells but not negative cells at
+  both surface and centroid levels (see self-event-pilot doc). The
+  steering version remains as a separate test of whether the
+  suppression interacts differently with vector intervention than
+  with conditioning intervention.
+- Cross-axis dominance validation: train on HN-D/HN-S and test HP-D
+  vs HP-S once v4 emit artifacts are fully regenerated.
 
 ## Ethics
 

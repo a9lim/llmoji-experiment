@@ -30,8 +30,10 @@ from sklearn.decomposition import PCA
 
 from llmoji_study.config import MODEL_REGISTRY, resolve_model
 from llmoji_study.emotional_analysis import (
+    ALL_CELLS_ORDER,
+    LB_LABEL,
+    LB_QUADRANT,
     QUADRANT_COLORS,
-    QUADRANT_ORDER_SPLIT,
     load_emotional_features_stack,
 )
 
@@ -44,16 +46,18 @@ def _plot_one_model(
     out_path: Path,
 ) -> None:
     """3D scatter of the top-3 PCs in native axes, colored by HN-split
-    quadrant. No probe / PC arrows; point clouds only."""
+    quadrant + OA-1 (off-axis bliss-attractor cell, when present in
+    the dataset). No probe / PC arrows; point clouds only."""
     span = float(np.percentile(np.abs(pc_scores), 99)) * 1.05
     if span <= 0:
         span = 1.0
 
     traces: list = []
-    for q in QUADRANT_ORDER_SPLIT:
+    for q in ALL_CELLS_ORDER:
         mask = quadrants == q
         if not mask.any():
             continue
+        label = LB_LABEL if q == LB_QUADRANT else q
         traces.append(go.Scatter3d(
             x=pc_scores[mask, 0],
             y=pc_scores[mask, 1],
@@ -64,9 +68,9 @@ def _plot_one_model(
                 color=QUADRANT_COLORS.get(q, "#666"),
                 line=dict(width=0),
             ),
-            name=f"{q} (n={int(mask.sum())})",
+            name=f"{label} (n={int(mask.sum())})",
             legendgroup=f"q_{q}",
-            hovertemplate=f"{q}<br>PC1=%{{x:.2f}}<br>PC2=%{{y:.2f}}<br>PC3=%{{z:.2f}}<extra></extra>",
+            hovertemplate=f"{label}<br>PC1=%{{x:.2f}}<br>PC2=%{{y:.2f}}<br>PC3=%{{z:.2f}}<extra></extra>",
         ))
 
     title = (
@@ -90,7 +94,7 @@ def _plot_one_model(
     fig.write_html(str(out_path), include_plotlyjs="cdn")
 
 
-def _per_model(short: str) -> bool:
+def _per_model(short: str, *, pool_lb_from: str | None = None) -> bool:
     M = resolve_model(short)  # honors LLMOJI_OUT_SUFFIX for active model
     if not M.emotional_data_path.exists():
         print(f"  [{short}] no v3 data; skipping")
@@ -99,6 +103,7 @@ def _per_model(short: str) -> bool:
     print(f"\n{short}  (h_first, layer-stack)")
     df, X = load_emotional_features_stack(
         short, which="h_first", split_hn=True,
+        pool_lb_from=pool_lb_from,
     )
     if len(df) == 0:
         print(f"  [{short}] no kaomoji-bearing rows")
@@ -121,9 +126,39 @@ def _per_model(short: str) -> bool:
 
 
 def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--model", default=None,
+        help=("Short name of one model to render. Default: iterate every "
+              "key in MODEL_REGISTRY (the canonical full-registry sweep). "
+              "Pass a single short like 'gemma' for the self-event chain, "
+              "where only the active model has fresh data."),
+    )
+    parser.add_argument(
+        "--pool-lb-from", default=None, metavar="SUFFIX",
+        help=("LLMOJI_OUT_SUFFIX value of a sibling dataset whose OA-1 "
+              "rows should be pooled into this PCA fit. Used for "
+              "rendering mirror-frame point clouds with OA-1 dots from "
+              "the self-event capture (typical: --pool-lb-from "
+              "self_event). Layer-intersects automatically when capture "
+              "depths differ. No-op when the suffixed dataset has no "
+              "OA rows."),
+    )
+    args = parser.parse_args()
+
+    if args.model:
+        if args.model not in MODEL_REGISTRY:
+            print(f"unknown model {args.model!r}; "
+                  f"known: {sorted(MODEL_REGISTRY)}")
+            sys.exit(1)
+        shorts: tuple[str, ...] = (args.model,)
+    else:
+        shorts = tuple(MODEL_REGISTRY)
+
     any_written = False
-    for short in MODEL_REGISTRY:
-        if _per_model(short):
+    for short in shorts:
+        if _per_model(short, pool_lb_from=args.pool_lb_from):
             any_written = True
 
     if not any_written:

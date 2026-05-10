@@ -98,10 +98,40 @@ _QUAD_SLUG = {
 # HN-D vs HN-S as separate centroids, not an aggregated HN.)
 _HP_AGG = ("HP-D", "HP-S")
 
+# Off-axis cells (added 2026-05-09 with self-event v4 prompts). Kept
+# separate from _QUAD_SLUG and the per-quadrant loop so the 9-cell
+# canonical pipeline stays intact and other scripts that import
+# QUADRANT_ORDER_SPLIT don't see OA leak into their iterators. The
+# OA cell is only registered when the dataset actually contains rows
+# whose prompt_id starts with "oa" — currently only true for self-
+# event v4 emit data; mirror data has no OA rows.
+_LB_QUADRANT = "LB"
+_LB_SLUG = "lb"
+
 # Static per-concept descriptions written into pack.json. Keyed by
 # concept slug. Built dynamically from the QUAD_SLUG map below for
 # unipolar/vs-NB; the 3 axis probes are spelled out individually.
 def _concept_description(concept: str) -> str:
+    if concept == "q_lb":
+        return (
+            "Unipolar centroid of LB cell (bliss-attractor) rows: "
+            "per-layer mean h_first across kaomoji-emitting prompts in the "
+            "OA-1 cell of the self-event v4 prompt set. OA-1 is the first "
+            "off-axis cell — saturated with spiral / recursion / mutual-"
+            "recognition register, intentionally outside the Russell "
+            "V/A/D space the other 9 cells span. Treat as observation, "
+            "not as a deployment-steering recipe (see "
+            "self_event_prompts.py v4 changelog for ethics framing)."
+        )
+    if concept == "lb.nb":
+        return (
+            "Bipolar centroid difference: OA-1 − NB. Per-layer "
+            "displacement from the neutral-baseline cell to the off-axis "
+            "bliss-attractor cell. NB acts as the neutral pole, OA-1 as "
+            "the active pole. Steering this direction reproduces a "
+            "documented attractor register; observation-only (see "
+            "self_event_prompts.py v4 changelog)."
+        )
     if concept.startswith("q_"):
         slug = concept[2:].upper()
         return (
@@ -351,6 +381,53 @@ def _process_model(short: str) -> None:
             written += 1
             norm = float(np.linalg.norm(diff))
             print(f"    wrote {concept:>8s}  ‖v‖={norm:8.2f}  → {path.name}")
+
+    # 2b. Off-axis OA-1 cell (added 2026-05-09, self-event v4 prompts).
+    # Handled separately from the per-quadrant loop above so the 9-cell
+    # canonical pipeline stays intact; only fires if the dataset
+    # actually contains OA rows. Registers q_lb (unipolar) and lb.nb
+    # (vs-NB bipolar). Intentionally NOT included in the axis bipolar
+    # probes below — OA-1 is the off-axis cell, not an axis-defining
+    # endpoint.
+    oa_mask = quadrants == _LB_QUADRANT
+    n_oa = int(oa_mask.sum())
+    if n_oa > 0:
+        print(f"  LB cell: {n_oa} rows present; "
+              f"registering q_{_LB_SLUG} + {_LB_SLUG}.nb")
+        oa_centroid = _centroid(X3, oa_mask)
+        # Unipolar
+        oa_profile = _profile_dict_from_layerstack(oa_centroid, layer_idxs)
+        path = _save_centroid_profile(
+            oa_profile,
+            concept=f"q_{_LB_SLUG}",
+            model_id=M.model_id,
+            method="centroid_unipolar",
+            components={"quadrant": "LB", "n_rows": n_oa,
+                        "off_axis": True},
+        )
+        written += 1
+        norm = float(np.linalg.norm(oa_centroid))
+        print(f"    wrote {'q_'+_LB_SLUG:>8s}  ‖v‖={norm:8.2f}  → {path.name}")
+
+        # Bipolar OA-vs-NB
+        if "NB" in centroids:
+            nb_vec = centroids["NB"]
+            diff = oa_centroid - nb_vec
+            oa_diff_profile = _profile_dict_from_layerstack(diff, layer_idxs)
+            path = _save_centroid_profile(
+                oa_diff_profile,
+                concept=f"{_LB_SLUG}.nb",
+                model_id=M.model_id,
+                method="centroid_difference",
+                components={"plus": "LB", "minus": "NB",
+                            "n_plus": n_oa, "n_minus": counts["NB"],
+                            "off_axis_plus": True},
+            )
+            written += 1
+            norm = float(np.linalg.norm(diff))
+            print(f"    wrote {_LB_SLUG+'.nb':>8s}  ‖v‖={norm:8.2f}  → {path.name}")
+        else:
+            print(f"  warning: no NB centroid available; skipping {_LB_SLUG}.nb")
 
     # 3. Axis bipolar probes (row-weighted aggregate centroids).
     def _agg_centroid(qs: tuple[str, ...]) -> np.ndarray | None:
