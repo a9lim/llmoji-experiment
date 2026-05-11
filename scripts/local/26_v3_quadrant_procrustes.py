@@ -418,34 +418,9 @@ def main() -> None:
     cols = max(2, math.ceil(math.sqrt(n_panels)))
     rows = math.ceil(n_panels / cols)
 
-    # Per-panel titles: model L{layer} + variance ratios for per-model
-    # panels; rotation/residual summary for the overlay.
-    titles = []
-    for m in models:
-        evr = per_model[m]["pca"].explained_variance_ratio_
-        titles.append(
-            f"{m} (layer-stack)<br>"
-            f"<sub>PC1 {evr[0]*100:.1f}% · PC2 {evr[1]*100:.1f}% · "
-            f"PC3 {evr[2]*100:.1f}% · n={per_model[m]['n']}</sub>"
-        )
-    overlay_subs = []
-    for m in models:
-        if m == reference:
-            continue
-        rot, res = pair_summaries[m]
-        overlay_subs.append(f"{m}→{reference} {rot:.1f}° (resid {res:.2f})")
-    titles.append(
-        f"all overlaid on {reference}<br><sub>" +
-        " · ".join(overlay_subs) + "</sub>"
-    )
-    # Pad with empty titles if grid has more cells than panels.
-    while len(titles) < rows * cols:
-        titles.append("")
-
     fig = make_subplots(
         rows=rows, cols=cols,
         specs=[[{"type": "scene"} for _ in range(cols)] for _ in range(rows)],
-        subplot_titles=titles,
         horizontal_spacing=0.04, vertical_spacing=0.06,
     )
 
@@ -478,14 +453,8 @@ def main() -> None:
     layout_updates[overlay_key] = overlay_axes
     fig.update_layout(
         **layout_updates,
-        title=dict(
-            text=(f"v3 cross-model quadrant geometry in 3D — "
-                  f"PC(1,2,3) per model, Procrustes-aligned overlay "
-                  f"to {reference} (HN split: HN-D anger / HN-S fear)"),
-            x=0.5, xanchor="center",
-        ),
         legend=dict(font=dict(size=10), itemsizing="constant"),
-        margin=dict(l=10, r=10, t=80, b=10),
+        margin=dict(l=10, r=10, t=10, b=10),
         height=max(800, 500 * rows), width=max(1200, 500 * cols),
     )
 

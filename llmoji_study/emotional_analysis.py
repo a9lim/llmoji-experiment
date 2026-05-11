@@ -42,10 +42,13 @@ from .quadrants import (  # noqa: E402  (re-export, stays near constants)
     ALL_CELLS_ORDER as _ALL_CELLS_ORDER_TUPLE,
     LB_LABEL,
     LB_QUADRANT,
+    MR_LABEL,
+    MR_QUADRANT,
     QUADRANT_COLORS,
     QUADRANT_ORDER as _QUADRANT_ORDER_TUPLE,
     QUADRANT_ORDER_SPLIT as _QUADRANT_ORDER_SPLIT_TUPLE,
     SPLIT_MARKERS as _SPLIT_MARKERS,
+    canonicalize_cell,
 )
 
 # Pandas/Counter call sites historically expected lists (e.g. for
@@ -101,6 +104,13 @@ def apply_pad_split(
     HP / HN prompts (currently none in v4). Other quadrants (LP, NP,
     LN, NB, HB) pass through unchanged.
 
+    Also applies the 2026-05-11 LB → MR rename via
+    ``canonicalize_cell`` — pre-rename JSONL rows have prompt_id
+    ``lb01``…``lb20`` which derive a raw quadrant of ``"LB"``;
+    canonicalization rewrites that to ``"MR"`` so downstream
+    iteration against ``QUADRANT_ORDER_SPLIT`` (which carries ``"MR"``)
+    sees a unified label.
+
     For scripts that build their own quadrant column from
     ``prompt_id[:2]`` (rather than going through
     ``load_emotional_features``). Pass the row-aligned feature matrix
@@ -112,7 +122,7 @@ def apply_pad_split(
         lambda r: (
             pad_split.get(r["prompt_id"], None)
             if r["quadrant"] in ("HP", "HN")
-            else r["quadrant"]
+            else canonicalize_cell(r["quadrant"])
         ),
         axis=1,
     )
@@ -781,13 +791,6 @@ def plot_kaomoji_cosine_heatmap(
         tick.set_color(color)
     for tick, color in zip(ax.get_yticklabels(), row_colors):
         tick.set_color(color)
-    centering_note = "grand-mean centered; " if center else "uncentered; "
-    filter_note = "" if min_count <= 1 else f"n ≥ {min_count}; "
-    ax.set_title(
-        f"Figure A: per-kaomoji HIDDEN-STATE cosine similarity  "
-        f"({centering_note}{filter_note}{n} kaomoji)\n"
-        "rows/cols hierarchically clustered; tick colour = dominant emission quadrant"
-    )
     cb = fig.colorbar(im, ax=ax, shrink=0.7, label="cosine similarity")
     cb.ax.tick_params(labelsize=8)
 

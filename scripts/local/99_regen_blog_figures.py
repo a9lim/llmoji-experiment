@@ -121,13 +121,13 @@ def plot_layerwise(theme: str) -> None:
     fig, axes = plt.subplots(1, 3, figsize=(16, 5))
     panels = [
         (axes[0], "silhouette",
-         "silhouette score (quadrants in PC1-PC2)", "quadrant separation"),
+         "silhouette score (quadrants in PC1-PC2)"),
         (axes[1], "between_centroid_std_pc1",
-         "between-centroid std on PC1", "PC1 spread"),
+         "between-centroid std on PC1"),
         (axes[2], "between_centroid_std_pc2",
-         "between-centroid std on PC2", "PC2 spread"),
+         "between-centroid std on PC2"),
     ]
-    for ax, ycol, ylabel, title in panels:
+    for ax, ycol, ylabel in panels:
         for short, metrics in per_model.items():
             layers = metrics["layer"].to_numpy()
             denom = max(1.0, float(layers.max() - layers.min()))
@@ -141,12 +141,9 @@ def plot_layerwise(theme: str) -> None:
                        linewidth=0.5, alpha=0.4, zorder=0)
         ax.set_xlabel("fractional depth  (layer normalized to [0, 1])")
         ax.set_ylabel(ylabel)
-        ax.set_title(title)
         ax.legend(loc="best", fontsize=9, frameon=False,
                   labelcolor=plt.rcParams["text.color"])
 
-    fig.suptitle("v3 layer-wise emergence — cross-model comparison",
-                 color=plt.rcParams["text.color"])
     fig.tight_layout()
     out = BLOG_ASSETS_DIR / f"fig_v3_layerwise_emergence_compare_{theme}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight",

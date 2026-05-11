@@ -267,9 +267,9 @@ def wrap_procrustes(
     var origScene = origLayout[OVERLAY_SCENE] || origLayout.scene || {{}};
     var scene = JSON.parse(JSON.stringify(origScene));
     scene.bgcolor = 'rgba(0,0,0,0)';
-    scene.domain = {{ x: [0, 1], y: [0, 1] }};
+    scene.domain = {{ x: [-0.08, 1.08], y: [-0.08, 1.08] }};
     scene.aspectmode = 'cube';
-    scene.camera = {{ eye: {{ x: 1.85, y: 1.85, z: 1.65 }} }};
+    scene.camera = {{ eye: {{ x: 1.45, y: 1.45, z: 1.30 }} }};
     ['xaxis', 'yaxis', 'zaxis'].forEach(function(ax) {{
       if (!scene[ax]) scene[ax] = {{}};
       scene[ax].gridcolor = c.grid;
@@ -425,9 +425,9 @@ def wrap_wild_faces(raw_path: Path, out_path: Path) -> None:
     var origScene = origLayout.scene || {{}};
     var scene = JSON.parse(JSON.stringify(origScene));
     scene.bgcolor = 'rgba(0,0,0,0)';
-    scene.domain = {{ x: [0, 1], y: [0, 1] }};
+    scene.domain = {{ x: [-0.08, 1.08], y: [-0.08, 1.08] }};
     scene.aspectmode = 'cube';
-    scene.camera = {{ eye: {{ x: 1.85, y: 1.85, z: 1.65 }} }};
+    scene.camera = {{ eye: {{ x: 1.45, y: 1.45, z: 1.30 }} }};
     ['xaxis', 'yaxis', 'zaxis'].forEach(function(ax) {{
       if (!scene[ax]) scene[ax] = {{}};
       scene[ax].gridcolor = c.grid;
@@ -556,9 +556,9 @@ def wrap_per_face(raw_path: Path, out_path: Path, subtitles: list[str]) -> None:
     var origScene = origLayout[sceneKey] || origLayout.scene || {{}};
     var scene = JSON.parse(JSON.stringify(origScene));
     scene.bgcolor = 'rgba(0,0,0,0)';
-    scene.domain = {{ x: [0, 1], y: [0, 1] }};
+    scene.domain = {{ x: [-0.08, 1.08], y: [-0.08, 1.08] }};
     scene.aspectmode = 'cube';
-    scene.camera = {{ eye: {{ x: 1.85, y: 1.85, z: 1.65 }} }};
+    scene.camera = {{ eye: {{ x: 1.45, y: 1.45, z: 1.30 }} }};
     ['xaxis', 'yaxis', 'zaxis'].forEach(function(ax) {{
       if (!scene[ax]) scene[ax] = {{}};
       scene[ax].gridcolor = c.grid;

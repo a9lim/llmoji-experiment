@@ -161,12 +161,8 @@ def main() -> None:
         })
     fig.update_layout(
         height=800, width=1500,
-        title=dict(
-            text="v3 per-face PCA(3) on layer-stack h_first, per model",
-            x=0.5, xanchor="center",
-        ),
         showlegend=False,
-        margin=dict(l=10, r=10, t=60, b=10),
+        margin=dict(l=10, r=10, t=10, b=10),
     )
     OUT_HTML.parent.mkdir(parents=True, exist_ok=True)
     fig.write_html(str(OUT_HTML), include_plotlyjs="cdn", full_html=True)

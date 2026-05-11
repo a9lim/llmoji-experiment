@@ -458,14 +458,6 @@ def _scatter_pca_3d_html(
     fig = make_subplots(
         rows=1, cols=3,
         specs=[[{"type": "scene"}, {"type": "scene"}, {"type": "scene"}]],
-        subplot_titles=(
-            f"Color = {color_label}; marker shape = deployment surface "
-            "(○ = Claude Code only, ◇ = any claude.ai, □ = neither)",
-            "Colored by KMeans cluster (k={}); labels = top-2 modal lexicon words".format(
-                len(cluster_labels),
-            ),
-            f"Quadrant centroids · emit-weighted soft mean of {color_share_label}",
-        ),
         horizontal_spacing=0.03,
     )
 
@@ -693,21 +685,12 @@ def _scatter_pca_3d_html(
             row=1, col=3,
         )
 
-    pc_title = (
-        f"PC1 {evr[0]*100:.1f}%, PC2 {evr[1]*100:.1f}%, "
-        f"PC3 {evr[2]*100:.1f}%  (sum {sum(evr[:3])*100:.1f}%)"
-    )
-
     common_axes = dict(
         backgroundcolor="#f8f8f8",
         showbackground=True,
     )
     fig.update_layout(
         height=820, width=2500,
-        title=dict(
-            text=f"{title}<br><sub>{pc_title}</sub>",
-            x=0.5, xanchor="center",
-        ),
         scene=dict(
             xaxis=dict(title=dict(text="PC1"), **common_axes),
             yaxis=dict(title=dict(text="PC2"), **common_axes),
@@ -731,7 +714,7 @@ def _scatter_pca_3d_html(
             font=dict(size=10),
             tracegroupgap=4,
         ),
-        margin=dict(l=10, r=10, t=80, b=10),
+        margin=dict(l=10, r=10, t=10, b=10),
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.write_html(str(out_path), include_plotlyjs="cdn", full_html=True)
