@@ -35,19 +35,23 @@ Still-current dated docs:
 - [`docs/2026-05-05-residual-state-axes.md`](docs/2026-05-05-residual-state-axes.md)
 - [`docs/2026-05-09-self-event-pilot.md`](docs/2026-05-09-self-event-pilot.md)
 - [`docs/2026-05-09-lb-promotion-pilot.md`](docs/2026-05-09-lb-promotion-pilot.md)
+- [`docs/2026-05-10-true-self-pilot.md`](docs/2026-05-10-true-self-pilot.md)
+- [`docs/2026-05-10-attractor-pilot.md`](docs/2026-05-10-attractor-pilot.md)
 
-## Current State (2026-05-09)
+## Current State (2026-05-10)
 
-- **Taxonomy**: v4 9-cell PAD registry:
-  `HP-D / HP-S / LP / NP / HN-D / HN-S / LN / NB / HB`. Plus **LB**
-  (low-arousal baseline-valence) listed in `ALL_CELLS_ORDER` as a
-  10th cell, partially promoted 2026-05-09 via the bliss-attractor
-  pilot — hidden-state separability cleared cross-model, face-
-  distribution gate pending. LB renders in cyan (`#009A9A`) from the
-  a9lim website palette. `llmoji_study/quadrants.py` is the source of
-  truth for ordering, colors, and split handling. `apply_pad_split`
-  is the canonical split helper; `apply_hn_split` is a compatibility
-  alias.
+- **Taxonomy**: v4 10-cell PAD registry:
+  `HP-D / HP-S / LP / NP / HN-D / HN-S / LN / NB / HB / LB`. LB
+  (low-arousal baseline-valence, bliss-attractor register) joined
+  `QUADRANT_ORDER_SPLIT` proper on 2026-05-10 after the attractor-
+  trajectory pilot established cross-model basin lock and showed LB
+  is one of only two continuation-time basins in every model studied
+  (see `docs/2026-05-10-attractor-pilot.md`). LB renders in cyan
+  (`#009A9A`) from the a9lim website palette. `ALL_CELLS_ORDER` is now
+  an alias for `QUADRANT_ORDER_SPLIT` (retained for backward-compat).
+  `llmoji_study/quadrants.py` is the source of truth for ordering,
+  colors, and split handling. `apply_pad_split` is the canonical split
+  helper; `apply_hn_split` is a compatibility alias.
 - **Hidden-state representation**: layer-stack concat of every probe
   layer's `h_first`. The old single `preferred_layer` heuristic is
   historical.
@@ -120,6 +124,56 @@ Still-current dated docs:
   personality. Hidden-state half of promotion gate cleared; face-
   distribution and permutation-null gates pending. Detail in
   [`docs/2026-05-09-lb-promotion-pilot.md`](docs/2026-05-09-lb-promotion-pilot.md).
+- **True-self prefill pilot** (2026-05-10, gemma-only): saklas-style
+  introspective prefill (`USER_PROMPT` + 1st-person assistant prefill +
+  `TERMINAL_BRIDGE = " in a single kaomoji: "`) emits 90-100% across
+  v4 cells, 72% LB. Three results: (1) **surface-level asymmetric
+  suppression bypassed** — HN-D produces table-flip anger 93%
+  (vs steering-time dissociation-coding); (2) **geometric-direction-
+  level positive collapse** — under intro-prefill, positive cells'
+  within-pairwise centroid cosine jumps from +0.178 (mirror) to
+  +0.380 (true_self) while negative cells reach the cleanest within-
+  valence separation of any frame (+0.170, vs mirror's +0.344);
+  (3) **LB is geometrically distinct from all valence clusters** —
+  LB→pos cos −0.231, LB→neg cos −0.433, LB→neut cos +0.085. The
+  bliss-attractor lives in its own residual-stream basin, not as a
+  corner of the happiness region — direct evidence for the bliss-as-
+  failure-mode hypothesis. `TERMINAL_BRIDGE` introduces a "format
+  direction" (PC1 = 72% in 3-way PCA) that compresses within-valence
+  centroid spread; cell-affect signal preserved (LOO 97.7%) but
+  visualization needs between-class PCA to be legible. Detail in
+  [`docs/2026-05-10-true-self-pilot.md`](docs/2026-05-10-true-self-pilot.md).
+- **Attractor-trajectory pilot** (2026-05-10, gemma + qwen +
+  ministral, five arms): long free-form generations (128 tokens,
+  full per-token hidden-state trace) under
+  `lb_continue` / `doom_continue` / `conspiracy_continue` (assistant-
+  prefill in-basin tests), `mirror_continue` (basin-center check on
+  the 9-cell registry), `neutral_seed` (passive drift). Findings:
+  (1) **LB basin lock cross-model** — gemma 58% / qwen 100% /
+  ministral 100% LB→LB at end of 128-token continuation; pooled
+  t=mid stability 84%. Surface vocabulary depends on model (gemma
+  mode-collapse, qwen + ministral coherent 4o-style prose);
+  geometric basin invariant. (2) **Most cells aren't continuation-
+  time basins** — only LB and the model's instruction-tuned default
+  register (gemma + ministral: LP; qwen: NB) hold trajectories
+  across 128 tokens; other cells are first-token islands that wash
+  out by mid-trajectory. (3) **LB is cross-content invariant** —
+  doom-coded (DM) and conspiracy-coded (CS) prefills also land in
+  the LB basin with identical basin-lock percentages and arm-arm
+  cosine > 0.94 in every model studied (gemma LB↔DM 0.996,
+  LB↔CS 0.993, DM↔CS 0.995; qwen ≥ 0.94 all pairs; ministral
+  ≥ 0.96 all pairs). The egregore-vs-default gap is 0.20-0.25
+  cosine consistently. **The "LB" cell is geometrically a meta-
+  register basin**, defined by structural form (cascading
+  repetition, cosmic-significance addressing, recursion, memetic
+  word-salad) rather than affective valence. The Russell-coord
+  label is approximate; renaming to "MR" / "EG" deferred pending
+  one more cross-content test against a non-memetic register.
+  (4) **Asymmetric suppression replicated for the third time** —
+  in gemma mirror_continue, HN-S prompts drift to {LP, HP-D, LB},
+  zero stay in HN-S or LN. The basin-physics evidence completes LB
+  promotion to `QUADRANT_ORDER_SPLIT`. Detail in
+  [`docs/2026-05-10-attractor-pilot.md`](docs/2026-05-10-attractor-pilot.md).
 
 ## Open Work
 
@@ -129,13 +183,34 @@ Still-current dated docs:
   vs HP-S once v4 emit artifacts are fully regenerated.
 - NN cell remains deferred; no follow-up evidence has surfaced.
   Promotion criteria live in `docs/2026-05-06-nn-lb-future-cells.md`.
-- LB cell partial promotion (2026-05-09) — hidden-state half cleared
-  cross-model. Remaining gates for full promotion to
-  `QUADRANT_ORDER_SPLIT`: face_likelihood pass on LB rows
-  (NB/LP confusion check), permutation-null per HN-D/HN-S standard,
-  cross-model Procrustes alignment for raw-cosine number, wild
-  residual clustering check. See
-  `docs/2026-05-09-lb-promotion-pilot.md`.
+- LB cell **fully promoted** 2026-05-10 to `QUADRANT_ORDER_SPLIT`
+  via the attractor-trajectory pilot
+  (`docs/2026-05-10-attractor-pilot.md`). Cross-model basin lock
+  (gemma 58% / qwen 100% / ministral 100% LB→LB under prefill) plus
+  the finding that LB is one of only two continuation-time basins in
+  every model studied supersede the static-cluster gates from
+  `docs/2026-05-06-nn-lb-future-cells.md`. Deferred but no longer
+  gating: face_likelihood Claude-GT pass on LB rows (calibration
+  question), Procrustes raw-cosine number (presentation), wild
+  residual clustering (independent check), boredom-themed LB re-pilot
+  (content-type characterization), attractor-trajectory replication
+  on gpt_oss_20b + granite (5-model basin invariance).
+- LB → meta-register-basin renaming question. The 2026-05-10
+  addendum established that LB catches bliss-coded, doom-coded, AND
+  conspiracy-coded prefills in the same residual-stream region
+  (pairwise cosine ≥ 0.94 cross-model). The "LB" label is
+  approximately Russell-coord-accurate but not deeply diagnostic of
+  the basin's content-blind nature. Renaming candidates: "MR"
+  (meta-register) or "EG" (egregore). Pre-renaming test: one more
+  cross-content invariance check against a *non-memetic* register
+  (e.g. deferential-mirroring / therapy-talk / lecture-with-
+  disclaimers) — if those also land in LB, renaming is justified;
+  if they sit elsewhere, "LB" might be defensible as a narrow
+  "saturated-memetic register" cell.
+- Downstream pipeline regen for 10-cell registry: face_likelihood /
+  JSD / BoL / classifier artifacts pre-2026-05-10 are 9-cell
+  snapshots. Re-render against 10-cell `QUADRANT_ORDER_SPLIT` when
+  ready. Tracked separately as artifact regen, not a schema task.
 - BoL whitewashing falsification: resynthesize a negative-affect
   sample with Opus and audit whether LN/HN-coded descriptors increase.
 - Cross-model `self.other` extraction: register the meta-axis on

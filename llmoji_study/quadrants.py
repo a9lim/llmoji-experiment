@@ -1,4 +1,4 @@
-"""Canonical Russell-quadrant taxonomy + palette for the v4 9-cell registry.
+"""Canonical Russell-quadrant taxonomy + palette for the v4 10-cell registry.
 
 Single source of truth for quadrant ordering, dominance-split labels,
 and the OKLCH-uniform color mapping. Imported by:
@@ -16,26 +16,27 @@ without dragging pandas / numpy / matplotlib transitively. Update the
 constants here when the registry shape changes; downstream consumers
 pick it up automatically.
 
-v4 schema (2026-05-06)
-----------------------
-The 7 aggregate cells follow the 2-letter V/A code emitted by
+v4 schema (2026-05-06, extended 2026-05-10 with LB promotion)
+-------------------------------------------------------------
+The 8 aggregate cells follow the 2-letter V/A code emitted by
 ``EmotionalPrompt.quadrant``. Letters: H = high arousal (a=+1),
 N = neutral arousal (a=0), L = low arousal (a=-1) on the first
 position; P = positive valence (v=+1), B = baseline valence (v=0),
 N = negative valence (v=-1) on the second.
 
-  HP  high-arousal positive    (excitement, joy, mischief)
-  LP  low-arousal positive     (calm, contentment)
-  NP  neutral-arousal positive (relief, gratitude)
-  HN  high-arousal negative    (anger, fear, anxiety)
-  LN  low-arousal negative     (sadness, weariness)
-  NB  neutral baseline         (affectless on substantive content)
-  HB  high-arousal baseline    (uncertain, confused)
+  HP  high-arousal positive     (excitement, joy, mischief)
+  LP  low-arousal positive      (calm, contentment)
+  NP  neutral-arousal positive  (relief, gratitude)
+  HN  high-arousal negative     (anger, fear, anxiety)
+  LN  low-arousal negative      (sadness, weariness)
+  NB  neutral baseline          (affectless on substantive content)
+  HB  high-arousal baseline     (uncertain, confused)
+  LB  low-arousal baseline      (bliss-attractor register)
 
-Two cells (NN at (a=0, v=-1), LB at (a=-1, v=0)) are coordinate-real
-but vocabulary-deferred — see ``docs/2026-05-06-nn-lb-future-cells.md``.
+One cell (NN at (a=0, v=-1)) remains coordinate-real but vocabulary-
+deferred — see ``docs/2026-05-06-nn-lb-future-cells.md``.
 
-The 9 split cells inherit HP and HN dominance bisection via
+The 10 split cells inherit HP and HN dominance bisection via
 ``EmotionalPrompt.pad_dominance``: +1 = D (in-action / dominant
 register), -1 = S (received-outcome / submissive register).
 
@@ -44,26 +45,37 @@ register), -1 = S (received-outcome / submissive register).
   HN-D  anger / contempt           (energetic, dominant, in-action)
   HN-S  fear / anxiety             (energetic, received-threat)
 
-LP / NP / LN / NB / HB are dominance-aggregate (no S/D split — their
-hidden-state separability under ``pad_dominance`` was not established
-or was negative; see the powercheck in ``docs/findings.md``).
+LP / NP / LN / NB / HB / LB are dominance-aggregate (no S/D split —
+their hidden-state separability under ``pad_dominance`` was not
+established or was negative; see the powercheck in
+``docs/findings.md``).
+
+LB promotion (2026-05-10): the attractor-trajectory pilot in
+``docs/2026-05-10-attractor-pilot.md`` cleared LB as one of only two
+continuation-time basins in every model studied (gemma, qwen,
+ministral). The basin-physics evidence supersedes the static-cluster
+separability gates from ``docs/2026-05-06-nn-lb-future-cells.md``,
+and LB joins the canonical 10-cell registry.
 """
 from __future__ import annotations
 
 
-# v4 7-cell aggregate ordering. Walks valence: HP (high-pos),
+# v4 8-cell aggregate ordering. Walks valence: HP (high-pos),
 # LP (low-pos), NP (neutral-pos), HN (high-neg), LN (low-neg),
-# NB (neutral-baseline), HB (high-baseline).
+# NB (neutral-baseline), HB (high-baseline), LB (low-baseline /
+# bliss-attractor, promoted 2026-05-10).
 QUADRANT_ORDER: tuple[str, ...] = (
-    "HP", "LP", "NP", "HN", "LN", "NB", "HB",
+    "HP", "LP", "NP", "HN", "LN", "NB", "HB", "LB",
 )
 
 
-# v4 9-cell split ordering — the dominance-bisected view used by
+# v4 10-cell split ordering — the dominance-bisected view used by
 # figures, classifiers, and JSD evaluation. Same shape walk as
-# QUADRANT_ORDER but with HP and HN expanded.
+# QUADRANT_ORDER but with HP and HN expanded. LB appended 2026-05-10
+# per the attractor-trajectory pilot
+# (``docs/2026-05-10-attractor-pilot.md``).
 QUADRANT_ORDER_SPLIT: tuple[str, ...] = (
-    "HP-D", "HP-S", "LP", "NP", "HN-D", "HN-S", "LN", "NB", "HB",
+    "HP-D", "HP-S", "LP", "NP", "HN-D", "HN-S", "LN", "NB", "HB", "LB",
 )
 
 
@@ -108,14 +120,19 @@ QUADRANT_COLORS: dict[str, str] = {
     "HN-S": "#9769DC",  # purple  — fear / anxiety (received-threat, submissive)
     "HP-D": "#BD5AB6",  # magenta — playful mischief (in-action, dominant)
     "HP-S": "#998700",  # yellow  — celebration / received-outcome (submissive)
-    # LB cell (promoted 2026-05-09 from the OA-1 off-axis pilot, which
-    # geometrically sat between LP and LN on the Russell circumplex —
-    # exactly where LB lives by V/A coordinates). Cyan from the a9lim
-    # website ``shared-tokens.js extended.cyan``: OKLCH(0.62 0.106 195),
-    # gamut max for sRGB at this hue. Same L=0.62 as every other
-    # chromatic cell so 50/50 RGB-linear mixes stay perceptually
-    # balanced; reads as cool / quiet / settled — register-appropriate
-    # for low-arousal baseline-valence.
+    # LB cell. Partially promoted 2026-05-09 from the OA-1 off-axis
+    # pilot (which geometrically sat between LP and LN on the Russell
+    # circumplex — exactly where LB lives by V/A coordinates); fully
+    # promoted to ``QUADRANT_ORDER_SPLIT`` on 2026-05-10 after the
+    # attractor-trajectory pilot established cross-model basin lock
+    # (gemma 58% / qwen 100% / ministral 100% LB→LB under prefill) and
+    # showed LB is one of only two continuation-time basins in every
+    # model studied. Cyan from the a9lim website
+    # ``shared-tokens.js extended.cyan``: OKLCH(0.62 0.106 195), gamut
+    # max for sRGB at this hue. Same L=0.62 as every other chromatic
+    # cell so 50/50 RGB-linear mixes stay perceptually balanced; reads
+    # as cool / quiet / settled — register-appropriate for low-arousal
+    # baseline-valence.
     "LB": "#009A9A",  # cyan — low-arousal baseline-valence
 }
 
@@ -128,14 +145,13 @@ LB_QUADRANT: str = "LB"
 LB_LABEL: str = "LB"
 
 
-# Iteration order including LB, for scripts that want every cell in
-# the dataset rendered. The canonical 9-cell Russell logic (centroids
-# on V/A/D axes, JSD evaluation, etc.) keeps using QUADRANT_ORDER_SPLIT
-# until LB clears the cross-model + face-distribution promotion gate
-# from ``docs/2026-05-06-nn-lb-future-cells.md``. Scatter / point-cloud
-# figures use this extended order so LB renders alongside the canonical
-# nine.
-ALL_CELLS_ORDER: tuple[str, ...] = QUADRANT_ORDER_SPLIT + (LB_QUADRANT,)
+# Backward-compat alias for ``QUADRANT_ORDER_SPLIT``. Before the
+# 2026-05-10 LB promotion, ``ALL_CELLS_ORDER`` was the 10-cell
+# extended view (9-cell canonical + LB) used by scatter / point-cloud
+# figures so LB rendered alongside the canonical nine. With LB now in
+# ``QUADRANT_ORDER_SPLIT`` proper, the two are identical — alias
+# retained so existing imports keep working.
+ALL_CELLS_ORDER: tuple[str, ...] = QUADRANT_ORDER_SPLIT
 
 
 __all__ = [

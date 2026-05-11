@@ -3,10 +3,13 @@
 **Status:** applied 2026-05-09 (single-day session, gemma + qwen).
 Hidden-state half of the promotion gate from
 [`2026-05-06-nn-lb-future-cells.md`](2026-05-06-nn-lb-future-cells.md)
-clears unambiguously; face-distribution half is pending. LB is
-**partially promoted** — renamed and color-coded throughout the
-codebase, listed in `ALL_CELLS_ORDER`, but not yet in
-`QUADRANT_ORDER_SPLIT` until the face_likelihood pass lands.
+clears unambiguously; face-distribution half was pending at write
+time. **Superseded 2026-05-10** by
+[`2026-05-10-attractor-pilot.md`](2026-05-10-attractor-pilot.md),
+which completed LB promotion to `QUADRANT_ORDER_SPLIT` via cross-
+model basin-physics evidence — a stronger kind of evidence than the
+static-cluster gates this doc registered as remaining. This pilot
+remains valid as the static-cluster half of the promotion record.
 
 ## Why
 
