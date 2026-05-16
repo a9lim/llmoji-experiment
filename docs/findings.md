@@ -5,10 +5,14 @@ summarized in [`previous-experiments.md`](previous-experiments.md).
 
 ## Current Methodology
 
-- **Taxonomy**: v4 9-cell PAD registry:
-  `HP-D / HP-S / LP / NP / HN-D / HN-S / LN / NB / HB`.
-- **Hidden-state representation**: layer-stack concat of every probe
-  layer's `h_first`.
+- **Taxonomy**: v4 10-cell PAD registry:
+  `HP-D / HP-S / LP / NP / HN-D / HN-S / LN / NB / HB / MR`. The MR
+  cell (meta-register basin, formerly LB) is carried in the registry;
+  the MR-basin research that defined and renamed it now lives in the
+  separate `attractor-study` repo.
+- **Hidden-state representation**: layer-stack concat of probe-layer
+  `h_first` hidden states (kaomoji-emission state, first generated
+  token) for emit-time / cell-classification questions.
 - **Evaluation**: distribution-vs-distribution comparison with
   Jensen-Shannon similarity:
   `similarity = 1 - JSD(pred, gt) / ln(2)`.
@@ -259,9 +263,11 @@ Current tracked generated report:
 
 ## Deferred Cells
 
-NN `(a=0, v=-1)` and LB `(a=-1, v=0)` are coordinate-real but not
-promoted. The 2026-05-07 pilot did not show enough hidden-state or
-face-distribution evidence to justify moving from 9 to 11 cells.
+NN `(a=0, v=-1)` is coordinate-real but not promoted; the 2026-05-07
+pilot did not show enough hidden-state or face-distribution evidence
+to justify it.
 
-Keep their prompts and promotion criteria parked in
+LB has been promoted as MR (meta-register basin); the MR-basin
+research lives in the separate `attractor-study` repo. Prompts and
+the original promotion criteria are parked in
 [`2026-05-06-nn-lb-future-cells.md`](2026-05-06-nn-lb-future-cells.md).

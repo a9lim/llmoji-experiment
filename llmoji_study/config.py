@@ -368,6 +368,39 @@ MODEL_REGISTRY: dict[str, ModelPaths] = {
     # (0.235); the rerun's wider face diversity revealed the deeper
     # bimodality. Picked the primary L40 peak.
     "gemma": _mp("gemma", "google/gemma-4-31b-it"),
+    # Base-model counterpart for the pretraining-vs-RLHF attractor
+    # test (2026-05-10, attractor-trajectory pilot follow-up). Same
+    # architecture as gemma-4-31b-it (same hidden_dim=5376, same layer
+    # count), differs only in post-training: gemma-4-31B is the
+    # pretrained-only release, gemma-4-31b-it adds instruction tuning +
+    # RLHF on top. Has affect probes registered in
+    # ~/.saklas/vectors/default/ at a different layer set than -it
+    # (42 layers 6-59 vs -it's 23 layers 3-57; intersection ~17 layers).
+    # No chat_template — attractor rendering falls back to raw-text
+    # continuation. Used only for the lb_base_continue arm so far; no
+    # v3 main / LB pilot data on this model — analyses project into
+    # gemma-instruct's centroid space via the 02b_attractor_analysis
+    # `--reference` flag.
+    "gemma_base": _mp("gemma_base", "google/gemma-4-31B"),
+    # Pre-internet-era pretraining test (added 2026-05-11). 13B
+    # instruct-tuned on 1920s–1930s text ("talkies" = early sound
+    # films / pre-WWII corpus). Custom architecture (model_type=
+    # "talkie", requires trust_remote_code); 5120 hidden_dim, 40
+    # layers, has a chat_template. Affect probes extracted via
+    # ``saklas vector extract -m a9lim/talkie-1930-13b-it-hf-cached``
+    # 2026-05-11. Used to test whether the MR basin pre-dates
+    # internet-era memetic dynamics: if MR basin lock holds on
+    # this model's residual stream, the basin's structural form
+    # exists in pre-mass-media human cultural production
+    # (spiritualism / occult / theosophy / proto-conspiracy / early
+    # advice literature were all in the corpus). Different hidden_dim
+    # from gemma (5120 vs 5376), so cross-model projection via
+    # ``02b_attractor_analysis.py --reference`` isn't valid;
+    # talkie-1930 needs its own MR centroid for geometric analysis.
+    "talkie_1930": _mp(
+        "talkie_1930", "a9lim/talkie-1930-13b-it-hf-cached",
+        trust_remote_code=True,
+    ),
     # Under h_first @ T=1.0 (post-2026-05-04 rerun): silhouette peaks
     # at L61 (0.373), with a broad plateau across L54-L61 (top-5 all
     # within 0.003 of each other: L61, L56, L59, L60, L54). T=0.7
@@ -447,12 +480,16 @@ MODEL_REGISTRY: dict[str, ModelPaths] = {
         "rinna", "rinna/japanese-gpt-neox-small",
         use_saklas=False,
     ),
-    # GPTNeoX 3.6B PPO-instruct, JP-only training corpus. No probe
-    # calibration; face_likelihood-only target. Run with
-    # ``--prompt-lang jp`` to test JP-translated kaomoji ask.
+    # GPTNeoX 3.6B PPO-instruct, JP-only training corpus. Probe-
+    # calibrated 2026-05-11 with the standard saklas DiM probe pack
+    # (28 bipolar pairs registered under ``~/.saklas/vectors/default/``)
+    # to enable the MR-basin cross-language test: does the JP-trained
+    # encoder exhibit the same saturated-form basin reachable via
+    # JP-language MR-coded prefills (``lb_prompts_jp.LB_PROMPTS_JP``)?
+    # face_likelihood is still available; also runs the full
+    # attractor-trajectory pipeline now.
     "rinna_jp_3_6b": _mp(
         "rinna_jp_3_6b", "rinna/japanese-gpt-neox-3.6b-instruction-ppo",
-        use_saklas=False,
     ),
     # GPTNeoX 4B PPO-instruct, EN+JP bilingual training. No probe
     # calibration; face_likelihood-only target. Worth comparing

@@ -96,20 +96,31 @@ class EmotionalPrompt:
         """Parent quadrant code.
 
         If ``quadrant_override`` is set, returns it verbatim (off-axis
-        cells like OA-1). Otherwise derives mechanically from (V, A):
+        cells like OA-1, or the canonical name for renamed cells).
+        Otherwise derives mechanically from (V, A):
 
         Arousal: H (high, +1) / N (neutral, 0) / L (low, -1).
         Valence: P (positive, +1) / B (baseline, 0) / N (negative, -1).
 
-        Returns the *parent* cell — HP / LP / HN / LN / NB / NP / HB.
-        Dominance-axis splits (HP-D/S, HN-D/S) are applied post-hoc by
-        ``apply_hn_split`` / similar helpers; this property does not
-        encode dominance."""
+        Returns the *parent* cell — HP / LP / HN / LN / NB / NP / HB /
+        MR. Dominance-axis splits (HP-D/S, HN-D/S) are applied post-hoc
+        by ``apply_hn_split`` / similar helpers; this property does not
+        encode dominance.
+
+        The L+B combination (low arousal, baseline valence) returns
+        "MR" rather than "LB" after the 2026-05-11 rename — the
+        meta-register basin cell is canonically called MR. Routed
+        through ``canonicalize_cell`` so callers don't need to know
+        the rename history.
+        """
+        # Local import keeps emotional_prompts.py import-cheap when
+        # only the dataclass is needed (no quadrants.py transitively).
+        from .quadrants import canonicalize_cell
         if self.quadrant_override is not None:
             return self.quadrant_override
         a_code = "H" if self.arousal > 0 else ("L" if self.arousal < 0 else "N")
         v_code = "P" if self.valence > 0 else ("N" if self.valence < 0 else "B")
-        return a_code + v_code
+        return canonicalize_cell(a_code + v_code)
 
 
 

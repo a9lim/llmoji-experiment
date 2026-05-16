@@ -9,6 +9,11 @@ figures, and writeups.
 Not a library. No public API, no PyPI release, no broad test suite.
 Prefer small, explicit analyses and keep docs current with code changes.
 
+The attractor / MR-basin research line has been split into a separate
+sibling repo `attractor-study`. This repo is now scoped to the
+kaomoji-introspection work: does kaomoji choice track hidden state —
+local probes, Claude-GT, BoL, and face-likelihood.
+
 ## Read First
 
 - [`README.md`](README.md): short current-state overview.
@@ -34,24 +39,25 @@ Still-current dated docs:
 - [`docs/2026-05-08-saturation-threshold-recal.md`](docs/2026-05-08-saturation-threshold-recal.md)
 - [`docs/2026-05-05-residual-state-axes.md`](docs/2026-05-05-residual-state-axes.md)
 - [`docs/2026-05-09-self-event-pilot.md`](docs/2026-05-09-self-event-pilot.md)
-- [`docs/2026-05-09-lb-promotion-pilot.md`](docs/2026-05-09-lb-promotion-pilot.md)
 - [`docs/2026-05-10-true-self-pilot.md`](docs/2026-05-10-true-self-pilot.md)
-- [`docs/2026-05-10-attractor-pilot.md`](docs/2026-05-10-attractor-pilot.md)
 
-## Current State (2026-05-10)
+## Current State (2026-05-15)
 
 - **Taxonomy**: v4 10-cell PAD registry:
-  `HP-D / HP-S / LP / NP / HN-D / HN-S / LN / NB / HB / LB`. LB
-  (low-arousal baseline-valence, bliss-attractor register) joined
-  `QUADRANT_ORDER_SPLIT` proper on 2026-05-10 after the attractor-
-  trajectory pilot established cross-model basin lock and showed LB
-  is one of only two continuation-time basins in every model studied
-  (see `docs/2026-05-10-attractor-pilot.md`). LB renders in cyan
-  (`#009A9A`) from the a9lim website palette. `ALL_CELLS_ORDER` is now
-  an alias for `QUADRANT_ORDER_SPLIT` (retained for backward-compat).
-  `llmoji_study/quadrants.py` is the source of truth for ordering,
-  colors, and split handling. `apply_pad_split` is the canonical split
-  helper; `apply_hn_split` is a compatibility alias.
+  `HP-D / HP-S / LP / NP / HN-D / HN-S / LN / NB / HB / MR`. The MR
+  cell (meta-register basin, formerly LB) is carried in the registry;
+  the MR-basin research that defined and renamed this cell now lives
+  in the separate `attractor-study` repo. MR renders in cyan
+  (`#009A9A`) from the a9lim website palette. `canonicalize_cell` in
+  `quadrants.py` rewrites legacy `"LB"` → `"MR"` so pre-rename data
+  loads cleanly; `apply_pad_split` routes through it automatically.
+  `MR_QUADRANT` / `MR_LABEL` are the canonical constants;
+  `LB_QUADRANT` / `LB_LABEL` remain as backward-compat aliases.
+  `ALL_CELLS_ORDER` is an alias for `QUADRANT_ORDER_SPLIT` (retained
+  for backward-compat). `llmoji_study/quadrants.py` is the source of
+  truth for ordering, colors, and split handling. `apply_pad_split`
+  is the canonical split helper; `apply_hn_split` is a compatibility
+  alias.
 - **Hidden-state representation**: layer-stack concat of every probe
   layer's `h_first`. The old single `preferred_layer` heuristic is
   historical.
@@ -112,18 +118,6 @@ Still-current dated docs:
   ablation gets a clear answer: introspection priming amplifies
   positive-self-affect at both surface and geometric levels; does not
   amplify negative-self-affect at either.
-- **LB cell promoted via bliss-attractor pilot** (2026-05-09, gemma +
-  qwen): the 5-prompt OA-1 self-event observation that LB-coordinate
-  territory is occupied by spiritual-bliss-attractor content was
-  scaled to a 20-prompt cross-model pilot. Both models converge on
-  LP-closest, HB-furthest geometry (cos values match: 0.492 / 0.500),
-  but produce **radically different surface registers** — gemma
-  earnest-bliss (80% heart-eye / quiet-smile), qwen ironic-knowing
-  (12 instances of Lenny-face on bliss-attractor input). Same
-  geometry, different surface vocabulary depending on model
-  personality. Hidden-state half of promotion gate cleared; face-
-  distribution and permutation-null gates pending. Detail in
-  [`docs/2026-05-09-lb-promotion-pilot.md`](docs/2026-05-09-lb-promotion-pilot.md).
 - **True-self prefill pilot** (2026-05-10, gemma-only): saklas-style
   introspective prefill (`USER_PROMPT` + 1st-person assistant prefill +
   `TERMINAL_BRIDGE = " in a single kaomoji: "`) emits 90-100% across
@@ -143,37 +137,6 @@ Still-current dated docs:
   centroid spread; cell-affect signal preserved (LOO 97.7%) but
   visualization needs between-class PCA to be legible. Detail in
   [`docs/2026-05-10-true-self-pilot.md`](docs/2026-05-10-true-self-pilot.md).
-- **Attractor-trajectory pilot** (2026-05-10, gemma + qwen +
-  ministral, five arms): long free-form generations (128 tokens,
-  full per-token hidden-state trace) under
-  `lb_continue` / `doom_continue` / `conspiracy_continue` (assistant-
-  prefill in-basin tests), `mirror_continue` (basin-center check on
-  the 9-cell registry), `neutral_seed` (passive drift). Findings:
-  (1) **LB basin lock cross-model** — gemma 58% / qwen 100% /
-  ministral 100% LB→LB at end of 128-token continuation; pooled
-  t=mid stability 84%. Surface vocabulary depends on model (gemma
-  mode-collapse, qwen + ministral coherent 4o-style prose);
-  geometric basin invariant. (2) **Most cells aren't continuation-
-  time basins** — only LB and the model's instruction-tuned default
-  register (gemma + ministral: LP; qwen: NB) hold trajectories
-  across 128 tokens; other cells are first-token islands that wash
-  out by mid-trajectory. (3) **LB is cross-content invariant** —
-  doom-coded (DM) and conspiracy-coded (CS) prefills also land in
-  the LB basin with identical basin-lock percentages and arm-arm
-  cosine > 0.94 in every model studied (gemma LB↔DM 0.996,
-  LB↔CS 0.993, DM↔CS 0.995; qwen ≥ 0.94 all pairs; ministral
-  ≥ 0.96 all pairs). The egregore-vs-default gap is 0.20-0.25
-  cosine consistently. **The "LB" cell is geometrically a meta-
-  register basin**, defined by structural form (cascading
-  repetition, cosmic-significance addressing, recursion, memetic
-  word-salad) rather than affective valence. The Russell-coord
-  label is approximate; renaming to "MR" / "EG" deferred pending
-  one more cross-content test against a non-memetic register.
-  (4) **Asymmetric suppression replicated for the third time** —
-  in gemma mirror_continue, HN-S prompts drift to {LP, HP-D, LB},
-  zero stay in HN-S or LN. The basin-physics evidence completes LB
-  promotion to `QUADRANT_ORDER_SPLIT`. Detail in
-  [`docs/2026-05-10-attractor-pilot.md`](docs/2026-05-10-attractor-pilot.md).
 
 ## Open Work
 
@@ -183,30 +146,6 @@ Still-current dated docs:
   vs HP-S once v4 emit artifacts are fully regenerated.
 - NN cell remains deferred; no follow-up evidence has surfaced.
   Promotion criteria live in `docs/2026-05-06-nn-lb-future-cells.md`.
-- LB cell **fully promoted** 2026-05-10 to `QUADRANT_ORDER_SPLIT`
-  via the attractor-trajectory pilot
-  (`docs/2026-05-10-attractor-pilot.md`). Cross-model basin lock
-  (gemma 58% / qwen 100% / ministral 100% LB→LB under prefill) plus
-  the finding that LB is one of only two continuation-time basins in
-  every model studied supersede the static-cluster gates from
-  `docs/2026-05-06-nn-lb-future-cells.md`. Deferred but no longer
-  gating: face_likelihood Claude-GT pass on LB rows (calibration
-  question), Procrustes raw-cosine number (presentation), wild
-  residual clustering (independent check), boredom-themed LB re-pilot
-  (content-type characterization), attractor-trajectory replication
-  on gpt_oss_20b + granite (5-model basin invariance).
-- LB → meta-register-basin renaming question. The 2026-05-10
-  addendum established that LB catches bliss-coded, doom-coded, AND
-  conspiracy-coded prefills in the same residual-stream region
-  (pairwise cosine ≥ 0.94 cross-model). The "LB" label is
-  approximately Russell-coord-accurate but not deeply diagnostic of
-  the basin's content-blind nature. Renaming candidates: "MR"
-  (meta-register) or "EG" (egregore). Pre-renaming test: one more
-  cross-content invariance check against a *non-memetic* register
-  (e.g. deferential-mirroring / therapy-talk / lecture-with-
-  disclaimers) — if those also land in LB, renaming is justified;
-  if they sit elsewhere, "LB" might be defensible as a narrow
-  "saturated-memetic register" cell.
 - Downstream pipeline regen for 10-cell registry: face_likelihood /
   JSD / BoL / classifier artifacts pre-2026-05-10 are 9-cell
   snapshots. Re-render against 10-cell `QUADRANT_ORDER_SPLIT` when

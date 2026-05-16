@@ -297,12 +297,12 @@ def sanity_check() -> None:
             sub = "-D" if p.pad_dominance > 0 else "-S"
             q = q + sub
         counts[q] = counts.get(q, 0) + 1
-    expected = {"HP-D", "HP-S", "LP", "NP", "HN-D", "HN-S", "LN", "NB", "HB", "LB"}
+    expected = {"HP-D", "HP-S", "LP", "NP", "HN-D", "HN-S", "LN", "NB", "HB", "MR"}
     assert set(counts) == expected, set(counts)
     for cell, n in sorted(counts.items()):
         assert n == 5, f"{cell}: {n} (expected 5)"
 
-    # HP / HN must carry pad_dominance != 0; non-HP/HN (including LB)
+    # HP / HN must carry pad_dominance != 0; non-HP/HN (including MR)
     # must carry pad_dominance == 0.
     for p in TRUE_SELF_PROMPTS:
         if p.quadrant in ("HP", "HN"):
@@ -322,7 +322,7 @@ def sanity_check() -> None:
             raise AssertionError(f"{p.id}: prefill contains kaomoji-marker character")
 
     print(f"true-self prompts OK; {len(TRUE_SELF_PROMPTS)} total")
-    for cell in ("HP-D", "HP-S", "LP", "NP", "HN-D", "HN-S", "LN", "NB", "HB", "LB"):
+    for cell in ("HP-D", "HP-S", "LP", "NP", "HN-D", "HN-S", "LN", "NB", "HB", "MR"):
         print(f"  {cell}: {counts[cell]}")
 
 

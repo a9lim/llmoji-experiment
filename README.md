@@ -139,6 +139,8 @@ Still-current dated docs:
   contributor corpus.
 - [`saklas`](https://github.com/a9lim/saklas): activation steering and
   trait monitoring engine.
+- `attractor-study`: the MR / meta-register basin research line, split
+  off from this repo.
 - [eriskii's Claude-faces catalog](https://eriskii.net/projects/claude-faces):
   original kaomoji vocabulary catalog and prior art.
 

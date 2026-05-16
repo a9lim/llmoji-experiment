@@ -145,13 +145,17 @@ def _centroids_in_pca(coords, quadrants, cells):
 
 
 def _color_for(cell: str) -> str:
-    if cell in ("OA", "LB"):
+    # Legacy "OA" / "LB" labels (pre-2026-05-11 rename) map to the
+    # MR color. Post-rename data carries "MR" directly, which is in
+    # QUADRANT_COLORS, so the dict lookup handles it; the legacy
+    # branch keeps old artifacts rendering correctly.
+    if cell in ("OA", "LB", "MR"):
         return LB_COLOR
     return QUADRANT_COLORS.get(cell, "#888888")
 
 
 def _label_for(cell: str) -> str:
-    return LB_LABEL if cell in ("OA", "LB") else cell
+    return LB_LABEL if cell in ("OA", "LB", "MR") else cell
 
 
 def _delta_coherence(deltas: dict[str, np.ndarray]) -> tuple[float, float]:

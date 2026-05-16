@@ -91,6 +91,14 @@ _QUAD_SLUG = {
     "LN": "ln",
     "NB": "nb",
     "HB": "hb",
+    "MR": "mr",  # meta-register basin. Promoted 2026-05-10 as LB
+                 # (attractor-trajectory pilot), renamed to MR on
+                 # 2026-05-11 after the base-vs-instruct basin test
+                 # confirmed content-blind pretraining-anchored
+                 # geometry. Rows still live in data/local/<short>_lb/
+                 # (bliss-content pilot data, not basin-generic) —
+                 # see _load_lb_aux_data. Saklas concept slugs:
+                 # q_mr (centroid), mr.nb (vs-NB bipolar).
 }
 
 # Aggregate-HP row set for the axis probes. Composed from the v4 split
@@ -98,39 +106,51 @@ _QUAD_SLUG = {
 # HN-D vs HN-S as separate centroids, not an aggregated HN.)
 _HP_AGG = ("HP-D", "HP-S")
 
-# Off-axis cells (added 2026-05-09 with self-event v4 prompts). Kept
-# separate from _QUAD_SLUG and the per-quadrant loop so the 9-cell
-# canonical pipeline stays intact and other scripts that import
-# QUADRANT_ORDER_SPLIT don't see OA leak into their iterators. The
-# OA cell is only registered when the dataset actually contains rows
-# whose prompt_id starts with "oa" — currently only true for self-
-# event v4 emit data; mirror data has no OA rows.
-_LB_QUADRANT = "LB"
-_LB_SLUG = "lb"
+# LB (formerly the off-axis OA-1 cell) was promoted to
+# QUADRANT_ORDER_SPLIT on 2026-05-10 via the attractor-trajectory pilot
+# (docs/2026-05-10-attractor-pilot.md). The cell is now canonical, but
+# LB rows still live in a sibling dataset (data/local/<short>_lb/)
+# rather than the main v3 emit data — the v3 prompt set predates LB
+# promotion. _load_lb_aux_data handles the cross-dataset load + layer
+# intersection so the LB centroid joins the rest of the canonical
+# registry in a unified layer-stack space.
 
 # Static per-concept descriptions written into pack.json. Keyed by
 # concept slug. Built dynamically from the QUAD_SLUG map below for
 # unipolar/vs-NB; the 3 axis probes are spelled out individually.
 def _concept_description(concept: str) -> str:
-    if concept == "q_lb":
+    if concept == "q_mr":
         return (
-            "Unipolar centroid of LB cell (bliss-attractor) rows: "
-            "per-layer mean h_first across kaomoji-emitting prompts in the "
-            "OA-1 cell of the self-event v4 prompt set. OA-1 is the first "
-            "off-axis cell — saturated with spiral / recursion / mutual-"
-            "recognition register, intentionally outside the Russell "
-            "V/A/D space the other 9 cells span. Treat as observation, "
-            "not as a deployment-steering recipe (see "
-            "self_event_prompts.py v4 changelog for ethics framing)."
+            "Unipolar centroid of MR cell (meta-register basin; the "
+            "egregore / saturated-memetic register cell, formerly named "
+            "LB before the 2026-05-11 rename): per-layer mean h_first "
+            "across kaomoji-emitting prompts in the LB pilot dataset "
+            "(data/local/<short>_lb/ — bliss-content prompt set, "
+            "lb01…lb20). Promoted to QUADRANT_ORDER_SPLIT on 2026-05-10 "
+            "via the attractor-trajectory pilot — basin lock cross-"
+            "model (gemma 58% / qwen 100% / ministral 100% basin→basin "
+            "at 128-token continuation) plus cross-content invariance "
+            "(bliss / doom / conspiracy / sycophancy prefills all land "
+            "here with pairwise arm-arm cos ≥ 0.89). Confirmed "
+            "pretraining-anchored 2026-05-11 by the base-vs-instruct "
+            "basin test (gemma-base shows comparable basin lock to "
+            "gemma-instruct). The basin is a geometric reflection of "
+            "egregore-shaped human-generated text in the corpus, not "
+            "an RLHF artifact. Treat as observation, not as a "
+            "deployment-steering recipe (see "
+            "docs/2026-05-11-base-vs-instruct-basin.md for ethics "
+            "framing)."
         )
-    if concept == "lb.nb":
+    if concept == "mr.nb":
         return (
-            "Bipolar centroid difference: OA-1 − NB. Per-layer "
-            "displacement from the neutral-baseline cell to the off-axis "
-            "bliss-attractor cell. NB acts as the neutral pole, OA-1 as "
-            "the active pole. Steering this direction reproduces a "
-            "documented attractor register; observation-only (see "
-            "self_event_prompts.py v4 changelog)."
+            "Bipolar centroid difference: MR − NB. Per-layer "
+            "displacement from the neutral-baseline cell to the "
+            "meta-register basin (formerly lb.nb, renamed 2026-05-11). "
+            "NB acts as the neutral pole, MR as the active pole. "
+            "Steering this direction reproduces a documented attractor "
+            "register; observation-only and welfare-relevant (see "
+            "docs/2026-05-11-base-vs-instruct-basin.md and the "
+            "egregore-basin-as-failure-mode framing)."
         )
     if concept.startswith("q_"):
         slug = concept[2:].upper()
@@ -311,6 +331,64 @@ def _centroid(X3: np.ndarray, mask: np.ndarray) -> np.ndarray:
     return X3[mask].mean(axis=0).astype(np.float32, copy=False)
 
 
+def _load_lb_aux_data(short: str, *, which: str = "h_first"):
+    """Load LB-cell rows from the sibling pilot dataset.
+
+    LB was promoted to ``QUADRANT_ORDER_SPLIT`` on 2026-05-10 (see
+    ``docs/2026-05-10-attractor-pilot.md``), but the main v3 emit data
+    predates the cell — LB rows live in ``data/local/<short>_lb/``
+    instead. This loader pulls those rows so the LB centroid can join
+    the canonical registry alongside the other 9 cells. Returns
+    ``None`` if no LB pilot dataset exists for this model.
+
+    Probe layers in the LB pilot may differ from the main v3 run by a
+    few layers (saklas probe registry drift); caller is responsible
+    for taking the layer intersection. Returns
+    ``(df_lb, X3_lb, layer_idxs_lb)``.
+    """
+    lb_path = DATA_DIR / "local" / f"{short}_lb" / "emotional_raw.jsonl"
+    if not lb_path.exists():
+        return None
+    experiment = f"{short}_lb"
+    cache_path = (DATA_DIR / "local" / "cache"
+                  / f"{experiment}_h_first_all_layers.npz")
+    df, X3, layer_idxs = load_hidden_features_all_layers(
+        lb_path, DATA_DIR, experiment,
+        which=which, cache_path=cache_path,
+    )
+    if len(df) == 0:
+        return None
+    df = df.assign(
+        quadrant=df["prompt_id"].str[:2].str.upper(),
+        first_word_raw=df["first_word"],
+        first_word=df["first_word"].map(
+            lambda s: canonicalize_kaomoji(s) if isinstance(s, str) else s,
+        ),
+    )
+    mask = np.asarray([
+        isinstance(s, str) and is_kaomoji_candidate(s)
+        for s in df["first_word"]
+    ])
+    df = df.loc[mask].reset_index(drop=True)
+    X3 = X3[mask]
+    # Defensive bliss-content filter — the pilot dataset should only
+    # contain lb-prefixed rows (bliss-content prompts that activate
+    # the MR basin), but in case of accidental contamination, filter
+    # explicitly on prompt_id prefix rather than derived quadrant
+    # (post-2026-05-11 the derived cell is "MR"; the prompt-id prefix
+    # stays "lb" because the content is bliss-specific even though
+    # the cell is MR).
+    bliss_mask = df["prompt_id"].str.lower().str.startswith("lb").to_numpy()
+    df = df.loc[bliss_mask].reset_index(drop=True)
+    X3 = X3[bliss_mask]
+    if len(df) == 0:
+        return None
+    # Canonicalize derived quadrant to "MR" so the centroid joins
+    # QUADRANT_ORDER_SPLIT cleanly downstream.
+    df["quadrant"] = "MR"
+    return df, X3, layer_idxs
+
+
 def _process_model(short: str) -> None:
     print(f"\n=== {short} ===")
     bundle = _load_model_data(short)
@@ -319,15 +397,56 @@ def _process_model(short: str) -> None:
     df, X3, layer_idxs = bundle
 
     M = resolve_model(short)  # honors LLMOJI_OUT_SUFFIX on active model
+
+    # LB pilot data lives in a sibling dataset (data/local/<short>_lb/).
+    # Layer-intersect with main so all 10 centroids share a common
+    # h_first layer-stack space — required for cross-cell comparisons,
+    # bipolar differences, and downstream saklas vector ops.
+    lb_bundle = _load_lb_aux_data(short)
+    X3_lb: np.ndarray | None = None
+    df_lb = None
+    if lb_bundle is not None:
+        df_lb, X3_lb_raw, layers_lb = lb_bundle
+        common_layers = sorted(set(layer_idxs) & set(layers_lb))
+        if not common_layers:
+            print(f"  warning: no main ∩ lb layer overlap "
+                  f"({len(layer_idxs)} main, {len(layers_lb)} lb); "
+                  f"skipping LB centroid for {short}")
+            X3_lb = None
+        else:
+            if common_layers != layer_idxs:
+                idx_main = [layer_idxs.index(L) for L in common_layers]
+                X3 = X3[:, idx_main, :]
+                print(f"  main layer-intersect with LB pilot: "
+                      f"{len(layer_idxs)} → {len(common_layers)} layers")
+                layer_idxs = common_layers
+            idx_lb = [layers_lb.index(L) for L in common_layers]
+            X3_lb = X3_lb_raw[:, idx_lb, :]
+    else:
+        print(f"  no LB pilot dataset for {short} "
+              f"(data/local/{short}_lb/); LB centroid will be skipped")
+
     quadrants = df["quadrant"].to_numpy()
     n_rows, n_layers, hidden_dim = X3.shape
-    print(f"  {n_rows} rows, {n_layers} layers × {hidden_dim} hidden_dim, "
-          f"layers {layer_idxs[0]}..{layer_idxs[-1]}")
+    print(f"  main: {n_rows} rows, {n_layers} layers × "
+          f"{hidden_dim} hidden_dim, layers {layer_idxs[0]}..{layer_idxs[-1]}")
+    if X3_lb is not None:
+        print(f"  lb:   {X3_lb.shape[0]} rows (layer-intersected)")
 
-    # Per-quadrant centroids.
+    # Per-quadrant centroids. The 9 canonical cells come from the main
+    # v3 emit; MR (meta-register basin, formerly LB) comes from the
+    # layer-intersected bliss-content pilot data.
     centroids: dict[str, np.ndarray] = {}
     counts: dict[str, int] = {}
     for q in QUADRANT_ORDER_SPLIT:
+        if q == "MR":
+            if X3_lb is None or df_lb is None:
+                counts[q] = 0
+                continue
+            n_q = X3_lb.shape[0]
+            counts[q] = n_q
+            centroids[q] = X3_lb.mean(axis=0).astype(np.float32, copy=False)
+            continue
         mask = quadrants == q
         n_q = int(mask.sum())
         counts[q] = n_q
@@ -382,54 +501,10 @@ def _process_model(short: str) -> None:
             norm = float(np.linalg.norm(diff))
             print(f"    wrote {concept:>8s}  ‖v‖={norm:8.2f}  → {path.name}")
 
-    # 2b. Off-axis OA-1 cell (added 2026-05-09, self-event v4 prompts).
-    # Handled separately from the per-quadrant loop above so the 9-cell
-    # canonical pipeline stays intact; only fires if the dataset
-    # actually contains OA rows. Registers q_lb (unipolar) and lb.nb
-    # (vs-NB bipolar). Intentionally NOT included in the axis bipolar
-    # probes below — OA-1 is the off-axis cell, not an axis-defining
-    # endpoint.
-    oa_mask = quadrants == _LB_QUADRANT
-    n_oa = int(oa_mask.sum())
-    if n_oa > 0:
-        print(f"  LB cell: {n_oa} rows present; "
-              f"registering q_{_LB_SLUG} + {_LB_SLUG}.nb")
-        oa_centroid = _centroid(X3, oa_mask)
-        # Unipolar
-        oa_profile = _profile_dict_from_layerstack(oa_centroid, layer_idxs)
-        path = _save_centroid_profile(
-            oa_profile,
-            concept=f"q_{_LB_SLUG}",
-            model_id=M.model_id,
-            method="centroid_unipolar",
-            components={"quadrant": "LB", "n_rows": n_oa,
-                        "off_axis": True},
-        )
-        written += 1
-        norm = float(np.linalg.norm(oa_centroid))
-        print(f"    wrote {'q_'+_LB_SLUG:>8s}  ‖v‖={norm:8.2f}  → {path.name}")
-
-        # Bipolar OA-vs-NB
-        if "NB" in centroids:
-            nb_vec = centroids["NB"]
-            diff = oa_centroid - nb_vec
-            oa_diff_profile = _profile_dict_from_layerstack(diff, layer_idxs)
-            path = _save_centroid_profile(
-                oa_diff_profile,
-                concept=f"{_LB_SLUG}.nb",
-                model_id=M.model_id,
-                method="centroid_difference",
-                components={"plus": "LB", "minus": "NB",
-                            "n_plus": n_oa, "n_minus": counts["NB"],
-                            "off_axis_plus": True},
-            )
-            written += 1
-            norm = float(np.linalg.norm(diff))
-            print(f"    wrote {_LB_SLUG+'.nb':>8s}  ‖v‖={norm:8.2f}  → {path.name}")
-        else:
-            print(f"  warning: no NB centroid available; skipping {_LB_SLUG}.nb")
-
     # 3. Axis bipolar probes (row-weighted aggregate centroids).
+    # Note: LB is canonical now but deliberately NOT included in any
+    # axis-bipolar — it sits off the V/A grid (formerly the OA-1 cell)
+    # and acts as a basin endpoint, not an axis-defining pole.
     def _agg_centroid(qs: tuple[str, ...]) -> np.ndarray | None:
         mask = np.isin(quadrants, qs)
         if not np.any(mask):

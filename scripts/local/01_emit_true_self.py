@@ -205,11 +205,12 @@ def _render_input(session: SaklasSession, ep) -> str:
 
 def _emission_rate_by_quadrant(path: Path) -> dict[str, tuple[int, int]]:
     """Per-quadrant kaomoji-emission stats; matches 00_emit.py's
-    progress-logging logic. LB included since the true-self pilot
-    runs the 10-cell registry (9 v4 + LB)."""
+    progress-logging logic. MR included since the true-self pilot
+    runs the 10-cell registry (9 v4 + MR; cell renamed from LB →
+    MR on 2026-05-11 — see docs/2026-05-11-base-vs-instruct-basin.md)."""
     stats: dict[str, list[int]] = {
         "HP": [0, 0], "LP": [0, 0], "HN": [0, 0], "LN": [0, 0], "NB": [0, 0],
-        "NP": [0, 0], "HB": [0, 0], "LB": [0, 0],
+        "NP": [0, 0], "HB": [0, 0], "MR": [0, 0],
     }
     if not path.exists():
         return {q: (v[0], v[1]) for q, v in stats.items()}
@@ -430,7 +431,7 @@ def main() -> None:
                         if i % 80 == 0:
                             stats = _emission_rate_by_quadrant(M.emotional_data_path)
                             print("    emission rate by quadrant:")
-                            for q in ("HP", "LP", "HN", "LN", "NB", "NP", "HB", "LB"):
+                            for q in ("HP", "LP", "HN", "LN", "NB", "NP", "HB", "MR"):
                                 k, n = stats[q]
                                 rate = (k / n) if n else 0.0
                                 print(f"      {q}: {k}/{n} kaomoji-bearing ({rate:.0%})")
