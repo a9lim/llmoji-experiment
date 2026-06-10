@@ -382,6 +382,23 @@ MODEL_REGISTRY: dict[str, ModelPaths] = {
     # gemma-instruct's centroid space via the 02b_attractor_analysis
     # `--reference` flag.
     "gemma_base": _mp("gemma_base", "google/gemma-4-31B"),
+    # Smaller sibling of gemma-4-31b-it (added 2026-06-09 for the
+    # time-experiment cross-size replication). DIFFERENT architecture
+    # class from the 31B: model_type "gemma4_unified"
+    # (Gemma4UnifiedForConditionalGeneration), a multimodal "unified"
+    # wrapper whose text-submodel weights live under
+    # model.language_model.* — saklas's _LAYER_ACCESSORS routes it
+    # through the VLM accessor + text-extraction prefix-strip (wired
+    # 2026-06; gemma4_unified is in _LAYER_ACCESSORS but not yet in
+    # _TESTED_ARCHS, so loading warns "wired up but untested"). 48
+    # hidden layers, hidden_dim 3840 (vs the 31B's 60 / 5376). Single
+    # ~24GB bf16 safetensors, cached locally. No contrastive affect
+    # probes extracted (probe_calibrated=False); harmless here because
+    # time-experiment fits its own time manifold and passes probes=[].
+    "gemma_12b": _mp(
+        "gemma_12b", "google/gemma-4-12B-it",
+        probe_calibrated=False,
+    ),
     # Pre-internet-era pretraining test (added 2026-05-11). 13B
     # instruct-tuned on 1920s–1930s text ("talkies" = early sound
     # films / pre-WWII corpus). Custom architecture (model_type=
