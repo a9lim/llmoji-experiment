@@ -7,7 +7,7 @@ those 48 dims, and plots a 2D scatter.
 Two panels:
   1. PC1 vs PC2 colored by the **inferred Russell quadrant** from
      the BoL's circumplex slots
-     (:func:`llmoji_study.lexicon.bol_modal_quadrant`). This is the
+     (:func:`llmoji_experiment.lexicon.bol_modal_quadrant`). This is the
      synthesizer's structured commit on what each face means — no
      encoder, no projection.
   2. PC1 vs PC2 with KMeans(k=15) labeled by the **modal lexicon
@@ -34,13 +34,13 @@ from matplotlib.lines import Line2D
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 
-from llmoji_study.claude_faces import load_bol_parquet
-from llmoji_study.config import (
+from llmoji_experiment.claude_faces import load_bol_parquet
+from llmoji_experiment.config import (
     CLAUDE_FACES_LEXICON_BAG_PATH,
     FIGURES_DIR,
 )
-from llmoji_study.emotional_analysis import QUADRANT_COLORS
-from llmoji_study.lexicon import (
+from llmoji_experiment.emotional_analysis import QUADRANT_COLORS
+from llmoji_experiment.lexicon import (
     LEXICON_WORDS,
     QUADRANTS,
     bol_modal_quadrant,
@@ -49,8 +49,8 @@ from llmoji_study.lexicon import (
 
 
 def _use_cjk_font() -> None:
-    """Synced with llmoji_study/per_project_charts.py /
-    llmoji_study/emotional_analysis.py — keep these chains in sync."""
+    """Synced with llmoji_experiment/per_project_charts.py /
+    llmoji_experiment/emotional_analysis.py — keep these chains in sync."""
     import matplotlib.font_manager as fm
     repo_root = Path(__file__).resolve().parent.parent.parent
     emoji_font = repo_root / "data" / "fonts" / "NotoEmoji-Regular.ttf"

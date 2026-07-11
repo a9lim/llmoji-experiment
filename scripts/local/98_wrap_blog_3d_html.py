@@ -353,9 +353,9 @@ def wrap_procrustes(
 
 
 # Quadrant colors for the wild-faces legend bar. Sourced from the
-# canonical ``llmoji_study.quadrants`` module so the static legend
+# canonical ``llmoji_experiment.quadrants`` module so the static legend
 # matches the per-face proportional-blend colors plotly draws.
-from llmoji_study.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT  # noqa: E402
+from llmoji_experiment.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT  # noqa: E402
 WILD_QUADRANTS = QUADRANT_ORDER_SPLIT
 WILD_QUADRANT_COLORS = {q: QUADRANT_COLORS[q] for q in WILD_QUADRANTS}
 # Surface marker shapes match the plotly markers script 67 emits:

@@ -28,8 +28,8 @@ import numpy as np
 import plotly.graph_objects as go
 from sklearn.decomposition import PCA
 
-from llmoji_study.config import MODEL_REGISTRY, resolve_model
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.config import MODEL_REGISTRY, resolve_model
+from llmoji_experiment.emotional_analysis import (
     ALL_CELLS_ORDER,
     LB_LABEL,
     LB_QUADRANT,

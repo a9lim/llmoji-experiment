@@ -34,13 +34,13 @@ import argparse
 import pandas as pd
 from sklearn.metrics import cohen_kappa_score
 
-from llmoji_study.jsd import js, normalize, similarity
+from llmoji_experiment.jsd import js, normalize, similarity
 
-from llmoji_study.config import DATA_DIR
-from llmoji_study.face_likelihood_discovery import discover_parquets
-from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
+from llmoji_experiment.config import DATA_DIR
+from llmoji_experiment.face_likelihood_discovery import discover_parquets
+from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
 
-# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
 QUADRANTS = list(QUADRANT_ORDER_SPLIT)
 
@@ -176,7 +176,7 @@ def main() -> None:
         print(f"  {name:20s} {'(pilot)' if is_pilot else '(full) '} ← {path}")
 
     if args.claude_gt:
-        from llmoji_study.claude_gt import (
+        from llmoji_experiment.claude_gt import (
             load_claude_gt,
             load_claude_gt_distribution,
         )

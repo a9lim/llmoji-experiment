@@ -14,7 +14,7 @@ __pycache__/
 data/local/hidden/
 
 # local envs
-.venv/
+.venv
 .env
 
 # run logs — ad-hoc tee'd output, not part of the experimental record

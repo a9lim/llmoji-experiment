@@ -52,8 +52,8 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from llmoji_study.config import DATA_DIR, INTROSPECTION_CONDITIONS, current_model
-from llmoji_study.emotional_analysis import _use_cjk_font, load_emotional_features_stack_at
+from llmoji_experiment.config import DATA_DIR, INTROSPECTION_CONDITIONS, current_model
+from llmoji_experiment.emotional_analysis import _use_cjk_font, load_emotional_features_stack_at
 
 
 # Import script 25's helpers via importlib (filename starts with a

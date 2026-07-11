@@ -38,8 +38,8 @@ import pandas as pd  # noqa: E402
 STUDY_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(STUDY_ROOT))
 
-from llmoji_study.config import MODEL_REGISTRY  # noqa: E402
-from llmoji_study.emotional_analysis import (  # noqa: E402
+from llmoji_experiment.config import MODEL_REGISTRY  # noqa: E402
+from llmoji_experiment.emotional_analysis import (  # noqa: E402
     load_emotional_features_stack,
     plot_kaomoji_cosine_heatmap,
 )

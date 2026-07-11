@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This is the research-side repo for `llmoji`. The companion package at
-`../llmoji` owns taxonomy, canonicalization, hook templates, synthesis,
+`../../llmoji` owns taxonomy, canonicalization, hook templates, synthesis,
 upload, and the public CLI. This repo owns local probes, hidden-state
 sidecars, Claude-GT collection, BoL corpus analysis, face_likelihood,
 figures, and writeups.
@@ -10,7 +10,7 @@ Not a library. No public API, no PyPI release, no broad test suite.
 Prefer small, explicit analyses and keep docs current with code changes.
 
 The attractor / MR-basin research line has been split into a separate
-sibling repo `attractor-study`. This repo is now scoped to the
+sibling repo `attractor-experiment`. This repo is now scoped to the
 kaomoji-introspection work: does kaomoji choice track hidden state —
 local probes, Claude-GT, BoL, and face-likelihood.
 
@@ -47,14 +47,14 @@ Still-current dated docs:
   `HP-D / HP-S / LP / NP / HN-D / HN-S / LN / NB / HB / MR`. The MR
   cell (meta-register basin, formerly LB) is carried in the registry;
   the MR-basin research that defined and renamed this cell now lives
-  in the separate `attractor-study` repo. MR renders in cyan
+  in the separate `attractor-experiment` repo. MR renders in cyan
   (`#009A9A`) from the a9lim website palette. `canonicalize_cell` in
   `quadrants.py` rewrites legacy `"LB"` → `"MR"` so pre-rename data
   loads cleanly; `apply_pad_split` routes through it automatically.
   `MR_QUADRANT` / `MR_LABEL` are the canonical constants;
   `LB_QUADRANT` / `LB_LABEL` remain as backward-compat aliases.
   `ALL_CELLS_ORDER` is an alias for `QUADRANT_ORDER_SPLIT` (retained
-  for backward-compat). `llmoji_study/quadrants.py` is the source of
+  for backward-compat). `llmoji_experiment/quadrants.py` is the source of
   truth for ordering, colors, and split handling. `apply_pad_split`
   is the canonical split helper; `apply_hn_split` is a compatibility
   alias.
@@ -183,8 +183,8 @@ emotional states regardless of phenomenal-status uncertainty.
 ## Commands
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -e ../llmoji
+source .venv/bin/activate  # .venv -> ../.venvs/llmoji-experiment
+pip install -e ../../llmoji
 pip install -e .
 ```
 
@@ -281,7 +281,7 @@ scripts/regen_blog.sh --skip-static
 ## Layout
 
 ```text
-llmoji_study/
+llmoji_experiment/
   config.py              model registry, paths, preambles, run constants
   emotional_prompts.py   v4 prompt registry
   quadrants.py           current quadrant ordering, colors, split helpers

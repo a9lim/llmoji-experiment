@@ -43,12 +43,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from llmoji_study.claude_gt import (
+from llmoji_experiment.claude_gt import (
     CLAUDE_GT_DIR,
     CLAUDE_GT_INTRO_DIR,
     EMOTIONAL_RAW_FILENAME,
 )
-from llmoji_study.config import DATA_DIR
+from llmoji_experiment.config import DATA_DIR
 
 # Old dirs.
 LEGACY_NATURALISTIC_DIR = DATA_DIR / "harness" / "claude-runs"

@@ -15,10 +15,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from llmoji_study.config import (
+from llmoji_experiment.config import (
     current_model,
 )
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.emotional_analysis import (
     load_emotional_features_stack,
     plot_face_cosine_heatmap,
     plot_kaomoji_cosine_heatmap,
@@ -26,7 +26,7 @@ from llmoji_study.emotional_analysis import (
     plot_within_kaomoji_consistency,
     summary_table,
 )
-from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
+from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
 from llmoji.taxonomy import extract
 
 

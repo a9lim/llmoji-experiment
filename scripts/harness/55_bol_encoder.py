@@ -42,12 +42,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 import pandas as pd
 
-from llmoji_study.claude_faces import load_bol_parquet
-from llmoji_study.config import (
+from llmoji_experiment.claude_faces import load_bol_parquet
+from llmoji_experiment.config import (
     CLAUDE_FACES_LEXICON_BAG_PATH,
     DATA_DIR,
 )
-from llmoji_study.lexicon import (
+from llmoji_experiment.lexicon import (
     QUADRANTS,
     bol_to_quadrant_distribution,
 )

@@ -49,19 +49,19 @@ import pandas as pd
 
 from llmoji.taxonomy import canonicalize_kaomoji
 
-from llmoji_study.claude_gt import (
+from llmoji_experiment.claude_gt import (
     CLAUDE_GT_DIR,
     claude_emotional_raw_path,
     load_emotional_raw,
 )
-from llmoji_study.config import DATA_DIR, MODEL_REGISTRY
-from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
-from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
+from llmoji_experiment.config import DATA_DIR, MODEL_REGISTRY
+from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS
+from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
 
 
 # Default v3 main lineup post-2026-05-03 vocab-pilot expansion.
 DEFAULT_MODELS = ("gemma", "qwen", "ministral", "gpt_oss_20b", "granite")
-# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
 QUADRANT_ORDER = list(QUADRANT_ORDER_SPLIT)
 

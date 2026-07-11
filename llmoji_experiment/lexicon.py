@@ -35,7 +35,7 @@ LEXICON history:
     shipping.
   - v2 (2026-05-06): 50 words / 9 cells (HP-D, HP-S, LP, NP, HN-D,
     HN-S, LN, NB, HB) / 26 circumplex anchors / 24 extension axes.
-    Aligned with llmoji-study v4 PAD-coordinate prompt registry.
+    Aligned with llmoji-experiment v4 PAD-coordinate prompt registry.
 
 When ``LEXICON_VERSION`` rotates again (v3+), this module needs the new
 lexicon's cell tags. Consumers should call :func:`assert_lexicon_v2`
@@ -91,7 +91,7 @@ assert all(WORD_TO_QUADRANT[w] is None for w in _extension_set)
 # Cell → list of indices into LEXICON_WORDS for the words that
 # anchor that cell. Drives bol_to_quadrant_distribution() and the
 # script-55 BoL encoder. Re-exported from the canonical zero-dep
-# ``llmoji_study.quadrants`` module so the BoL→cell projection shares
+# ``llmoji_experiment.quadrants`` module so the BoL→cell projection shares
 # its cell ordering with figures, JSD evaluation, and the analysis
 # pipeline. Update ``quadrants.py`` to change the registry shape.
 from .quadrants import QUADRANT_ORDER_SPLIT as QUADRANTS

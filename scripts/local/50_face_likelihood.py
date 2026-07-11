@@ -72,26 +72,26 @@ import numpy as np
 import pandas as pd
 import torch
 
-from llmoji_study.capture import (
+from llmoji_experiment.capture import (
     build_messages,
     maybe_override_gpt_oss_chat_template,
     maybe_override_ministral_chat_template,
     maybe_override_rinna_chat_template,
 )
-from llmoji_study.config import (
+from llmoji_experiment.config import (
     DATA_DIR,
     KAOMOJI_INSTRUCTION,
     KAOMOJI_INSTRUCTION_JP,
     PROBE_CATEGORIES,
     resolve_model,
 )
-from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS, EmotionalPrompt
-from llmoji_study.emotional_prompts_jp import EMOTIONAL_PROMPTS_JP
-from llmoji_study.prompts import Prompt
-from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
+from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS, EmotionalPrompt
+from llmoji_experiment.emotional_prompts_jp import EMOTIONAL_PROMPTS_JP
+from llmoji_experiment.prompts import Prompt
+from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
 
 
-# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
 QUADRANT_ORDER = list(QUADRANT_ORDER_SPLIT)
 # Per-face evaluation batch size (faces stacked into a single forward

@@ -48,7 +48,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 
 # --- module-level: argparse + tiny helpers only. No model imports. ---
-# All heavy imports (saklas, llmoji_study.config, etc.) happen in main()
+# All heavy imports (saklas, llmoji_experiment.config, etc.) happen in main()
 # so the import-test stays cheap.
 
 
@@ -134,7 +134,7 @@ def main() -> None:
     # touching torch / saklas / loading a model.
     from saklas import SaklasSession, SamplingConfig
 
-    from llmoji_study.config import (
+    from llmoji_experiment.config import (
         DATA_DIR,
         EMOTIONAL_CONDITION,
         KAOMOJI_INSTRUCTION,
@@ -145,9 +145,9 @@ def main() -> None:
         TEMPERATURE,
         current_model,
     )
-    from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
-    from llmoji_study.hidden_capture import read_after_generate
-    from llmoji_study.hidden_state_io import (
+    from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS
+    from llmoji_experiment.hidden_capture import read_after_generate
+    from llmoji_experiment.hidden_state_io import (
         hidden_state_path,
         save_hidden_states,
     )

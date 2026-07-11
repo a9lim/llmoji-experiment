@@ -13,7 +13,7 @@ History:
     pulled directly from llmoji v2's ``synthesis: {primary_affect,
     stance_modality_function}`` adjective bag. No encoder, no MiniLM,
     no prose round-trip — the synthesizer's pick over the locked
-    50-word LEXICON is the vector. See :mod:`llmoji_study.lexicon`
+    50-word LEXICON is the vector. See :mod:`llmoji_experiment.lexicon`
     for the LEXICON index + Russell-quadrant tags.
 
 Public surface:
@@ -28,7 +28,7 @@ Public surface:
     for v1-only legacy bundles).
   - :func:`save_bol_parquet` / :func:`load_bol_parquet` — parquet
     round-trip with ``lexicon_version`` stamped via column constant
-    so :func:`llmoji_study.lexicon.assert_lexicon_v2` can refuse
+    so :func:`llmoji_experiment.lexicon.assert_lexicon_v2` can refuse
     cross-version mixes on read.
 """
 
@@ -40,7 +40,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from llmoji_study.lexicon import (
+from llmoji_experiment.lexicon import (
     LEXICON_VERSION,
     LEXICON_WORDS,
     N_LEXICON,

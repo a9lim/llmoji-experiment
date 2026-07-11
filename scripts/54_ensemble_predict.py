@@ -48,12 +48,12 @@ import sys
 import pandas as pd
 from sklearn.metrics import cohen_kappa_score
 
-from llmoji_study.config import DATA_DIR
-from llmoji_study.face_likelihood_discovery import summary_path_for
-from llmoji_study.jsd import LN2, js, normalize, similarity
-from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
+from llmoji_experiment.config import DATA_DIR
+from llmoji_experiment.face_likelihood_discovery import summary_path_for
+from llmoji_experiment.jsd import LN2, js, normalize, similarity
+from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
 
-# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
 QUADRANTS = QUADRANT_ORDER_SPLIT
 
@@ -109,7 +109,7 @@ def main() -> None:
     # Per-face GT distribution (raw counts dict). Two paths:
     gt_counts: dict[str, dict[str, int]] = {}
     if args.claude_gt:
-        from llmoji_study.claude_gt import load_claude_gt_distribution
+        from llmoji_experiment.claude_gt import load_claude_gt_distribution
         gt_counts = load_claude_gt_distribution(floor=args.claude_gt_floor)
         print(f"Claude-GT: {len(gt_counts)} faces with total ≥ "
               f"{args.claude_gt_floor}")

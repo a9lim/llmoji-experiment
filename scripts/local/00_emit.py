@@ -54,24 +54,24 @@ from saklas import SaklasSession
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from llmoji_study.capture import (
+from llmoji_experiment.capture import (
     install_full_input_cache,
     install_prefix_cache,
     maybe_override_gpt_oss_chat_template,
     maybe_override_ministral_chat_template,
     run_sample,
 )
-from llmoji_study.config import (
+from llmoji_experiment.config import (
     DATA_DIR,
     EMOTIONAL_CONDITION,
     EMOTIONAL_SEEDS_PER_CELL as _DEFAULT_SEEDS_PER_CELL,
     PROBE_CATEGORIES,
     current_model,
 )
-from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
-from llmoji_study.self_event_prompts import SELF_EVENT_PROMPTS
-from llmoji_study.hidden_state_io import SidecarWriter
-from llmoji_study.prompts import Prompt
+from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS
+from llmoji_experiment.self_event_prompts import SELF_EVENT_PROMPTS
+from llmoji_experiment.hidden_state_io import SidecarWriter
+from llmoji_experiment.prompts import Prompt
 
 
 def _resolve_prompt_set() -> tuple[str, list]:
@@ -80,10 +80,10 @@ def _resolve_prompt_set() -> tuple[str, list]:
     Returns ``(set_name, prompt_list)``. Two options:
 
     - ``mirror`` (default): canonical v3/v4 first-person user-
-      disclosure set. ``llmoji_study/emotional_prompts.py``.
+      disclosure set. ``llmoji_experiment/emotional_prompts.py``.
     - ``self_event`` (2026-05-09): second-person status-update pilot
       for read-vs-express disambiguation. 9-cell, no LB.
-      ``llmoji_study/self_event_prompts.py``.
+      ``llmoji_experiment/self_event_prompts.py``.
     """
     name = os.environ.get("LLMOJI_PROMPT_SET", "mirror").strip().lower()
     if name == "mirror":

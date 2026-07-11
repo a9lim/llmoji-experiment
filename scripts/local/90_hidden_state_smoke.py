@@ -27,12 +27,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 import numpy as np
 from saklas import SaklasSession
 
-from llmoji_study.capture import (
+from llmoji_experiment.capture import (
     maybe_override_gpt_oss_chat_template,
     maybe_override_ministral_chat_template,
     run_sample,
 )
-from llmoji_study.config import (
+from llmoji_experiment.config import (
     DATA_DIR,
     MAX_NEW_TOKENS,
     PROBE_CATEGORIES,
@@ -40,8 +40,8 @@ from llmoji_study.config import (
     STEERED_AXIS,
     current_model,
 )
-from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
-from llmoji_study.hidden_state_io import hidden_state_path, load_hidden_states
+from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS
+from llmoji_experiment.hidden_state_io import hidden_state_path, load_hidden_states
 
 
 SMOKE_EXPERIMENT = "smoke"
@@ -55,7 +55,7 @@ def _pick_smoke_prompts():
     one per cell. Aggregate (not split) so the smoke stays cheap;
     HP-D / HP-S / HN-D / HN-S separability is exercised by the main
     pipelines, not the smoke."""
-    from llmoji_study.quadrants import QUADRANT_ORDER
+    from llmoji_experiment.quadrants import QUADRANT_ORDER
     by_quad: dict[str, list] = {q: [] for q in QUADRANT_ORDER}
     for p in EMOTIONAL_PROMPTS:
         q = p.id[:2].upper()

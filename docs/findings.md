@@ -9,7 +9,7 @@ summarized in [`previous-experiments.md`](previous-experiments.md).
   `HP-D / HP-S / LP / NP / HN-D / HN-S / LN / NB / HB / MR`. The MR
   cell (meta-register basin, formerly LB) is carried in the registry;
   the MR-basin research that defined and renamed it now lives in the
-  separate `attractor-study` repo.
+  separate `attractor-experiment` repo.
 - **Hidden-state representation**: layer-stack concat of probe-layer
   `h_first` hidden states (kaomoji-emission state, first generated
   token) for emit-time / cell-classification questions.
@@ -268,6 +268,6 @@ pilot did not show enough hidden-state or face-distribution evidence
 to justify it.
 
 LB has been promoted as MR (meta-register basin); the MR-basin
-research lives in the separate `attractor-study` repo. Prompts and
+research lives in the separate `attractor-experiment` repo. Prompts and
 the original promotion criteria are parked in
 [`2026-05-06-nn-lb-future-cells.md`](2026-05-06-nn-lb-future-cells.md).

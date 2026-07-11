@@ -36,8 +36,8 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
 
-from llmoji_study.config import FIGURES_DIR, MODEL_REGISTRY, current_model, resolve_model
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.config import FIGURES_DIR, MODEL_REGISTRY, current_model, resolve_model
+from llmoji_experiment.emotional_analysis import (
     QUADRANT_COLORS,
     QUADRANT_ORDER_SPLIT,
     _use_cjk_font,

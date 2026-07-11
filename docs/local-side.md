@@ -19,8 +19,8 @@ Current lineup:
 
 Current taxonomy is v4: `HP-D`, `HP-S`, `LP`, `NP`, `HN-D`, `HN-S`,
 `LN`, `NB`, `HB`. The source of truth is
-`llmoji_study/emotional_prompts.py`; ordering and colors live in
-`llmoji_study/quadrants.py`.
+`llmoji_experiment/emotional_prompts.py`; ordering and colors live in
+`llmoji_experiment/quadrants.py`.
 
 The v3 six-cell base still matters because most local hidden-state
 numbers were collected there: HP, LP, HN-D, HN-S, LN, NB, 20 prompts
@@ -35,7 +35,7 @@ Generation uses the naturalistic kaomoji ask and `MAX_NEW_TOKENS=16`.
 The state of interest is `h_first`: the residual at the kaomoji-emission
 token. This stays invariant when later output length changes.
 
-Model-specific capture fixes live in `llmoji_study/capture.py`:
+Model-specific capture fixes live in `llmoji_experiment/capture.py`:
 
 - `gpt_oss_20b`: harmony final-channel override plus Lenny byte
   suppression.

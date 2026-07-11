@@ -12,8 +12,8 @@ synthesized prose description through MiniLM and pooled the resulting
 384-d embeddings — a noisy reconstruction of structure that was
 already present in the v2 ``synthesis`` object. Post-refactor we
 consume the structured commit directly. See
-``llmoji_study.lexicon`` for the canonical 50-word index + Russell-
-quadrant tags, and ``llmoji_study.claude_faces.embed_lexicon_bags``
+``llmoji_experiment.lexicon`` for the canonical 50-word index + Russell-
+quadrant tags, and ``llmoji_experiment.claude_faces.embed_lexicon_bags``
 for the pooler.
 
 Faces with zero v2 descriptions (legacy v1.x bundles only) are
@@ -35,17 +35,17 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from llmoji_study.claude_faces import (
+from llmoji_experiment.claude_faces import (
     embed_lexicon_bags,
     load_descriptions,
     save_bol_parquet,
 )
-from llmoji_study.config import (
+from llmoji_experiment.config import (
     CLAUDE_DESCRIPTIONS_PATH,
     CLAUDE_FACES_LEXICON_BAG_PATH,
     DATA_DIR,
 )
-from llmoji_study.lexicon import (
+from llmoji_experiment.lexicon import (
     LEXICON_VERSION,
     bol_modal_quadrant,
 )

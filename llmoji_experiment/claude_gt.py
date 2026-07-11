@@ -39,7 +39,7 @@ from pathlib import Path
 
 from llmoji.taxonomy import canonicalize_kaomoji
 
-from llmoji_study.config import DATA_DIR
+from llmoji_experiment.config import DATA_DIR
 
 # ---------------------------------------------------------------------------
 # Paths.
@@ -276,7 +276,7 @@ def load_claude_gt_distribution(
     Default ``floor=3`` matches the modal-stability threshold used
     elsewhere in the project (script 25's ``min_emits=3``).
 
-    Use with ``llmoji_study.jsd.normalize`` + ``js`` for the
+    Use with ``llmoji_experiment.jsd.normalize`` + ``js`` for the
     distribution-vs-distribution comparison.
 
     ``include_introspection``: when True (default), pools the

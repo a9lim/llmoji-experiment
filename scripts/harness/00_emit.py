@@ -102,17 +102,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from llmoji.taxonomy import canonicalize_kaomoji, extract
 
-from llmoji_study.claude_gt import (
+from llmoji_experiment.claude_gt import (
     CLAUDE_GT_DIR,
     CLAUDE_GT_INTRO_DIR,
     claude_emotional_raw_path,
 )
-from llmoji_study.config import (
+from llmoji_experiment.config import (
     DATA_DIR,
     INTROSPECTION_PREAMBLE,
     KAOMOJI_INSTRUCTION,
 )
-from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS, EmotionalPrompt
+from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS, EmotionalPrompt
 
 
 # ---------------------------------------------------------------------------
@@ -253,7 +253,7 @@ def _bucket_of(prompt: EmotionalPrompt) -> str:
     identity with the closed v3 pilot's run-0..7 rows: hp01-20 are
     pad_dominance=−1 and are stored as ``"HP"`` across all 8
     naturalistic + 1 introspection runs. The read-side
-    ``pad_split`` map in ``llmoji_study.claude_gt`` / ``emotional_analysis``
+    ``pad_split`` map in ``llmoji_experiment.claude_gt`` / ``emotional_analysis``
     remaps ``"HP"`` → ``"HP-S"`` via prompt_id lookup so downstream
     9-cell consumers see the correct cell. The HP-D branch is what
     routes the v4-extension pilot's hp21-40 prompts to their proper

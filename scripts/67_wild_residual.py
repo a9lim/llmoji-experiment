@@ -8,7 +8,7 @@ prior 384-d MiniLM-on-prose embeddings (and to drop the eriskii
 pre-refactor). The new representation is the synthesizer's structured
 commit over the locked llmoji v2 LEXICON: 50-d soft distribution per
 canonical face, with 26 of those words tagged to the current
-PAD-coordinate cells. See ``llmoji_study.lexicon``.
+PAD-coordinate cells. See ``llmoji_experiment.lexicon``.
 
 Two parallel categorizations live in the data:
 
@@ -21,7 +21,7 @@ Two parallel categorizations live in the data:
   - **Deployment surface** (``claude_code`` / ``claude_ai`` /
     ``other``): drives the chart marker shape (post-2026-05-06).
     Sourced from a9's local ``~/.claude/kaomoji-journal.jsonl`` +
-    claude.ai exports via :mod:`llmoji_study.local_emissions`.
+    claude.ai exports via :mod:`llmoji_experiment.local_emissions`.
       * claude_code — face appears in the Claude Code journal AND
         NOT in any claude.ai export
       * claude_ai — face appears in any claude.ai export (whether
@@ -116,24 +116,24 @@ import numpy as np
 import pandas as pd
 
 from llmoji.taxonomy import canonicalize_kaomoji
-from llmoji_study.claude_faces import load_bol_parquet
-from llmoji_study.claude_gt import load_claude_gt, load_claude_gt_distribution
-from llmoji_study.config import (
+from llmoji_experiment.claude_faces import load_bol_parquet
+from llmoji_experiment.claude_gt import load_claude_gt, load_claude_gt_distribution
+from llmoji_experiment.config import (
     CLAUDE_DESCRIPTIONS_PATH,
     CLAUDE_FACES_LEXICON_BAG_PATH,
     DATA_DIR,
     FIGURES_DIR,
     REPO_ROOT,
 )
-from llmoji_study.emotional_analysis import QUADRANT_COLORS, mix_quadrant_color
-from llmoji_study.face_likelihood_discovery import discover_summaries
-from llmoji_study.lexicon import (
+from llmoji_experiment.emotional_analysis import QUADRANT_COLORS, mix_quadrant_color
+from llmoji_experiment.face_likelihood_discovery import discover_summaries
+from llmoji_experiment.lexicon import (
     QUADRANTS,
     bol_modal_quadrant,
     bol_to_quadrant_distribution,
     top_lexicon_words,
 )
-from llmoji_study.local_emissions import (
+from llmoji_experiment.local_emissions import (
     SOURCE_CLAUDE_AI,
     SOURCE_CLAUDE_CODE,
     load_face_source_counts,
@@ -145,7 +145,7 @@ HARNESS_FIG_DIR = FIGURES_DIR / "harness"
 DOCS_DIR = REPO_ROOT / "docs"
 
 # Per-face deployment surface (from a9's local journal + claude.ai
-# exports via llmoji_study.local_emissions). Drives the marker shape
+# exports via llmoji_experiment.local_emissions). Drives the marker shape
 # in the 3D PCA scene as of 2026-05-06: the analytical question is
 # "where in deployment does this face live?" rather than the prior
 # "where does this face sit relative to the GT elicitation set?"
@@ -184,7 +184,7 @@ def _load_predicted_shares(encoder: str) -> tuple[dict[str, np.ndarray], Path]:
 
     Reads ``softmax_<Q>`` columns from the encoder's
     ``face_likelihood{,*}_summary.tsv`` discovered by
-    :mod:`llmoji_study.face_likelihood_discovery`. Per-face shares are
+    :mod:`llmoji_experiment.face_likelihood_discovery`. Per-face shares are
     L1-renormalized defensively (face_likelihood already produces
     softmax — the renorm is just future-proofing against schema drift).
     Faces not in the encoder's TSV simply don't appear in the returned
@@ -1175,7 +1175,7 @@ def main() -> None:
         f"**neither / HF corpus only** = **{n_other}**. "
         f"Source: a9's local `~/.claude/kaomoji-journal.jsonl` + "
         f"the claude.ai exports listed in "
-        f"`llmoji_study.local_emissions.DEFAULT_CLAUDE_EXPORTS`."
+        f"`llmoji_experiment.local_emissions.DEFAULT_CLAUDE_EXPORTS`."
     )
     if args.color_by == "gt":
         lines.append(

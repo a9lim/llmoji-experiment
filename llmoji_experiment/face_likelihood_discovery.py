@@ -21,7 +21,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from llmoji_study.config import DATA_DIR
+from llmoji_experiment.config import DATA_DIR
 
 
 _LOCAL_SUMMARY_RE = re.compile(

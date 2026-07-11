@@ -1,4 +1,4 @@
-"""llmoji-study — research-side companion to the ``llmoji`` PyPI package.
+"""llmoji-experiment — research-side companion to the ``llmoji`` PyPI package.
 
 Renamed from ``llmoji`` after the v1.0 split (2026-04-27): the public
 namespace ``llmoji.*`` covers data collection / canonicalization /

@@ -61,13 +61,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 import numpy as np
 import torch
 
-from llmoji_study.config import DATA_DIR, MODEL_REGISTRY, resolve_model
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.config import DATA_DIR, MODEL_REGISTRY, resolve_model
+from llmoji_experiment.emotional_analysis import (
     apply_pad_split,
     is_kaomoji_candidate,
 )
-from llmoji_study.hidden_state_analysis import load_hidden_features_all_layers
-from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
+from llmoji_experiment.hidden_state_analysis import load_hidden_features_all_layers
+from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
 from llmoji.taxonomy import canonicalize_kaomoji
 
 
@@ -186,11 +186,11 @@ def _concept_description(concept: str) -> str:
             "The v3-validated dominance split — HN-D = anger/contempt "
             "(in-action), HN-S = fear/anxiety (received-threat)."
         )
-    return f"llmoji-study centroid probe: {concept}"
+    return f"llmoji-experiment centroid probe: {concept}"
 
 
-_PACK_TAGS = ("llmoji-study", "centroid", "v4-9cell")
-_PACK_SOURCE = "llmoji-study/scripts/local/22c_register_centroid_probes.py"
+_PACK_TAGS = ("llmoji-experiment", "centroid", "v4-9cell")
+_PACK_SOURCE = "llmoji-experiment/scripts/local/22c_register_centroid_probes.py"
 _PACK_LICENSE = "CC-BY-4.0"
 _PACK_RECOMMENDED_ALPHA = 0.3  # centroid magnitudes are large; start low
 

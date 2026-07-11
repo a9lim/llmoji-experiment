@@ -45,12 +45,12 @@ import pandas as pd
 from sklearn.cross_decomposition import CCA
 from sklearn.decomposition import PCA
 
-from llmoji_study.config import DATA_DIR, FIGURES_DIR, MODEL_REGISTRY
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.config import DATA_DIR, FIGURES_DIR, MODEL_REGISTRY
+from llmoji_experiment.emotional_analysis import (
     KAOMOJI_START_CHARS,
     _use_cjk_font,
 )
-from llmoji_study.hidden_state_analysis import load_hidden_features_all_layers
+from llmoji_experiment.hidden_state_analysis import load_hidden_features_all_layers
 
 
 # ---------------------------------------------------------------------------

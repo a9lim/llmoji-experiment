@@ -52,8 +52,8 @@ from sklearn.model_selection import StratifiedGroupKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from llmoji_study.config import DATA_DIR, MODEL_REGISTRY
-from llmoji_study.emotional_analysis import load_emotional_features_stack
+from llmoji_experiment.config import DATA_DIR, MODEL_REGISTRY
+from llmoji_experiment.emotional_analysis import load_emotional_features_stack
 
 # HN and HP D/S labels are encoded as ``pad_dominance`` on
 # EmotionalPrompt; pull them from the registry. LN was previously
@@ -61,7 +61,7 @@ from llmoji_study.emotional_analysis import load_emotional_features_stack
 # 2026-05-06 after the powercheck confirmed LN-null is genuine in
 # gemma + qwen and only power-confounded in models whose HN itself is
 # fused. See docs/findings.md and docs/previous-experiments.md.
-from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
+from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS
 
 
 def _registry_ds_labels(quadrant: str) -> dict[str, str]:

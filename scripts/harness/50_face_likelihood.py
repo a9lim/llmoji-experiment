@@ -94,9 +94,9 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from llmoji_study.claude_gt import load_claude_gt_distribution
-from llmoji_study.config import DATA_DIR
-from llmoji_study.jsd import jsd_quadrant, normalize, similarity
+from llmoji_experiment.claude_gt import load_claude_gt_distribution
+from llmoji_experiment.config import DATA_DIR
+from llmoji_experiment.jsd import jsd_quadrant, normalize, similarity
 
 
 # ---------------------------------------------------------------------------
@@ -116,9 +116,9 @@ MAX_TOKENS = 180   # JSON {likelihoods: {9 floats}} — was 120 under the v3
                    # 6-cell taxonomy; bumped 2026-05-07 for v4's 9 cells
                    # (HP-D / HP-S / NP / HB additions). Still much smaller
                    # than v1's {quadrant, confidences, reason} payload.
-# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
-from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
+from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
 QUADRANTS = QUADRANT_ORDER_SPLIT
 QUADRANT_SET = set(QUADRANTS)
 
@@ -221,8 +221,8 @@ def _claude_modal_table() -> dict[str, str]:
     """
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
     from llmoji.taxonomy import canonicalize_kaomoji
-    from llmoji_study.claude_gt import load_emotional_raw
-    from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
+    from llmoji_experiment.claude_gt import load_emotional_raw
+    from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS
     rows = load_emotional_raw()
     if not rows:
         return {}
@@ -453,7 +453,7 @@ def _write_face_likelihood_tsv(
     Schema mirrors ``data/local/<model>/face_likelihood_summary.tsv`` so
     the Anthropic judges drop into ``face_likelihood_discovery`` and the
     ensemble pipeline (52/53/54) treats them like any other encoder.
-    Likelihoods are normalized + smoothed via ``llmoji_study.jsd.normalize``
+    Likelihoods are normalized + smoothed via ``llmoji_experiment.jsd.normalize``
     (eps=1e-6) so log probabilities are well-defined. The
     ``n_prompts_*`` cols are 0 (the signal didn't come from a prompted
     generation) and ``n_face_tokens=1`` (introspective signal,
@@ -800,7 +800,7 @@ def main() -> None:
           f"wild: {int(df['is_wild'].sum())})")
 
     if args.gt_only:
-        from llmoji_study.claude_gt import load_claude_gt
+        from llmoji_experiment.claude_gt import load_claude_gt
         gt = load_claude_gt(floor=args.claude_gt_floor)
         gt_set = set(gt)
         df = df[df["first_word"].isin(gt_set)].reset_index(drop=True)

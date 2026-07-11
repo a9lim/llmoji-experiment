@@ -1,5 +1,5 @@
 [project]
-name = "llmoji-study"
+name = "llmoji-experiment"
 version = "0.1.0"
 description = "Does kaomoji choice track internal state in local LMs? Research-side companion to the `llmoji` PyPI package."
 requires-python = ">=3.11"
@@ -31,6 +31,6 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 # We don't intend to publish this — it's a research repo. The wheel
 # config exists only so `pip install -e .` works for local dev (and
-# `from llmoji_study import …` if anyone ever wants it). The real
+# `from llmoji_experiment import …` if anyone ever wants it). The real
 # entry point is the scripts in `scripts/`.
-packages = ["llmoji_study"]
+packages = ["llmoji_experiment"]

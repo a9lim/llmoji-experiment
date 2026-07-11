@@ -35,7 +35,7 @@ from llmoji.taxonomy import KAOMOJI_START_CHARS, is_kaomoji_candidate
 
 
 # Russell-quadrant palette + ordering — re-exported from the canonical
-# zero-dep ``llmoji_study.quadrants`` module so figure code, JSD math,
+# zero-dep ``llmoji_experiment.quadrants`` module so figure code, JSD math,
 # BoL projection, and analysis scripts all share the same source of
 # truth. Update ``quadrants.py`` to change the registry shape.
 from .quadrants import (  # noqa: E402  (re-export, stays near constants)
@@ -210,7 +210,7 @@ def mix_quadrant_color(
         positive subset.
       - 9-element array-like aligned to :data:`QUADRANT_ORDER_SPLIT`
         (i.e. the soft per-quadrant share that
-        :func:`llmoji_study.lexicon.bol_to_quadrant_distribution`
+        :func:`llmoji_experiment.lexicon.bol_to_quadrant_distribution`
         produces).
 
     ``colors`` defaults to the full 11-key :data:`QUADRANT_COLORS`
@@ -567,7 +567,7 @@ def pool_lb_into(
 
     Originally written as ``pool_lb_into`` for the OA-1 off-axis
     pilot; renamed 2026-05-09 when OA-1 was promoted into the LB cell
-    of the Russell taxonomy. See ``llmoji_study/lb_prompts.py`` v1
+    of the Russell taxonomy. See ``llmoji_experiment/lb_prompts.py`` v1
     changelog for the promotion case.
     """
     from dataclasses import replace

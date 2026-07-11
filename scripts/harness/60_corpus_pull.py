@@ -98,7 +98,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from llmoji.taxonomy import canonicalize_kaomoji
-from llmoji_study.config import (
+from llmoji_experiment.config import (
     CLAUDE_DATASET_DIR,
     CLAUDE_DESCRIPTIONS_PATH,
     CLAUDE_HF_REPO,

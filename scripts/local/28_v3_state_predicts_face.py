@@ -42,8 +42,8 @@ import pandas as pd
 from scipy.spatial.distance import jensenshannon
 from scipy.stats import spearmanr
 
-from llmoji_study.config import FIGURES_DIR, MODEL_REGISTRY, resolve_model
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.config import FIGURES_DIR, MODEL_REGISTRY, resolve_model
+from llmoji_experiment.emotional_analysis import (
     _use_cjk_font,
     load_emotional_features_stack,
 )

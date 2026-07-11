@@ -47,8 +47,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 import numpy as np
 import pandas as pd
 
-from llmoji_study.config import current_model
-from llmoji_study.emotional_analysis import _use_cjk_font
+from llmoji_experiment.config import current_model
+from llmoji_experiment.emotional_analysis import _use_cjk_font
 
 
 # Concepts shared between the mirror and self-event namespaces. Both

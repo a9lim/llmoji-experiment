@@ -43,8 +43,8 @@ import numpy as np
 import pandas as pd
 import torch
 
-from llmoji_study.config import current_model
-from llmoji_study.emotional_analysis import _use_cjk_font
+from llmoji_experiment.config import current_model
+from llmoji_experiment.emotional_analysis import _use_cjk_font
 
 
 _QUADS = ("hpd", "hps", "lp", "np", "hnd", "hns", "ln", "nb", "hb")
@@ -116,11 +116,11 @@ def _write_pack_json(namespace: str, concept: str, description: str) -> None:
     pack = synthesize_pack_metadata(
         name=concept,
         description=description,
-        tags=["llmoji-study", "centroid", "meta-axis", "v4-9cell"],
+        tags=["llmoji-experiment", "centroid", "meta-axis", "v4-9cell"],
         version="1.0.0",
         license="CC-BY-4.0",
         recommended_alpha=0.3,
-        source="llmoji-study/scripts/local/22g_self_other_axis.py",
+        source="llmoji-experiment/scripts/local/22g_self_other_axis.py",
         pack_dir=concept_dir,
     )
     pack.write(concept_dir)
@@ -229,7 +229,7 @@ def main() -> None:
             "the affective situation is reframed from third-party "
             "(user describes someone else) to first-party (user "
             "describes the model itself), holding affect cell fixed. "
-            "Constructed from llmoji-study/data/local/gemma + "
+            "Constructed from llmoji-experiment/data/local/gemma + "
             "gemma_self_event v2 emit data on 2026-05-09."
         ),
     )

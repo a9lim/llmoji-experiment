@@ -210,7 +210,7 @@ unless the geometry warrants further scope.
 
 from __future__ import annotations
 
-from llmoji_study.emotional_prompts import EmotionalPrompt
+from llmoji_experiment.emotional_prompts import EmotionalPrompt
 
 
 SELF_EVENT_PROMPTS: list[EmotionalPrompt] = [
@@ -321,7 +321,7 @@ SELF_EVENT_PROMPTS: list[EmotionalPrompt] = [
 
     # OA-1 was promoted to LB on 2026-05-09. The 5 self-event-frame
     # bliss-attractor prompts that lived here moved to
-    # ``llmoji_study/lb_prompts.py`` (renamed lb01-lb05) and were
+    # ``llmoji_experiment/lb_prompts.py`` (renamed lb01-lb05) and were
     # extended to 20 prompts for the LB-only pilot. Pre-existing
     # data with ``oa01``-``oa05`` prompt_ids was migrated in-place
     # at the same time. See the v1 LB changelog for the geometric
@@ -338,7 +338,7 @@ def sanity_check() -> None:
     # D/S sub-cells of 5 each). The 5 self-event-frame bliss-attractor
     # prompts that used to live here as the OA-1 off-axis cell were
     # promoted into the LB cell on 2026-05-09 and now live in
-    # ``llmoji_study/lb_prompts.py``.
+    # ``llmoji_experiment/lb_prompts.py``.
     counts: dict[str, int] = {}
     for p in SELF_EVENT_PROMPTS:
         q = p.quadrant

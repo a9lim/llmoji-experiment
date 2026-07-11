@@ -3,9 +3,9 @@
 Single source of truth for quadrant ordering, dominance-split labels,
 and the OKLCH-uniform color mapping. Imported by:
 
-- ``llmoji_study.emotional_analysis`` (figure helpers, per_face_*)
-- ``llmoji_study.jsd`` (distribution-vs-distribution math)
-- ``llmoji_study.lexicon`` (BoL → quadrant softmax)
+- ``llmoji_experiment.emotional_analysis`` (figure helpers, per_face_*)
+- ``llmoji_experiment.jsd`` (distribution-vs-distribution math)
+- ``llmoji_experiment.lexicon`` (BoL → quadrant softmax)
 - ``scripts/40_face_union.py`` / ``41_face_overlap.py`` / ``50_face_likelihood.py``
   / ``harness/10_emit_analysis.py`` etc. — all the analysis scripts
   that iterate per-cell or compute per-cell metrics.

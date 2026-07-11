@@ -36,7 +36,7 @@ PROBE_CATEGORIES = ["affect"]
 # keyed schema for `powerful.powerless` / `surprised.unsurprised` /
 # `disgusted.accepting` populated post-hoc by the now-orphaned
 # `scripts/local/27_v3_extension_probe_rescore.py`. The extension
-# packs still live in `llmoji_study/probe_packs/` and the saklas-side
+# packs still live in `llmoji_experiment/probe_packs/` and the saklas-side
 # vectors at `~/.saklas/vectors/default/` — they can be re-scored from
 # any sidecar via `monitor.score_single_token` without going through
 # this list. The eager / lazy split was a historical accident; this
@@ -253,7 +253,7 @@ EMOTIONAL_EXPERIMENT = "gemma"
 #
 # Post-2026-05-06 the research side replaced MiniLM-on-prose with
 # bag-of-lexicon (BoL) vectors directly: ``embed_lexicon_bags`` in
-# ``llmoji_study.claude_faces`` pools per-bundle synthesis picks
+# ``llmoji_experiment.claude_faces`` pools per-bundle synthesis picks
 # (count-weighted, L1-normalized) into a 50-d soft distribution per
 # canonical kaomoji. The legacy MiniLM-prose pipeline (eriskii
 # 21-axis projection, Haiku-labeled clusters,

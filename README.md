@@ -1,6 +1,6 @@
-# llmoji-study
+# llmoji-experiment
 
-`llmoji-study` asks whether a language model's kaomoji choice tracks
+`llmoji-experiment` asks whether a language model's kaomoji choice tracks
 something about its internal state. The local side uses
 [`saklas`](https://github.com/a9lim/saklas) to read hidden states and
 run face-likelihood probes on open-weight causal LMs. The harness side
@@ -35,7 +35,7 @@ Public writeup:
   is gone.
 - **Quadrants**: current split taxonomy is the 9-cell PAD registry:
   `HP-D`, `HP-S`, `LP`, `NP`, `HN-D`, `HN-S`, `LN`, `NB`, `HB`.
-  `llmoji_study/quadrants.py` is the source of truth for ordering,
+  `llmoji_experiment/quadrants.py` is the source of truth for ordering,
   colors, and split handling.
 
 ## Headline Findings
@@ -65,8 +65,8 @@ Full numbers live in [`docs/findings.md`](docs/findings.md).
 ## Reproducing
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -e ../llmoji
+source .venv/bin/activate  # .venv -> ../.venvs/llmoji-experiment
+pip install -e ../../llmoji
 pip install -e .
 ```
 
@@ -139,7 +139,7 @@ Still-current dated docs:
   contributor corpus.
 - [`saklas`](https://github.com/a9lim/saklas): activation steering and
   trait monitoring engine.
-- `attractor-study`: the MR / meta-register basin research line, split
+- `attractor-experiment`: the MR / meta-register basin research line, split
   off from this repo.
 - [eriskii's Claude-faces catalog](https://eriskii.net/projects/claude-faces):
   original kaomoji vocabulary catalog and prior art.

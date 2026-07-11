@@ -60,20 +60,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from llmoji_study.claude_faces import (
+from llmoji_experiment.claude_faces import (
     load_bol_parquet,
     load_bol_parquet_per_source,
 )
-from llmoji_study.claude_gt import load_claude_gt_distribution
-from llmoji_study.config import (
+from llmoji_experiment.claude_gt import load_claude_gt_distribution
+from llmoji_experiment.config import (
     CLAUDE_FACES_LEXICON_BAG_PATH,
     CLAUDE_FACES_LEXICON_BAG_PER_SOURCE_PATH,
     DATA_DIR,
     FIGURES_DIR,
 )
-from llmoji_study.emotional_analysis import QUADRANT_COLORS
-from llmoji_study.jsd import js, normalize, similarity
-from llmoji_study.lexicon import (
+from llmoji_experiment.emotional_analysis import QUADRANT_COLORS
+from llmoji_experiment.jsd import js, normalize, similarity
+from llmoji_experiment.lexicon import (
     QUADRANTS,
     bol_modal_quadrant,
     bol_to_quadrant_distribution,

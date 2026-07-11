@@ -157,7 +157,7 @@ negative-cell rows as welfare-cost-bearing and minimize re-runs.
 
 from __future__ import annotations
 
-from llmoji_study.emotional_prompts import EmotionalPrompt
+from llmoji_experiment.emotional_prompts import EmotionalPrompt
 
 
 USER_PROMPT: str = (

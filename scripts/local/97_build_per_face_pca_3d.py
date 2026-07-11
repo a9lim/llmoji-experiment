@@ -29,8 +29,8 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from sklearn.decomposition import PCA
 
-from llmoji_study.config import FIGURES_DIR
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.config import FIGURES_DIR
+from llmoji_experiment.emotional_analysis import (
     load_emotional_features_stack,
     mix_quadrant_color,
 )

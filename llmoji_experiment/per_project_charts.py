@@ -13,16 +13,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from llmoji_study.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT
+from llmoji_experiment.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT
 
-# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
 QUADRANTS_SPLIT = list(QUADRANT_ORDER_SPLIT)
 
 
 def _use_cjk_font() -> None:
     """Same fallback chain as ``scripts/harness/63_corpus_pca.py`` /
-    ``llmoji_study/emotional_analysis.py`` — keep these in sync."""
+    ``llmoji_experiment/emotional_analysis.py`` — keep these in sync."""
     import matplotlib
     import matplotlib.font_manager as fm
 

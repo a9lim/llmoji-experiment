@@ -87,7 +87,7 @@ empirical-centroid approach replaces that hierarchy.
 
 ### Self-event prompt set
 
-`llmoji_study/self_event_prompts.py`. 5 prompts × 9 v4 cells = 45
+`llmoji_experiment/self_event_prompts.py`. 5 prompts × 9 v4 cells = 45
 prompts. ID convention matches `emotional_prompts.py` so
 `prompt_id[:2].upper()` quadrant inference still works. Run via
 `LLMOJI_PROMPT_SET=self_event LLMOJI_OUT_SUFFIX=self_event` on
@@ -420,7 +420,7 @@ In rough priority order (none executed in this session):
 
 ## Files
 
-- Prompts: `llmoji_study/self_event_prompts.py` (v2)
+- Prompts: `llmoji_experiment/self_event_prompts.py` (v2)
 - Emit pipeline: `scripts/local/00_emit.py` (`LLMOJI_PROMPT_SET` env var)
 - Centroid registration: `scripts/local/22c_register_centroid_probes.py`
 - Comparison: `scripts/local/22e_mirror_vs_self_event.py`,

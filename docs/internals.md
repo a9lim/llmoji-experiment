@@ -5,7 +5,7 @@ canonicalization.
 
 ## Hidden-State Sidecars
 
-After generation, `llmoji_study.hidden_capture.read_after_generate()`
+After generation, `llmoji_experiment.hidden_capture.read_after_generate()`
 reads saklas buckets and writes one sidecar per row:
 
 ```text
@@ -45,7 +45,7 @@ data/harness/claude/emotional_raw.jsonl
 data/harness/claude_intro_v7/emotional_raw.jsonl
 ```
 
-Each row has `run_index`. Use `llmoji_study.claude_gt` helpers rather
+Each row has `run_index`. Use `llmoji_experiment.claude_gt` helpers rather
 than reading legacy `claude-runs*/run-N.jsonl` paths directly.
 
 ## Kaomoji Canonicalization
@@ -75,7 +75,7 @@ for analysis.
 
 ## Quadrants
 
-`llmoji_study/quadrants.py` owns:
+`llmoji_experiment/quadrants.py` owns:
 
 - `QUADRANT_ORDER`: aggregate order.
 - `QUADRANT_ORDER_SPLIT`: 9-cell split order.

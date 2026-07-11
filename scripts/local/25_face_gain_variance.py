@@ -40,8 +40,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from llmoji_study.config import FIGURES_DIR, DATA_DIR, MODEL_REGISTRY
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.config import FIGURES_DIR, DATA_DIR, MODEL_REGISTRY
+from llmoji_experiment.emotional_analysis import (
     _use_cjk_font,
     load_emotional_features_stack,
 )

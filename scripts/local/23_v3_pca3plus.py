@@ -37,8 +37,8 @@ import pandas as pd
 from scipy.stats import pearsonr
 from sklearn.decomposition import PCA
 
-from llmoji_study.config import PROBES, current_model
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.config import PROBES, current_model
+from llmoji_experiment.emotional_analysis import (
     _use_cjk_font,
     load_emotional_features_stack,
 )

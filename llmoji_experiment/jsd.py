@@ -21,7 +21,7 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable
 
-# Re-exported from the canonical zero-dep ``llmoji_study.quadrants``
+# Re-exported from the canonical zero-dep ``llmoji_experiment.quadrants``
 # module so the JSD math layer shares ordering with figures /
 # classifiers / BoL projection. Update ``quadrants.py`` to change the
 # registry shape; this and ``emotional_analysis.py`` /  ``lexicon.py``

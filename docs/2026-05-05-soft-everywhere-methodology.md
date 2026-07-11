@@ -40,8 +40,8 @@ historical unless a fresh primed face-likelihood summary is regenerated.
 
 ## Code Surface
 
-- `llmoji_study/jsd.py`: normalization, JSD, and similarity helpers.
-- `llmoji_study/claude_gt.py`: Claude-GT distribution loader.
+- `llmoji_experiment/jsd.py`: normalization, JSD, and similarity helpers.
+- `llmoji_experiment/claude_gt.py`: Claude-GT distribution loader.
 - `scripts/52_subset_search.py`: exhaustive subset search.
 - `scripts/53_topk_pooling.py`: pooling variants and diagnostics.
 - `scripts/54_ensemble_predict.py`: ensemble output.

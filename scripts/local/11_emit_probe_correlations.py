@@ -28,14 +28,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from llmoji_study.config import DATA_DIR, current_model
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.config import DATA_DIR, current_model
+from llmoji_experiment.emotional_analysis import (
     available_extension_probes,
     compute_probe_correlations,
     load_rows,
     plot_probe_correlation_matrix,
 )
-from llmoji_study.quadrants import QUADRANT_ORDER
+from llmoji_experiment.quadrants import QUADRANT_ORDER
 
 
 # Affect trio for the headline correlation table. Order: valence,

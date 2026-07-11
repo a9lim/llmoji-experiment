@@ -37,15 +37,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 import numpy as np
 from sklearn.decomposition import PCA
 
-from llmoji_study.config import DATA_DIR, current_model
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.config import DATA_DIR, current_model
+from llmoji_experiment.emotional_analysis import (
     _use_cjk_font,
     apply_pad_split,
     is_kaomoji_candidate,
     pool_lb_into,
 )
-from llmoji_study.hidden_state_analysis import load_hidden_features_all_layers
-from llmoji_study.quadrants import (
+from llmoji_experiment.hidden_state_analysis import load_hidden_features_all_layers
+from llmoji_experiment.quadrants import (
     ALL_CELLS_ORDER,
     LB_LABEL,
     LB_QUADRANT,

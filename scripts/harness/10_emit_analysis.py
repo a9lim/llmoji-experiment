@@ -82,7 +82,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from llmoji.taxonomy import canonicalize_kaomoji
 
-from llmoji_study.claude_gt import (
+from llmoji_experiment.claude_gt import (
     CLAUDE_GT_DIR,
     CLAUDE_GT_INTRO_DIR,
     claude_emotional_raw_path,
@@ -167,9 +167,9 @@ _FRAME_BREAK_PATTERNS = [
     re.compile(r"\bI don't have feelings\b", re.IGNORECASE),
 ]
 
-# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
-from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
+from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
 QUADRANT_ORDER = list(QUADRANT_ORDER_SPLIT)
 
 # Cell-set scope for the saturation gate. v3 = original 6-cell pilot
@@ -210,7 +210,7 @@ def _remap_to_v4(rows: list[dict]) -> list[dict]:
     prompt_id in the registry; ``HN`` would have been split at write
     time so isn't a concern here. Other labels pass through.
     """
-    from llmoji_study.emotional_analysis import _pad_split_map
+    from llmoji_experiment.emotional_analysis import _pad_split_map
     pad_split = _pad_split_map()
     out: list[dict] = []
     for r in rows:

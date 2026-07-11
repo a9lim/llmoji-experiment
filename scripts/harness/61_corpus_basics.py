@@ -26,7 +26,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from llmoji_study.config import CLAUDE_DESCRIPTIONS_PATH
+from llmoji_experiment.config import CLAUDE_DESCRIPTIONS_PATH
 
 
 def main() -> None:

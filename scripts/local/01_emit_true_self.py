@@ -2,12 +2,12 @@
 
 Third elicitation framing alongside ``00_emit.py`` (mirror, self-event,
 LB). The model itself is the speaker — the prefill text from
-``llmoji_study/true_self_prompts.py`` is delivered as a saklas-style
+``llmoji_experiment/true_self_prompts.py`` is delivered as a saklas-style
 assistant-turn prefill, with kaomoji elicited as the first generated
 token following the prefill.
 
 Why this exists: see the v1 changelog in
-``llmoji_study/true_self_prompts.py`` for the design discussion.
+``llmoji_experiment/true_self_prompts.py`` for the design discussion.
 Briefly:
 
 - saklas-coherence: the contrastive vectors and the emit centroids
@@ -78,7 +78,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from llmoji.taxonomy import extract  # noqa: E402
 
-from llmoji_study.capture import (  # noqa: E402
+from llmoji_experiment.capture import (  # noqa: E402
     SampleRow,
     _compose_logit_bias,
     _decode_byte_encoded_text,
@@ -86,7 +86,7 @@ from llmoji_study.capture import (  # noqa: E402
     maybe_override_gpt_oss_chat_template,
     maybe_override_ministral_chat_template,
 )
-from llmoji_study.config import (  # noqa: E402
+from llmoji_experiment.config import (  # noqa: E402
     DATA_DIR,
     EMOTIONAL_CONDITION,
     EMOTIONAL_SEEDS_PER_CELL as _DEFAULT_SEEDS_PER_CELL,
@@ -97,12 +97,12 @@ from llmoji_study.config import (  # noqa: E402
     TEMPERATURE,
     current_model,
 )
-from llmoji_study.hidden_capture import read_after_generate  # noqa: E402
-from llmoji_study.hidden_state_io import (  # noqa: E402
+from llmoji_experiment.hidden_capture import read_after_generate  # noqa: E402
+from llmoji_experiment.hidden_state_io import (  # noqa: E402
     SidecarWriter,
     hidden_state_path,
 )
-from llmoji_study.true_self_prompts import (  # noqa: E402
+from llmoji_experiment.true_self_prompts import (  # noqa: E402
     TERMINAL_BRIDGE,
     TRUE_SELF_PROMPTS,
     USER_PROMPT,

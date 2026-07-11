@@ -62,8 +62,8 @@ from sklearn.model_selection import (
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from llmoji_study.config import FIGURES_DIR, MODEL_REGISTRY, current_model, resolve_model
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.config import FIGURES_DIR, MODEL_REGISTRY, current_model, resolve_model
+from llmoji_experiment.emotional_analysis import (
     QUADRANT_ORDER,
     _use_cjk_font,
     load_emotional_features_stack,
@@ -319,7 +319,7 @@ def _within_face_consistency(
     """Per-face cosine-to-mean consistency. Same metric used in
     Figure B / `summary_table` from `emotional_analysis.py`, reproduced
     here so the predictiveness summary stands alone."""
-    from llmoji_study.hidden_state_analysis import cosine_to_mean
+    from llmoji_experiment.hidden_state_analysis import cosine_to_mean
     rows = []
     for face, sub in df.groupby("first_word"):
         if len(sub) < min_n:

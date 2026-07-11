@@ -65,19 +65,19 @@ import pandas as pd
 from llmoji.sources.journal import iter_journal
 from llmoji.taxonomy import canonicalize_kaomoji
 
-from llmoji_study.claude_gt import (
+from llmoji_experiment.claude_gt import (
     CLAUDE_GT_DIR,
     CLAUDE_GT_INTRO_DIR,
     claude_emotional_raw_path,
     find_run_indices,
     load_emotional_raw,
 )
-from llmoji_study.config import DATA_DIR, MODEL_REGISTRY
-from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
+from llmoji_experiment.config import DATA_DIR, MODEL_REGISTRY
+from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
 
 
 DEFAULT_MODELS = ("gemma", "qwen", "ministral", "gpt_oss_20b", "granite")
-# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
 QUADRANT_ORDER = list(QUADRANT_ORDER_SPLIT)
 WILD_DATA_DIR = DATA_DIR / "harness" / "hf_dataset" / "contributors"
@@ -112,7 +112,7 @@ def _build_prompt_id_to_quadrant() -> dict[str, str]:
     EmotionalPrompt.quadrant aggregate. Single source of truth — when
     the registry shape changes, this map updates automatically.
     """
-    from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
+    from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS
     out: dict[str, str] = {}
     for p in EMOTIONAL_PROMPTS:
         if p.quadrant in ("HP", "HN") and p.pad_dominance != 0:

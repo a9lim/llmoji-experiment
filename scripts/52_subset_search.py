@@ -53,12 +53,12 @@ from itertools import combinations
 import pandas as pd
 from sklearn.metrics import cohen_kappa_score
 
-from llmoji_study.config import DATA_DIR
-from llmoji_study.face_likelihood_discovery import discover_summaries
-from llmoji_study.jsd import LN2, js, normalize, similarity
-from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
+from llmoji_experiment.config import DATA_DIR
+from llmoji_experiment.face_likelihood_discovery import discover_summaries
+from llmoji_experiment.jsd import LN2, js, normalize, similarity
+from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
 
-# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
 QUADRANTS = QUADRANT_ORDER_SPLIT
 
@@ -67,7 +67,7 @@ def _discover(prefer_full: bool, exclude: set[str]) -> dict[str, tuple[str, bool
     """Map encoder_short → (path, is_pilot). Picks pilot/full per ``prefer_full``.
 
     Wraps the canonical layout discovery in
-    ``llmoji_study.face_likelihood_discovery`` and tags pilot-vs-full so
+    ``llmoji_experiment.face_likelihood_discovery`` and tags pilot-vs-full so
     callers can label the cell origin.
     """
     found = discover_summaries(prefer_full)
@@ -112,7 +112,7 @@ def _gt_distribution_claude(faces: list[str],
                             floor: int) -> tuple[dict[str, dict[str, int]],
                                                  list[str]]:
     """Claude-GT mode: per-face per-quadrant Claude emission counts."""
-    from llmoji_study.claude_gt import load_claude_gt_distribution
+    from llmoji_experiment.claude_gt import load_claude_gt_distribution
     cgt = load_claude_gt_distribution(floor=floor)
     counts = {f: cgt[f] for f in faces if f in cgt}
     eligible = [f for f in faces if f in cgt]

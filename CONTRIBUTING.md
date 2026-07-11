@@ -1,6 +1,6 @@
 # Contributing
 
-`llmoji-study` is a research repo. The standard for changes is: is the
+`llmoji-experiment` is a research repo. The standard for changes is: is the
 claim honest, is the artifact reproducible, and will future-us know what
 changed.
 
@@ -43,7 +43,7 @@ priming condition, not a current face-likelihood encoder unless its
 summary is regenerated. New models should follow the current layer-stack
 pipeline, not the old single-layer `preferred_layer` workflow.
 
-1. Register the model in `llmoji_study/config.py`.
+1. Register the model in `llmoji_experiment/config.py`.
 2. Run the hidden-state smoke test:
 
    ```bash
@@ -85,12 +85,12 @@ layer-stack helpers.
 ## Working Locally
 
 ```bash
-git clone https://github.com/a9lim/llmoji-study
-git clone https://github.com/a9lim/llmoji ../llmoji
+git clone https://github.com/a9lim/llmoji-experiment
+git clone https://github.com/a9lim/llmoji ../../llmoji
 
-cd llmoji-study
-python -m venv .venv && source .venv/bin/activate
-pip install -e ../llmoji
+cd llmoji-experiment
+source .venv/bin/activate  # .venv -> ../.venvs/llmoji-experiment
+pip install -e ../../llmoji
 pip install -e .
 ```
 

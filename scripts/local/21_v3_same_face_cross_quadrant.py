@@ -44,8 +44,8 @@ from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
-from llmoji_study.config import current_model
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.config import current_model
+from llmoji_experiment.emotional_analysis import (
     QUADRANT_COLORS,
     QUADRANT_ORDER_SPLIT as QUADRANT_ORDER,
     _use_cjk_font,

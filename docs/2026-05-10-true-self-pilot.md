@@ -45,7 +45,7 @@ the prefill. Three motivated tests:
 
 ### Prompt set
 
-`llmoji_study/true_self_prompts.py` — 50 prompts, 5 per cell across
+`llmoji_experiment/true_self_prompts.py` — 50 prompts, 5 per cell across
 the 9 v4 cells plus LB. ID layout matches mirror and self-event for
 cell-aligned analysis. `USER_PROMPT` is constant across all rows,
 adapted from the v7-introspection preamble:
@@ -331,7 +331,7 @@ issue, not a "the experiment failed" issue, but it's worth flagging:
 
 ## Artifacts
 
-- `llmoji_study/true_self_prompts.py` — 50-prompt registry, USER_PROMPT,
+- `llmoji_experiment/true_self_prompts.py` — 50-prompt registry, USER_PROMPT,
   TERMINAL_BRIDGE constants
 - `scripts/local/00_emit_true_self.py` — emit script
 - `scripts/local/22i_three_way_pca_scatter.py` — 3-way PCA visualization

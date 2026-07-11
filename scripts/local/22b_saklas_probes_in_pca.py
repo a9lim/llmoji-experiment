@@ -61,14 +61,14 @@ import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
 
-from llmoji_study.config import (
+from llmoji_experiment.config import (
     PROBE_CATEGORIES,
     PROBES,
     current_model,
 )
-from llmoji_study.emotional_analysis import _use_cjk_font
-from llmoji_study.hidden_state_analysis import load_hidden_features_all_layers
-from llmoji_study.quadrants import (
+from llmoji_experiment.emotional_analysis import _use_cjk_font
+from llmoji_experiment.hidden_state_analysis import load_hidden_features_all_layers
+from llmoji_experiment.quadrants import (
     LB_LABEL,
     LB_QUADRANT,
     QUADRANT_COLORS,
@@ -343,7 +343,7 @@ def _plot_3d(
 
 
 def _kaomoji_filter_idx(first_words) -> np.ndarray:
-    from llmoji_study.emotional_analysis import is_kaomoji_candidate
+    from llmoji_experiment.emotional_analysis import is_kaomoji_candidate
     return np.asarray([
         isinstance(s, str) and is_kaomoji_candidate(s) for s in first_words
     ])
@@ -453,7 +453,7 @@ def main() -> None:
 
     # 2. Load layer-stack data at the chosen aggregate.
     print(f"loading hidden-state features ({args.which}, layer-stack)...")
-    from llmoji_study.config import DATA_DIR
+    from llmoji_experiment.config import DATA_DIR
     # Cache key tracks both the experiment slug (so LLMOJI_OUT_SUFFIX'd
     # runs cache separately) and the aggregate (so h_first / h_last
     # don't clobber each other).
@@ -487,7 +487,7 @@ def main() -> None:
     # in 22b), and OA passes through apply_pad_split unchanged, so the
     # combined df has 7 aggregate cells + OA-1.
     if args.pool_lb_from:
-        from llmoji_study.emotional_analysis import pool_lb_into
+        from llmoji_experiment.emotional_analysis import pool_lb_into
         df, X3, layer_idxs = pool_lb_into(
             df, X3, layer_idxs,
             ref_short=M.short_name,

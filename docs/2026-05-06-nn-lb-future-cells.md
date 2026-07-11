@@ -95,5 +95,5 @@ git history if the exact candidate strings are needed.
 
 ## Current Rule
 
-Do not add NN or LB to `llmoji_study/quadrants.py`,
+Do not add NN or LB to `llmoji_experiment/quadrants.py`,
 `EMOTIONAL_PROMPTS`, or the LEXICON without a new evidence pass.

@@ -24,7 +24,7 @@ BoL replacement is more principled (the synthesizer literally
 committed to a structured pick over the locked v2 LEXICON, and 19
 of those 48 lexicon words are explicit Russell-quadrant anchors)
 and zero-cost (no model call). See
-``llmoji_study.lexicon.bol_modal_quadrant``.
+``llmoji_experiment.lexicon.bol_modal_quadrant``.
 
 Source corpora (both):
   - ``~/.claude/kaomoji-journal.jsonl`` (Claude Code, has cwd → project)
@@ -58,23 +58,23 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 import pandas as pd
 
-from llmoji_study.claude_faces import load_bol_parquet
-from llmoji_study.claude_gt import load_claude_gt
-from llmoji_study.config import (
+from llmoji_experiment.claude_faces import load_bol_parquet
+from llmoji_experiment.claude_gt import load_claude_gt
+from llmoji_experiment.config import (
     CLAUDE_FACES_LEXICON_BAG_PATH,
     DATA_DIR,
     FIGURES_DIR,
 )
-from llmoji_study.lexicon import bol_modal_quadrant
-from llmoji_study.local_emissions import (
+from llmoji_experiment.lexicon import bol_modal_quadrant
+from llmoji_experiment.local_emissions import (
     DEFAULT_CLAUDE_EXPORTS,
     DEFAULT_CLAUDE_JOURNAL,
     iter_local_emissions,
 )
-from llmoji_study.per_project_charts import plot_per_project_quadrants
-from llmoji_study.quadrants import QUADRANT_ORDER_SPLIT
+from llmoji_experiment.per_project_charts import plot_per_project_quadrants
+from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
 
-# v4 9-cell ordering, sourced from llmoji_study.quadrants — single
+# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
 QUADRANTS = list(QUADRANT_ORDER_SPLIT)
 HARNESS_DIR = DATA_DIR / "harness"
@@ -112,7 +112,7 @@ def _load_bol_predictions(path: Path) -> dict[str, dict]:
 
 # Reader plumbing (DEFAULT_CLAUDE_JOURNAL, DEFAULT_CLAUDE_EXPORTS,
 # format dispatch, journal + claude.ai readers) lives in
-# `llmoji_study.local_emissions` so script 67 (wild residual marker
+# `llmoji_experiment.local_emissions` so script 67 (wild residual marker
 # semantics) can share the same code path. Per-emission rows from
 # `iter_local_emissions` are `(face, source, project)` tuples; this
 # script discards `source` and groups by `project`.

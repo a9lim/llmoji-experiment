@@ -29,17 +29,17 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from llmoji_study.claude_faces import (
+from llmoji_experiment.claude_faces import (
     embed_lexicon_bags_per_source,
     load_descriptions,
     save_bol_parquet_per_source,
 )
-from llmoji_study.config import (
+from llmoji_experiment.config import (
     CLAUDE_DESCRIPTIONS_PATH,
     CLAUDE_FACES_LEXICON_BAG_PER_SOURCE_PATH,
     DATA_DIR,
 )
-from llmoji_study.lexicon import (
+from llmoji_experiment.lexicon import (
     LEXICON_VERSION,
     bol_modal_quadrant,
 )

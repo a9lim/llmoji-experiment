@@ -37,20 +37,20 @@ from sklearn.decomposition import PCA
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from llmoji_study.config import (
+from llmoji_experiment.config import (
     DATA_DIR,
     INTROSPECTION_CONDITIONS,
     PROBES,
     current_model,
 )
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.emotional_analysis import (
     _hn_split_map,
     _use_cjk_font,
     available_extension_probes,
     load_emotional_features_stack_at,
     load_rows,
 )
-from llmoji_study.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT
+from llmoji_experiment.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT
 
 
 _use_cjk_font()

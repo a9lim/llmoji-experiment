@@ -41,16 +41,16 @@ from saklas import SaklasSession
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from llmoji_study.capture import (
+from llmoji_experiment.capture import (
     install_prefix_cache,
     maybe_override_gpt_oss_chat_template,
     maybe_override_ministral_chat_template,
     run_sample,
 )
-from llmoji_study.config import DATA_DIR, PROBE_CATEGORIES, current_model
-from llmoji_study.emotional_prompts import EMOTIONAL_PROMPTS
-from llmoji_study.hidden_state_io import SidecarWriter
-from llmoji_study.prompts import Prompt
+from llmoji_experiment.config import DATA_DIR, PROBE_CATEGORIES, current_model
+from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS
+from llmoji_experiment.hidden_state_io import SidecarWriter
+from llmoji_experiment.prompts import Prompt
 
 
 JSONL_FLUSH_EVERY = 20

@@ -43,8 +43,8 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from llmoji_study.config import DATA_DIR, MODEL_REGISTRY, resolve_model
-from llmoji_study.emotional_analysis import (
+from llmoji_experiment.config import DATA_DIR, MODEL_REGISTRY, resolve_model
+from llmoji_experiment.emotional_analysis import (
     load_emotional_features_stack,
     load_emotional_features_stack_at,
 )
