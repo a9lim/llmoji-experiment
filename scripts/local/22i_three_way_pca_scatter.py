@@ -36,8 +36,8 @@ Stdout reports three numerical comparisons:
 
 Usage::
 
-    LLMOJI_MODEL=gemma .venv/bin/python scripts/local/22i_three_way_pca_scatter.py
-    LLMOJI_MODEL=gemma .venv/bin/python scripts/local/22i_three_way_pca_scatter.py --which h_last
+    LLMOJI_MODEL=gemma python scripts/local/22i_three_way_pca_scatter.py
+    LLMOJI_MODEL=gemma python scripts/local/22i_three_way_pca_scatter.py --which h_last
 """
 
 from __future__ import annotations

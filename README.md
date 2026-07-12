@@ -65,7 +65,7 @@ Full numbers live in [`docs/findings.md`](docs/findings.md).
 ## Reproducing
 
 ```bash
-source .venv/bin/activate  # .venv -> ../.venvs/llmoji-experiment
+python --version  # system Python 3.12
 pip install -e ../../llmoji
 pip install -e .
 ```
@@ -73,7 +73,7 @@ pip install -e .
 For local hidden-state sanity:
 
 ```bash
-.venv/bin/python scripts/local/90_hidden_state_smoke.py
+python scripts/local/90_hidden_state_smoke.py
 ```
 
 For the full local analysis chain after an emit refresh:

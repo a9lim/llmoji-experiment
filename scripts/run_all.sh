@@ -58,13 +58,13 @@ echo "################################################################"
     for m in "${MODELS[@]}"; do
         echo ""
         echo "  >>> scripts/local/50_face_likelihood.py --model $m"
-        .venv/bin/python scripts/local/50_face_likelihood.py --model "$m"
+        python scripts/local/50_face_likelihood.py --model "$m"
     done
     echo ""
     echo "  >>> scripts/local/50_face_likelihood.py --model $V7PRIMED_MODEL (suffix=$V7PRIMED_SUFFIX)"
     LLMOJI_OUT_SUFFIX="$V7PRIMED_SUFFIX" \
     LLMOJI_PREAMBLE_FILE="$V7PRIMED_PREAMBLE" \
-        .venv/bin/python scripts/local/50_face_likelihood.py --model "$V7PRIMED_MODEL"
+        python scripts/local/50_face_likelihood.py --model "$V7PRIMED_MODEL"
 
     if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
         echo ""
@@ -73,8 +73,8 @@ echo "################################################################"
         echo "#"
         echo "#  to finish: export ANTHROPIC_API_KEY=… and run, in order:"
         echo "#    scripts/run_harness_chain.sh"
-        echo "#    .venv/bin/python scripts/harness/50_face_likelihood.py"
-        echo "#    .venv/bin/python scripts/harness/50_face_likelihood.py --model opus --gt-only"
+        echo "#    python scripts/harness/50_face_likelihood.py"
+        echo "#    python scripts/harness/50_face_likelihood.py --model opus --gt-only"
         echo "#    scripts/run_post_likelihood.sh"
         echo "################################################################"
         exit 0
@@ -90,10 +90,10 @@ echo "################################################################"
     echo "################################################################"
     echo ""
     echo "  >>> scripts/harness/50_face_likelihood.py            # haiku, default"
-    .venv/bin/python scripts/harness/50_face_likelihood.py
+    python scripts/harness/50_face_likelihood.py
     echo ""
     echo "  >>> scripts/harness/50_face_likelihood.py --model opus --gt-only"
-    .venv/bin/python scripts/harness/50_face_likelihood.py --model opus --gt-only
+    python scripts/harness/50_face_likelihood.py --model opus --gt-only
 
     # 5. Post-50 aggregations.
     bash scripts/run_post_likelihood.sh

@@ -29,8 +29,8 @@ Uploaded data:
 This repo pulls the public dataset with:
 
 ```bash
-.venv/bin/python scripts/harness/60_corpus_pull.py
-.venv/bin/python scripts/harness/61_corpus_basics.py
+python scripts/harness/60_corpus_pull.py
+python scripts/harness/61_corpus_basics.py
 ```
 
 ## BoL Pipeline
@@ -39,10 +39,10 @@ BoL means bag-of-lexicon. Each canonical face becomes a 50-dimensional
 L1-normalized vector over `llmoji.synth_prompts.LEXICON`.
 
 ```bash
-.venv/bin/python scripts/harness/62_corpus_lexicon.py
-.venv/bin/python scripts/harness/64_corpus_lexicon_per_source.py
-.venv/bin/python scripts/harness/63_corpus_pca.py
-.venv/bin/python scripts/harness/55_bol_encoder.py
+python scripts/harness/62_corpus_lexicon.py
+python scripts/harness/64_corpus_lexicon_per_source.py
+python scripts/harness/63_corpus_pca.py
+python scripts/harness/55_bol_encoder.py
 ```
 
 Outputs:
@@ -72,11 +72,11 @@ active read surface.
 Collection and analysis:
 
 ```bash
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --run-index N
-.venv/bin/python scripts/harness/10_emit_analysis.py
+ANTHROPIC_API_KEY=... python scripts/harness/00_emit.py --run-index N
+python scripts/harness/10_emit_analysis.py
 
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --fill-gaps
-.venv/bin/python scripts/harness/10_emit_analysis.py --cross-arm
+ANTHROPIC_API_KEY=... python scripts/harness/00_emit.py --fill-gaps
+python scripts/harness/10_emit_analysis.py --cross-arm
 ```
 
 Current saturation gate:
@@ -96,8 +96,8 @@ only: no `top_pick`, no `reason`. The script requests `temperature=0`
 when the target model still accepts that parameter.
 
 ```bash
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/50_face_likelihood.py
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/50_face_likelihood.py --model opus --gt-only
+ANTHROPIC_API_KEY=... python scripts/harness/50_face_likelihood.py
+ANTHROPIC_API_KEY=... python scripts/harness/50_face_likelihood.py --model opus --gt-only
 ```
 
 Outputs:
@@ -115,8 +115,8 @@ Three channels measure different things:
 - **act**: BoL, how Haiku summarizes in-context wild uses of the face.
 
 ```bash
-.venv/bin/python scripts/harness/68_three_way_analysis.py
-.venv/bin/python scripts/harness/69_per_source_drift.py
+python scripts/harness/68_three_way_analysis.py
+python scripts/harness/69_per_source_drift.py
 ```
 
 Key result: Opus and Haiku read each other closely, but BoL diverges
@@ -127,11 +127,11 @@ deployment-state ground truth.
 ## Cross-Platform Aggregations
 
 ```bash
-.venv/bin/python scripts/66_per_project_quadrants.py --mode gt-priority
-.venv/bin/python scripts/66_per_project_quadrants.py --mode bol
-.venv/bin/python scripts/66_per_project_quadrants.py --mode gt-only
-.venv/bin/python scripts/67_wild_residual.py --fixed-k 9
-.venv/bin/python scripts/41_face_overlap.py --include-claude
+python scripts/66_per_project_quadrants.py --mode gt-priority
+python scripts/66_per_project_quadrants.py --mode bol
+python scripts/66_per_project_quadrants.py --mode gt-only
+python scripts/67_wild_residual.py --fixed-k 9
+python scripts/41_face_overlap.py --include-claude
 ```
 
 `scripts/66_per_project_quadrants.py` reads local journals and exports.

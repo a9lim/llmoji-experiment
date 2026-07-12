@@ -22,8 +22,8 @@ Outputs to ``figures/local/<short>/``:
 
 Usage::
 
-    LLMOJI_MODEL=gemma .venv/bin/python scripts/local/22d_data_pca_scatter.py
-    LLMOJI_MODEL=gemma .venv/bin/python scripts/local/22d_data_pca_scatter.py --which h_last
+    LLMOJI_MODEL=gemma python scripts/local/22d_data_pca_scatter.py
+    LLMOJI_MODEL=gemma python scripts/local/22d_data_pca_scatter.py --which h_last
 """
 
 from __future__ import annotations

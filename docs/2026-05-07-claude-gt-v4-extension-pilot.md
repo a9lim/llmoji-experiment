@@ -73,8 +73,8 @@ Detail:
 ## Commands
 
 ```bash
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --cells v4-new --run-index N
-.venv/bin/python scripts/harness/10_emit_analysis.py --cells v4-new
+ANTHROPIC_API_KEY=... python scripts/harness/00_emit.py --cells v4-new --run-index N
+python scripts/harness/10_emit_analysis.py --cells v4-new
 ```
 
 `--cells v4-new` is naturalistic only and uses the three-cell set

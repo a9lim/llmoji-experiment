@@ -24,9 +24,9 @@ Outputs to ``figures/local/<short>/``:
 
 Usage::
 
-    LLMOJI_MODEL=gemma .venv/bin/python scripts/local/22h_combined_pca_scatter.py
-    LLMOJI_MODEL=gemma .venv/bin/python scripts/local/22h_combined_pca_scatter.py --which h_last
-    LLMOJI_MODEL=gemma .venv/bin/python scripts/local/22h_combined_pca_scatter.py --self-event-suffix self_event
+    LLMOJI_MODEL=gemma python scripts/local/22h_combined_pca_scatter.py
+    LLMOJI_MODEL=gemma python scripts/local/22h_combined_pca_scatter.py --which h_last
+    LLMOJI_MODEL=gemma python scripts/local/22h_combined_pca_scatter.py --self-event-suffix self_event
 """
 
 from __future__ import annotations

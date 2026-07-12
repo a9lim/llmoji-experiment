@@ -17,7 +17,7 @@ parent document's `data-theme` attribute (with a MutationObserver), so
 the figures track the site's light/dark toggle live.
 
 Usage:
-    .venv/bin/python scripts/local/98_wrap_blog_3d_html.py
+    python scripts/local/98_wrap_blog_3d_html.py
 """
 from __future__ import annotations
 

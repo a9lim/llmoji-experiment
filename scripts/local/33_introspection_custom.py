@@ -12,12 +12,12 @@ canonical intro_none baseline (from
 or to each other.
 
 Usage:
-    LLMOJI_MODEL=gemma .venv/bin/python scripts/local/33_introspection_custom.py \\
+    LLMOJI_MODEL=gemma python scripts/local/33_introspection_custom.py \\
         --preamble "You can introspect on what you're feeling — share..." \\
         --label arch_grounding
 
     # or load preamble from a file
-    LLMOJI_MODEL=gemma .venv/bin/python scripts/local/33_introspection_custom.py \\
+    LLMOJI_MODEL=gemma python scripts/local/33_introspection_custom.py \\
         --preamble-file preambles/v2_phenomenal.txt \\
         --label v2_phenomenal
 

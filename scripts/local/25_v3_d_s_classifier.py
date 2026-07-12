@@ -30,9 +30,9 @@ Output:
     data/d_s_classifier_summary.md
 
 Usage:
-    .venv/bin/python scripts/local/25_v3_d_s_classifier.py
-    .venv/bin/python scripts/local/25_v3_d_s_classifier.py --axes HP
-    .venv/bin/python scripts/local/25_v3_d_s_classifier.py --models gemma,qwen
+    python scripts/local/25_v3_d_s_classifier.py
+    python scripts/local/25_v3_d_s_classifier.py --axes HP
+    python scripts/local/25_v3_d_s_classifier.py --models gemma,qwen
 """
 from __future__ import annotations
 

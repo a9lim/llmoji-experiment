@@ -47,7 +47,7 @@ pipeline, not the old single-layer `preferred_layer` workflow.
 2. Run the hidden-state smoke test:
 
    ```bash
-   LLMOJI_MODEL=your_short_name .venv/bin/python scripts/local/90_hidden_state_smoke.py
+   LLMOJI_MODEL=your_short_name python scripts/local/90_hidden_state_smoke.py
    ```
 
 3. Write a short design note if the model needs special handling
@@ -57,7 +57,7 @@ pipeline, not the old single-layer `preferred_layer` workflow.
 5. If the pilot clears, run the main emit and the chain scripts:
 
    ```bash
-   LLMOJI_MODEL=your_short_name .venv/bin/python scripts/local/00_emit.py
+   LLMOJI_MODEL=your_short_name python scripts/local/00_emit.py
    scripts/run_local_chain.sh
    ```
 
@@ -89,7 +89,7 @@ git clone https://github.com/a9lim/llmoji-experiment
 git clone https://github.com/a9lim/llmoji ../../llmoji
 
 cd llmoji-experiment
-source .venv/bin/activate  # .venv -> ../.venvs/llmoji-experiment
+python --version  # system Python 3.12
 pip install -e ../../llmoji
 pip install -e .
 ```
@@ -97,7 +97,7 @@ pip install -e .
 Useful checks:
 
 ```bash
-.venv/bin/python scripts/local/90_hidden_state_smoke.py
+python scripts/local/90_hidden_state_smoke.py
 git diff --check
 ```
 

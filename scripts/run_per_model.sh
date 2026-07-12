@@ -49,7 +49,7 @@ PER_MODEL_SCRIPTS=(
 for script in "${PER_MODEL_SCRIPTS[@]}"; do
     echo ""
     echo "  >>> scripts/local/$script"
-    env "${env_args[@]}" .venv/bin/python "scripts/local/$script"
+    env "${env_args[@]}" python "scripts/local/$script"
 done
 
 echo ""

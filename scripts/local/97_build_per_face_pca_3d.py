@@ -13,7 +13,7 @@ companion wrapper ``98_wrap_blog_3d_html.py`` extracts each scene
 on-demand and exposes a model toggle for the blog post.
 
 Usage:
-    .venv/bin/python scripts/local/97_build_per_face_pca_3d.py
+    python scripts/local/97_build_per_face_pca_3d.py
 """
 from __future__ import annotations
 

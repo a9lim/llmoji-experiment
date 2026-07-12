@@ -115,7 +115,7 @@ corpus faces. Regenerate it after any local emit, Claude-GT, or harness
 corpus refresh:
 
 ```bash
-.venv/bin/python scripts/40_face_union.py
+python scripts/40_face_union.py
 ```
 
 ### BoL Parquets Are LEXICON-Versioned

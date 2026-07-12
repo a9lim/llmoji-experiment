@@ -12,8 +12,8 @@
 # Anthropic-API-judged faces have welfare cost and dollar cost, so
 # they run manually like 00_emit. After this chain:
 #
-#   ANTHROPIC_API_KEY=… .venv/bin/python scripts/harness/50_face_likelihood.py
-#   ANTHROPIC_API_KEY=… .venv/bin/python scripts/harness/50_face_likelihood.py \
+#   ANTHROPIC_API_KEY=… python scripts/harness/50_face_likelihood.py
+#   ANTHROPIC_API_KEY=… python scripts/harness/50_face_likelihood.py \
 #       --model opus --gt-only
 #
 # Then run scripts/run_post_likelihood.sh for the cross-platform
@@ -43,10 +43,10 @@ echo "  stage 1: BoL parquets (pooled + per-source)"
 echo "================================================================"
 echo ""
 echo "  >>> scripts/harness/62_corpus_lexicon.py"
-.venv/bin/python scripts/harness/62_corpus_lexicon.py
+python scripts/harness/62_corpus_lexicon.py
 echo ""
 echo "  >>> scripts/harness/64_corpus_lexicon_per_source.py"
-.venv/bin/python scripts/harness/64_corpus_lexicon_per_source.py
+python scripts/harness/64_corpus_lexicon_per_source.py
 
 # ---------------------------------------------------------------------
 # Stage 2 — BoL face_likelihood encoder. Reads claude_faces_lexicon_bag
@@ -60,7 +60,7 @@ echo "  stage 2: BoL face_likelihood encoder"
 echo "================================================================"
 echo ""
 echo "  >>> scripts/harness/55_bol_encoder.py"
-.venv/bin/python scripts/harness/55_bol_encoder.py
+python scripts/harness/55_bol_encoder.py
 
 # ---------------------------------------------------------------------
 # Stage 3 — Face overlap with Claude pull. Reads emit JSONLs only;
@@ -72,7 +72,7 @@ echo "  stage 3: face overlap with Claude pull"
 echo "================================================================"
 echo ""
 echo "  >>> scripts/41_face_overlap.py --include-claude"
-.venv/bin/python scripts/41_face_overlap.py --include-claude
+python scripts/41_face_overlap.py --include-claude
 
 echo ""
 echo "################################################################"

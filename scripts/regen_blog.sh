@@ -75,7 +75,7 @@ if [ "$skip_static" = 0 ]; then
     echo "================================================================"
     echo ""
     echo "  >>> scripts/local/99_regen_blog_figures.py"
-    .venv/bin/python scripts/local/99_regen_blog_figures.py
+    python scripts/local/99_regen_blog_figures.py
 fi
 
 # ---------------------------------------------------------------------
@@ -92,14 +92,14 @@ if [ "$skip_3d" = 0 ]; then
     # reference; idempotent.
     echo ""
     echo "  >>> scripts/local/26_v3_quadrant_procrustes.py"
-    .venv/bin/python scripts/local/26_v3_quadrant_procrustes.py \
+    python scripts/local/26_v3_quadrant_procrustes.py \
         --models gemma,qwen,ministral,gpt_oss_20b,granite \
         --reference gemma
 
     # Per-face PCA — drops fig_v3_per_face_pca_3d.html + meta.json.
     echo ""
     echo "  >>> scripts/local/97_build_per_face_pca_3d.py"
-    .venv/bin/python scripts/local/97_build_per_face_pca_3d.py
+    python scripts/local/97_build_per_face_pca_3d.py
 
     # Wild-faces PCA in BoL space, colored by per-face BoL quadrant
     # blend (default --color-by bol) — drops wild_faces_pca_3d.html
@@ -110,7 +110,7 @@ if [ "$skip_3d" = 0 ]; then
     # blog's primary figure.
     echo ""
     echo "  >>> scripts/67_wild_residual.py --fixed-k 6"
-    .venv/bin/python scripts/67_wild_residual.py --fixed-k 6
+    python scripts/67_wild_residual.py --fixed-k 6
 
     echo ""
     echo "================================================================"
@@ -118,7 +118,7 @@ if [ "$skip_3d" = 0 ]; then
     echo "================================================================"
     echo ""
     echo "  >>> scripts/local/98_wrap_blog_3d_html.py"
-    .venv/bin/python scripts/local/98_wrap_blog_3d_html.py
+    python scripts/local/98_wrap_blog_3d_html.py
 fi
 
 echo ""

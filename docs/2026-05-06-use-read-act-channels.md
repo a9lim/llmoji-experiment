@@ -51,8 +51,8 @@ What survives:
 ## Scripts
 
 ```bash
-.venv/bin/python scripts/harness/68_three_way_analysis.py
-.venv/bin/python scripts/harness/69_per_source_drift.py
+python scripts/harness/68_three_way_analysis.py
+python scripts/harness/69_per_source_drift.py
 ```
 
 Primary outputs:

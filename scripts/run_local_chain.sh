@@ -17,11 +17,11 @@
 # walltime cost and is run manually, like 00_emit. After this chain:
 #
 #   for m in gemma qwen ministral gpt_oss_20b granite; do
-#       .venv/bin/python scripts/local/50_face_likelihood.py --model "$m"
+#       python scripts/local/50_face_likelihood.py --model "$m"
 #   done
 #   LLMOJI_OUT_SUFFIX=intro_v7_primed \
 #   LLMOJI_PREAMBLE_FILE=preambles/introspection_v7.txt \
-#       .venv/bin/python scripts/local/50_face_likelihood.py --model gemma
+#       python scripts/local/50_face_likelihood.py --model gemma
 #
 # Then run scripts/run_harness_chain.sh, the manual harness-50 pass,
 # and finally scripts/run_post_likelihood.sh.
@@ -67,7 +67,7 @@ echo "  stage 2: face union (cross-platform)"
 echo "================================================================"
 echo ""
 echo "  >>> scripts/40_face_union.py"
-.venv/bin/python scripts/40_face_union.py
+python scripts/40_face_union.py
 
 # ---------------------------------------------------------------------
 # Stage 3 — cross-model hidden-state analyses. These iterate the
@@ -82,7 +82,7 @@ models_csv=$(IFS=,; echo "${MODELS[*]}")
 
 echo ""
 echo "  >>> scripts/local/26_v3_quadrant_procrustes.py --models $models_csv --reference gemma"
-.venv/bin/python scripts/local/26_v3_quadrant_procrustes.py \
+python scripts/local/26_v3_quadrant_procrustes.py \
     --models "$models_csv" --reference gemma
 
 # ---------------------------------------------------------------------
@@ -96,7 +96,7 @@ echo "================================================================"
 for script in 27_v3_face_stability.py 28_v3_state_predicts_face.py 29_v3_pc_point_clouds_3d.py; do
     echo ""
     echo "  >>> scripts/local/$script"
-    .venv/bin/python "scripts/local/$script"
+    python "scripts/local/$script"
 done
 
 # ---------------------------------------------------------------------
@@ -109,7 +109,7 @@ echo "  stage 5: face overlap (local-only, no Claude pull)"
 echo "================================================================"
 echo ""
 echo "  >>> scripts/41_face_overlap.py"
-.venv/bin/python scripts/41_face_overlap.py
+python scripts/41_face_overlap.py
 
 echo ""
 echo "################################################################"

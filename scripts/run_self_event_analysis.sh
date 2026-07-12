@@ -31,7 +31,7 @@ cd "$(dirname "$0")/.."
 
 MODEL=${1:-${LLMOJI_MODEL:-gemma}}
 SUFFIX=self_event
-PY=.venv/bin/python
+PY=python
 
 # Probe sets passed to 22b's --probes flag. AXES_OA includes oa.nb so
 # the bliss-attractor displacement appears alongside the 3 Russell

@@ -183,7 +183,7 @@ emotional states regardless of phenomenal-status uncertainty.
 ## Commands
 
 ```bash
-source .venv/bin/activate  # .venv -> ../.venvs/llmoji-experiment
+python --version  # system Python 3.12
 pip install -e ../../llmoji
 pip install -e .
 ```
@@ -191,7 +191,7 @@ pip install -e .
 Smoke hidden-state capture:
 
 ```bash
-.venv/bin/python scripts/local/90_hidden_state_smoke.py
+python scripts/local/90_hidden_state_smoke.py
 ```
 
 Full orchestrators:
@@ -213,61 +213,61 @@ The three named chain scripts deliberately do NOT run face_likelihood
 Core local chain:
 
 ```bash
-LLMOJI_MODEL=gemma .venv/bin/python scripts/local/00_emit.py
-.venv/bin/python scripts/local/10_emit_analysis.py
-.venv/bin/python scripts/local/11_emit_probe_correlations.py
+LLMOJI_MODEL=gemma python scripts/local/00_emit.py
+python scripts/local/10_emit_analysis.py
+python scripts/local/11_emit_probe_correlations.py
 
-.venv/bin/python scripts/local/20_v3_layerwise_emergence.py
-.venv/bin/python scripts/local/21_v3_same_face_cross_quadrant.py
-.venv/bin/python scripts/local/23_v3_pca3plus.py
-.venv/bin/python scripts/local/24_v3_kaomoji_predictiveness.py
-.venv/bin/python scripts/local/25_v3_d_s_classifier.py
-.venv/bin/python scripts/local/26_v3_quadrant_procrustes.py --models gemma,qwen,ministral,gpt_oss_20b,granite --reference gemma
+python scripts/local/20_v3_layerwise_emergence.py
+python scripts/local/21_v3_same_face_cross_quadrant.py
+python scripts/local/23_v3_pca3plus.py
+python scripts/local/24_v3_kaomoji_predictiveness.py
+python scripts/local/25_v3_d_s_classifier.py
+python scripts/local/26_v3_quadrant_procrustes.py --models gemma,qwen,ministral,gpt_oss_20b,granite --reference gemma
 
-.venv/bin/python scripts/local/27_v3_face_stability.py
-.venv/bin/python scripts/local/28_v3_state_predicts_face.py
-.venv/bin/python scripts/local/29_v3_pc_point_clouds_3d.py
+python scripts/local/27_v3_face_stability.py
+python scripts/local/28_v3_state_predicts_face.py
+python scripts/local/29_v3_pc_point_clouds_3d.py
 
-.venv/bin/python scripts/40_face_union.py
-.venv/bin/python scripts/local/50_face_likelihood.py --model gemma
-.venv/bin/python scripts/52_subset_search.py --prefer-full --top-k 25
-.venv/bin/python scripts/52_subset_search.py --prefer-full --top-k 25 --claude-gt --claude-gt-floor 3
-.venv/bin/python scripts/53_topk_pooling.py --prefer-full
-.venv/bin/python scripts/54_ensemble_predict.py --models gemma,ministral,opus
-.venv/bin/python scripts/54_ensemble_predict.py --models gemma,opus --claude-gt --claude-gt-floor 3
+python scripts/40_face_union.py
+python scripts/local/50_face_likelihood.py --model gemma
+python scripts/52_subset_search.py --prefer-full --top-k 25
+python scripts/52_subset_search.py --prefer-full --top-k 25 --claude-gt --claude-gt-floor 3
+python scripts/53_topk_pooling.py --prefer-full
+python scripts/54_ensemble_predict.py --models gemma,ministral,opus
+python scripts/54_ensemble_predict.py --models gemma,opus --claude-gt --claude-gt-floor 3
 ```
 
 Core harness chain:
 
 ```bash
-.venv/bin/python scripts/harness/60_corpus_pull.py
-.venv/bin/python scripts/harness/61_corpus_basics.py
-.venv/bin/python scripts/harness/62_corpus_lexicon.py
-.venv/bin/python scripts/harness/64_corpus_lexicon_per_source.py
-.venv/bin/python scripts/harness/63_corpus_pca.py
-.venv/bin/python scripts/harness/55_bol_encoder.py
+python scripts/harness/60_corpus_pull.py
+python scripts/harness/61_corpus_basics.py
+python scripts/harness/62_corpus_lexicon.py
+python scripts/harness/64_corpus_lexicon_per_source.py
+python scripts/harness/63_corpus_pca.py
+python scripts/harness/55_bol_encoder.py
 
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/50_face_likelihood.py
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/50_face_likelihood.py --model opus --gt-only
-.venv/bin/python scripts/harness/68_three_way_analysis.py
-.venv/bin/python scripts/harness/69_per_source_drift.py
-.venv/bin/python scripts/66_per_project_quadrants.py
-.venv/bin/python scripts/67_wild_residual.py --fixed-k 9
+ANTHROPIC_API_KEY=... python scripts/harness/50_face_likelihood.py
+ANTHROPIC_API_KEY=... python scripts/harness/50_face_likelihood.py --model opus --gt-only
+python scripts/harness/68_three_way_analysis.py
+python scripts/harness/69_per_source_drift.py
+python scripts/66_per_project_quadrants.py
+python scripts/67_wild_residual.py --fixed-k 9
 ```
 
 Claude-GT collection:
 
 ```bash
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --run-index N
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --run-index N --quadrants HP,LP,NB
-.venv/bin/python scripts/harness/10_emit_analysis.py
+ANTHROPIC_API_KEY=... python scripts/harness/00_emit.py --run-index N
+ANTHROPIC_API_KEY=... python scripts/harness/00_emit.py --run-index N --quadrants HP,LP,NB
+python scripts/harness/10_emit_analysis.py
 
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --fill-gaps
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --fill-gaps --preamble introspection
+ANTHROPIC_API_KEY=... python scripts/harness/00_emit.py --fill-gaps
+ANTHROPIC_API_KEY=... python scripts/harness/00_emit.py --fill-gaps --preamble introspection
 
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --cells v4-new --run-index N
-.venv/bin/python scripts/harness/10_emit_analysis.py --cells v4-new
-.venv/bin/python scripts/harness/10_emit_analysis.py --cross-arm
+ANTHROPIC_API_KEY=... python scripts/harness/00_emit.py --cells v4-new --run-index N
+python scripts/harness/10_emit_analysis.py --cells v4-new
+python scripts/harness/10_emit_analysis.py --cross-arm
 ```
 
 Blog figures:
@@ -304,8 +304,7 @@ docs/
 
 ## Conventions
 
-- Use `.venv/bin/python` or an activated `.venv`; plain `python` is not
-  reliable across this machine.
+- Use the machine's shared base Python 3.12 via plain `python`.
 - JSONL row files plus sidecar `.npz` files are the source of truth for
   local hidden-state data.
 - For structured config or parquet/jsonl data, use the repo helpers

@@ -5,15 +5,15 @@
 #
 #   # Local 50 (per encoder model):
 #   for m in gemma qwen ministral gpt_oss_20b granite; do
-#       .venv/bin/python scripts/local/50_face_likelihood.py --model "$m"
+#       python scripts/local/50_face_likelihood.py --model "$m"
 #   done
 #   LLMOJI_OUT_SUFFIX=intro_v7_primed \
 #   LLMOJI_PREAMBLE_FILE=preambles/introspection_v7.txt \
-#       .venv/bin/python scripts/local/50_face_likelihood.py --model gemma
+#       python scripts/local/50_face_likelihood.py --model gemma
 #
 #   # Harness 50 (Anthropic-API judges):
-#   ANTHROPIC_API_KEY=… .venv/bin/python scripts/harness/50_face_likelihood.py
-#   ANTHROPIC_API_KEY=… .venv/bin/python scripts/harness/50_face_likelihood.py \
+#   ANTHROPIC_API_KEY=… python scripts/harness/50_face_likelihood.py
+#   ANTHROPIC_API_KEY=… python scripts/harness/50_face_likelihood.py \
 #       --model opus --gt-only
 #
 # Order:
@@ -53,19 +53,19 @@ echo "================================================================"
 
 echo ""
 echo "  >>> scripts/52_subset_search.py --prefer-full --top-k 25"
-.venv/bin/python scripts/52_subset_search.py --prefer-full --top-k 25
+python scripts/52_subset_search.py --prefer-full --top-k 25
 
 echo ""
 echo "  >>> scripts/53_topk_pooling.py --prefer-full"
-.venv/bin/python scripts/53_topk_pooling.py --prefer-full
+python scripts/53_topk_pooling.py --prefer-full
 
 echo ""
 echo "  >>> scripts/54_ensemble_predict.py --models $models_csv"
-.venv/bin/python scripts/54_ensemble_predict.py --models "$models_csv"
+python scripts/54_ensemble_predict.py --models "$models_csv"
 
 echo ""
 echo "  >>> scripts/local/51_cross_emit_sanity.py --prefer-full"
-.venv/bin/python scripts/local/51_cross_emit_sanity.py --prefer-full
+python scripts/local/51_cross_emit_sanity.py --prefer-full
 
 # ---------------------------------------------------------------------
 # Stage 2 — three-way (use / read / act) per-face analysis. Inner-join
@@ -77,7 +77,7 @@ echo "  stage 2: three-way per-face analysis"
 echo "================================================================"
 echo ""
 echo "  >>> scripts/harness/68_three_way_analysis.py"
-.venv/bin/python scripts/harness/68_three_way_analysis.py
+python scripts/harness/68_three_way_analysis.py
 
 # ---------------------------------------------------------------------
 # Stage 3 — per-source drift case files.
@@ -88,7 +88,7 @@ echo "  stage 3: per-source drift"
 echo "================================================================"
 echo ""
 echo "  >>> scripts/harness/69_per_source_drift.py"
-.venv/bin/python scripts/harness/69_per_source_drift.py
+python scripts/harness/69_per_source_drift.py
 
 # ---------------------------------------------------------------------
 # Stage 4 — cross-platform aggregations: per-project quadrants (66) +
@@ -102,11 +102,11 @@ echo "================================================================"
 
 echo ""
 echo "  >>> scripts/66_per_project_quadrants.py --mode gt-priority"
-.venv/bin/python scripts/66_per_project_quadrants.py --mode gt-priority
+python scripts/66_per_project_quadrants.py --mode gt-priority
 
 echo ""
 echo "  >>> scripts/67_wild_residual.py --fixed-k 9"
-.venv/bin/python scripts/67_wild_residual.py --fixed-k 9
+python scripts/67_wild_residual.py --fixed-k 9
 
 echo ""
 echo "################################################################"

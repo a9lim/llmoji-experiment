@@ -103,9 +103,9 @@ The kaomoji is not the whole state, but it is not decoration either.
 Face-stability scripts:
 
 ```bash
-.venv/bin/python scripts/local/27_v3_face_stability.py
-.venv/bin/python scripts/local/28_v3_state_predicts_face.py
-.venv/bin/python scripts/local/29_v3_pc_point_clouds_3d.py
+python scripts/local/27_v3_face_stability.py
+python scripts/local/28_v3_state_predicts_face.py
+python scripts/local/29_v3_pc_point_clouds_3d.py
 ```
 
 ## Face Likelihood
@@ -118,15 +118,15 @@ passes but no hidden-state access.
 Run after `scripts/40_face_union.py`:
 
 ```bash
-.venv/bin/python scripts/local/50_face_likelihood.py --model gemma
+python scripts/local/50_face_likelihood.py --model gemma
 ```
 
 Cross-encoder search:
 
 ```bash
-.venv/bin/python scripts/52_subset_search.py --prefer-full --top-k 25
-.venv/bin/python scripts/53_topk_pooling.py --prefer-full
-.venv/bin/python scripts/54_ensemble_predict.py --models gemma,ministral,qwen
+python scripts/52_subset_search.py --prefer-full --top-k 25
+python scripts/53_topk_pooling.py --prefer-full
+python scripts/54_ensemble_predict.py --models gemma,ministral,qwen
 ```
 
 Current overlap-search headline: `{gemma, ministral, opus}` is the best
@@ -147,7 +147,7 @@ the observed qwen result was a collapse.
 ## Reproducing
 
 ```bash
-.venv/bin/python scripts/local/90_hidden_state_smoke.py
+python scripts/local/90_hidden_state_smoke.py
 scripts/run_per_model.sh gemma
 scripts/run_local_chain.sh
 ```

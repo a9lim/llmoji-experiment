@@ -23,7 +23,7 @@ changed; the heatmap path reads sidecars + cached h_first via
 Configure `BLOG_ASSETS_DIR` if the a9l.im checkout lives elsewhere.
 
 Usage:
-    .venv/bin/python scripts/99_regen_blog_figures.py
+    python scripts/99_regen_blog_figures.py
 """
 from __future__ import annotations
 

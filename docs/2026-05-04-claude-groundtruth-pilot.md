@@ -73,30 +73,30 @@ Cell exits:
 Naturalistic:
 
 ```bash
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --run-index N
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --run-index N --quadrants HP,LP,NB
-.venv/bin/python scripts/harness/10_emit_analysis.py
+ANTHROPIC_API_KEY=... python scripts/harness/00_emit.py --run-index N
+ANTHROPIC_API_KEY=... python scripts/harness/00_emit.py --run-index N --quadrants HP,LP,NB
+python scripts/harness/10_emit_analysis.py
 ```
 
 Introspection:
 
 ```bash
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --run-index N --preamble introspection
-.venv/bin/python scripts/harness/10_emit_analysis.py --cross-arm
+ANTHROPIC_API_KEY=... python scripts/harness/00_emit.py --run-index N --preamble introspection
+python scripts/harness/10_emit_analysis.py --cross-arm
 ```
 
 V4-new:
 
 ```bash
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --cells v4-new --run-index N
-.venv/bin/python scripts/harness/10_emit_analysis.py --cells v4-new
+ANTHROPIC_API_KEY=... python scripts/harness/00_emit.py --cells v4-new --run-index N
+python scripts/harness/10_emit_analysis.py --cells v4-new
 ```
 
 Backfill:
 
 ```bash
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --fill-gaps
-ANTHROPIC_API_KEY=... .venv/bin/python scripts/harness/00_emit.py --fill-gaps --preamble introspection
+ANTHROPIC_API_KEY=... python scripts/harness/00_emit.py --fill-gaps
+ANTHROPIC_API_KEY=... python scripts/harness/00_emit.py --fill-gaps --preamble introspection
 ```
 
 ## Welfare Frame
