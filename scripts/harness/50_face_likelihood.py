@@ -116,9 +116,9 @@ MAX_TOKENS = 180   # JSON {likelihoods: {9 floats}} — was 120 under the v3
                    # 6-cell taxonomy; bumped 2026-05-07 for v4's 9 cells
                    # (HP-D / HP-S / NP / HB additions). Still much smaller
                    # than v1's {quadrant, confidences, reason} payload.
-# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
+# v4 9-cell ordering, sourced from transformer_experiments.kaomoji.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
-from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
+from transformer_experiments.kaomoji.quadrants import QUADRANT_ORDER_SPLIT
 QUADRANTS = QUADRANT_ORDER_SPLIT
 QUADRANT_SET = set(QUADRANTS)
 
@@ -222,7 +222,7 @@ def _claude_modal_table() -> dict[str, str]:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
     from llmoji.taxonomy import canonicalize_kaomoji
     from llmoji_experiment.claude_gt import load_emotional_raw
-    from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS
+    from transformer_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS
     rows = load_emotional_raw()
     if not rows:
         return {}

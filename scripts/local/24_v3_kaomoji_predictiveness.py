@@ -319,7 +319,7 @@ def _within_face_consistency(
     """Per-face cosine-to-mean consistency. Same metric used in
     Figure B / `summary_table` from `emotional_analysis.py`, reproduced
     here so the predictiveness summary stands alone."""
-    from llmoji_experiment.hidden_state_analysis import cosine_to_mean
+    from transformer_experiments.hidden_state_analysis import cosine_to_mean
     rows = []
     for face, sub in df.groupby("first_word"):
         if len(sub) < min_n:

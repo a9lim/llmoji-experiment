@@ -145,9 +145,9 @@ def main() -> None:
         TEMPERATURE,
         current_model,
     )
-    from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS
-    from llmoji_experiment.hidden_capture import read_after_generate
-    from llmoji_experiment.hidden_state_io import (
+    from transformer_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS
+    from transformer_experiments.hidden_capture import read_after_generate
+    from transformer_experiments.hidden_state_io import (
         hidden_state_path,
         save_hidden_states,
     )

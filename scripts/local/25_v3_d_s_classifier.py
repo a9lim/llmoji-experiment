@@ -61,7 +61,7 @@ from llmoji_experiment.emotional_analysis import load_emotional_features_stack
 # 2026-05-06 after the powercheck confirmed LN-null is genuine in
 # gemma + qwen and only power-confounded in models whose HN itself is
 # fused. See docs/findings.md and docs/previous-experiments.md.
-from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS
+from transformer_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS
 
 
 def _registry_ds_labels(quadrant: str) -> dict[str, str]:

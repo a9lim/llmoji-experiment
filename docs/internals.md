@@ -5,7 +5,7 @@ canonicalization.
 
 ## Hidden-State Sidecars
 
-After generation, `llmoji_experiment.hidden_capture.read_after_generate()`
+After generation, `transformer_experiments.hidden_capture.read_after_generate()`
 reads saklas buckets and writes one sidecar per row:
 
 ```text

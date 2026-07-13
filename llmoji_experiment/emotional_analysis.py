@@ -31,24 +31,25 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from llmoji.taxonomy import KAOMOJI_START_CHARS, is_kaomoji_candidate
+from llmoji.taxonomy import is_kaomoji_candidate
 
 
 # Russell-quadrant palette + ordering — re-exported from the canonical
-# zero-dep ``llmoji_experiment.quadrants`` module so figure code, JSD math,
+# zero-dep ``transformer_experiments.kaomoji.quadrants`` module so figure code, JSD math,
 # BoL projection, and analysis scripts all share the same source of
 # truth. Update ``quadrants.py`` to change the registry shape.
-from .quadrants import (  # noqa: E402  (re-export, stays near constants)
+from transformer_experiments.kaomoji.analysis import (
+    apply_hn_split,
+    apply_pad_split,
+    pad_split_map as _pad_split_map,
+)
+from transformer_experiments.kaomoji.quadrants import (  # noqa: E402
     ALL_CELLS_ORDER as _ALL_CELLS_ORDER_TUPLE,
-    LB_LABEL,
     LB_QUADRANT,
-    MR_LABEL,
-    MR_QUADRANT,
     QUADRANT_COLORS,
     QUADRANT_ORDER as _QUADRANT_ORDER_TUPLE,
     QUADRANT_ORDER_SPLIT as _QUADRANT_ORDER_SPLIT_TUPLE,
     SPLIT_MARKERS as _SPLIT_MARKERS,
-    canonicalize_cell,
 )
 
 # Pandas/Counter call sites historically expected lists (e.g. for
@@ -74,71 +75,10 @@ def _palette_for(df: pd.DataFrame) -> tuple[list[str], dict[str, str]]:
     return QUADRANT_ORDER, QUADRANT_COLORS
 
 
-def _pad_split_map() -> dict[str, str]:
-    """Return ``{prompt_id: 'HP-D' | 'HP-S' | 'HN-D' | 'HN-S'}`` for
-    tagged HP / HN prompts. Pulls from the EmotionalPrompt registry —
-    single source of truth. Untagged HP / HN prompts (pad_dominance ==
-    0, currently none in v4) are absent from the map. Other quadrants
-    (LP, NP, LN, NB, HB) are dominance-aggregate and absent here."""
-    from .emotional_prompts import EMOTIONAL_PROMPTS
-    out: dict[str, str] = {}
-    for p in EMOTIONAL_PROMPTS:
-        if p.quadrant in ("HP", "HN") and p.pad_dominance != 0:
-            suffix = "D" if p.pad_dominance > 0 else "S"
-            out[p.id] = f"{p.quadrant}-{suffix}"
-    return out
-
-
 # Backward-compat alias. Older callers used ``_hn_split_map``; keep it
 # pointing at the generalized v4 implementation so anything that still
 # imports it picks up HP-D / HP-S as well.
 _hn_split_map = _pad_split_map
-
-
-def apply_pad_split(
-    df: pd.DataFrame,
-    X: np.ndarray | None = None,
-) -> tuple[pd.DataFrame, np.ndarray | None]:
-    """Replace the ``quadrant`` column in-place with v4 dominance-split
-    labels (HP→HP-D/HP-S, HN→HN-D/HN-S) and drop rows with untagged
-    HP / HN prompts (currently none in v4). Other quadrants (LP, NP,
-    LN, NB, HB) pass through unchanged.
-
-    Also applies the 2026-05-11 LB → MR rename via
-    ``canonicalize_cell`` — pre-rename JSONL rows have prompt_id
-    ``lb01``…``lb20`` which derive a raw quadrant of ``"LB"``;
-    canonicalization rewrites that to ``"MR"`` so downstream
-    iteration against ``QUADRANT_ORDER_SPLIT`` (which carries ``"MR"``)
-    sees a unified label.
-
-    For scripts that build their own quadrant column from
-    ``prompt_id[:2]`` (rather than going through
-    ``load_emotional_features``). Pass the row-aligned feature matrix
-    ``X`` to keep df+X aligned across the row drop.
-
-    Returns ``(df, X)`` after the split; X is None if not provided."""
-    pad_split = _pad_split_map()
-    new_q = df.apply(
-        lambda r: (
-            pad_split.get(r["prompt_id"], None)
-            if r["quadrant"] in ("HP", "HN")
-            else canonicalize_cell(r["quadrant"])
-        ),
-        axis=1,
-    )
-    keep = new_q.notna().to_numpy()
-    df = df.loc[keep].copy()
-    df["quadrant"] = new_q[keep].to_numpy()
-    df = df.reset_index(drop=True)
-    if X is not None:
-        X = X[keep]
-    return df, X
-
-
-# Backward-compat alias. The HN-only function name predates the v4 HP
-# split — point it at the unified implementation so existing callers
-# transparently get HP-D / HP-S splitting too.
-apply_hn_split = apply_pad_split
 
 
 def per_face_dominant_quadrant(df: pd.DataFrame) -> dict[str, str]:

@@ -31,11 +31,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 import numpy as np
 
 from llmoji_experiment.config import DATA_DIR, MODEL_REGISTRY
-from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS
-from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
+from transformer_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS
+from transformer_experiments.kaomoji.quadrants import QUADRANT_ORDER_SPLIT
 
 MODELS = ["gemma", "qwen"]
-# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
+# v4 9-cell ordering, sourced from transformer_experiments.kaomoji.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
 QUADRANTS = list(QUADRANT_ORDER_SPLIT)
 

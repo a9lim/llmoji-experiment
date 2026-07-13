@@ -2,7 +2,7 @@
 name = "llmoji-experiment"
 version = "0.1.0"
 description = "Does kaomoji choice track internal state in local LMs? Research-side companion to the `llmoji` PyPI package."
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = "CC-BY-SA-4.0"
 license-files = ["LICENSE"]
 authors = [{ name = "a9lim", email = "mx@a9l.im" }]
@@ -10,6 +10,7 @@ authors = [{ name = "a9lim", email = "mx@a9l.im" }]
 # bundle-and-upload side is in the `llmoji` package; depend on it
 # directly so all six study scripts can `from llmoji import …`.
 dependencies = [
+    "transformer-experiments>=0.1,<0.2",
     "llmoji>=2.0,<3",
     "saklas>=1.4.6",
     "anthropic",

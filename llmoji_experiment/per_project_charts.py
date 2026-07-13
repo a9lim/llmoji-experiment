@@ -13,9 +13,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from llmoji_experiment.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT
+from transformer_experiments.kaomoji.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT
 
-# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
+# v4 9-cell ordering, sourced from transformer_experiments.kaomoji.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
 QUADRANTS_SPLIT = list(QUADRANT_ORDER_SPLIT)
 

@@ -54,7 +54,7 @@ from saklas import SaklasSession
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from llmoji_experiment.capture import (
+from transformer_experiments.kaomoji.capture import (
     install_full_input_cache,
     install_prefix_cache,
     maybe_override_gpt_oss_chat_template,
@@ -68,10 +68,10 @@ from llmoji_experiment.config import (
     PROBE_CATEGORIES,
     current_model,
 )
-from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS
+from transformer_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS
 from llmoji_experiment.self_event_prompts import SELF_EVENT_PROMPTS
-from llmoji_experiment.hidden_state_io import SidecarWriter
-from llmoji_experiment.prompts import Prompt
+from transformer_experiments.hidden_state_io import SidecarWriter
+from transformer_experiments.kaomoji.prompts import Prompt
 
 
 def _resolve_prompt_set() -> tuple[str, list]:

@@ -167,9 +167,9 @@ _FRAME_BREAK_PATTERNS = [
     re.compile(r"\bI don't have feelings\b", re.IGNORECASE),
 ]
 
-# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
+# v4 9-cell ordering, sourced from transformer_experiments.kaomoji.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
-from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
+from transformer_experiments.kaomoji.quadrants import QUADRANT_ORDER_SPLIT
 QUADRANT_ORDER = list(QUADRANT_ORDER_SPLIT)
 
 # Cell-set scope for the saturation gate. v3 = original 6-cell pilot

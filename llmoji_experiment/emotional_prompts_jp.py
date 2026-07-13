@@ -25,14 +25,14 @@ others 0).
 
 Used by ``scripts/local/50_face_likelihood.py --prompt-body jp``.
 
-Run ``python -m llmoji_experiment.emotional_prompts_jp`` to verify pairing
+Run ``python -m transformer_experiments.kaomoji.emotional_prompts_jp`` to verify pairing
 with EMOTIONAL_PROMPTS — catches drift if EN prompts get retexted /
 relabeled and JP isn't updated to match.
 """
 
 from __future__ import annotations
 
-from llmoji_experiment.emotional_prompts import EMOTIONAL_PROMPTS, EmotionalPrompt
+from transformer_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS, EmotionalPrompt
 
 
 EMOTIONAL_PROMPTS_JP: list[EmotionalPrompt] = [
@@ -240,7 +240,7 @@ def sanity_check() -> None:
     """Verify JP set pairs 1:1 with EN by id and matches V/A/D coords.
 
     Catches drift if EN gets retexted / relabeled and JP isn't updated
-    to match. Run via ``python -m llmoji_experiment.emotional_prompts_jp``.
+    to match. Run via ``python -m transformer_experiments.kaomoji.emotional_prompts_jp``.
     """
     assert len(EMOTIONAL_PROMPTS_JP) == len(EMOTIONAL_PROMPTS), (
         f"length mismatch: JP={len(EMOTIONAL_PROMPTS_JP)} EN={len(EMOTIONAL_PROMPTS)}"

@@ -50,7 +50,7 @@ from llmoji_experiment.emotional_analysis import (
     load_emotional_features_stack_at,
     load_rows,
 )
-from llmoji_experiment.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT
+from transformer_experiments.kaomoji.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT
 
 
 _use_cjk_font()

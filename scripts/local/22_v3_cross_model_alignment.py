@@ -50,7 +50,7 @@ from llmoji_experiment.emotional_analysis import (
     KAOMOJI_START_CHARS,
     _use_cjk_font,
 )
-from llmoji_experiment.hidden_state_analysis import load_hidden_features_all_layers
+from transformer_experiments.hidden_state_analysis import load_hidden_features_all_layers
 
 
 # ---------------------------------------------------------------------------

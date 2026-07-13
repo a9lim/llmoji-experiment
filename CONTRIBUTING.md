@@ -90,8 +90,8 @@ git clone https://github.com/a9lim/llmoji ../../llmoji
 
 cd llmoji-experiment
 python --version  # system Python 3.12
-pip install -e ../../llmoji
-pip install -e .
+python -m pip install -e ..
+python -m pip install -e .
 ```
 
 Useful checks:

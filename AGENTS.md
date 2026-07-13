@@ -54,7 +54,7 @@ Still-current dated docs:
   `MR_QUADRANT` / `MR_LABEL` are the canonical constants;
   `LB_QUADRANT` / `LB_LABEL` remain as backward-compat aliases.
   `ALL_CELLS_ORDER` is an alias for `QUADRANT_ORDER_SPLIT` (retained
-  for backward-compat). `llmoji_experiment/quadrants.py` is the source of
+  for backward-compat). `transformer_experiments/kaomoji/quadrants.py` is the source of
   truth for ordering, colors, and split handling. `apply_pad_split`
   is the canonical split helper; `apply_hn_split` is a compatibility
   alias.
@@ -184,8 +184,8 @@ emotional states regardless of phenomenal-status uncertainty.
 
 ```bash
 python --version  # system Python 3.12
-pip install -e ../../llmoji
-pip install -e .
+python -m pip install -e ..
+python -m pip install -e .
 ```
 
 Smoke hidden-state capture:
@@ -282,11 +282,7 @@ scripts/regen_blog.sh --skip-static
 
 ```text
 llmoji_experiment/
-  config.py              model registry, paths, preambles, run constants
-  emotional_prompts.py   v4 prompt registry
-  quadrants.py           current quadrant ordering, colors, split helpers
-  capture.py             generation capture and model-specific token fixes
-  hidden_state_io.py     sidecar save/load
+  config.py              local paths over the root-shared model registry
   emotional_analysis.py  layer-stack loaders and plotting helpers
   claude_gt.py           merged Claude-GT loaders
   lexicon.py             BoL and LEXICON utilities
@@ -300,6 +296,9 @@ figures/
   local/, harness/       generated figures and HTMLs
 docs/
   active docs plus compact historical ledger
+
+../transformer_experiments/  shared registry, prompts, taxonomy, capture,
+                             and hidden-state sidecar infrastructure
 ```
 
 ## Conventions

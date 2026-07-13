@@ -66,8 +66,8 @@ from llmoji_experiment.emotional_analysis import (
     apply_pad_split,
     is_kaomoji_candidate,
 )
-from llmoji_experiment.hidden_state_analysis import load_hidden_features_all_layers
-from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
+from transformer_experiments.hidden_state_analysis import load_hidden_features_all_layers
+from transformer_experiments.kaomoji.quadrants import QUADRANT_ORDER_SPLIT
 from llmoji.taxonomy import canonicalize_kaomoji
 
 

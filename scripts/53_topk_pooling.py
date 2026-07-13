@@ -38,9 +38,9 @@ from llmoji_experiment.jsd import js, normalize, similarity
 
 from llmoji_experiment.config import DATA_DIR
 from llmoji_experiment.face_likelihood_discovery import discover_parquets
-from llmoji_experiment.quadrants import QUADRANT_ORDER_SPLIT
+from transformer_experiments.kaomoji.quadrants import QUADRANT_ORDER_SPLIT
 
-# v4 9-cell ordering, sourced from llmoji_experiment.quadrants — single
+# v4 9-cell ordering, sourced from transformer_experiments.kaomoji.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
 QUADRANTS = list(QUADRANT_ORDER_SPLIT)
 

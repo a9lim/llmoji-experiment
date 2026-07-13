@@ -66,8 +66,8 @@ Full numbers live in [`docs/findings.md`](docs/findings.md).
 
 ```bash
 python --version  # system Python 3.12
-pip install -e ../../llmoji
-pip install -e .
+python -m pip install -e ..
+python -m pip install -e .
 ```
 
 For local hidden-state sanity:
