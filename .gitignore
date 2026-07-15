@@ -4,6 +4,8 @@ dist/
 build/
 __pycache__/
 *.pyc
+.pytest_cache/
+.ruff_cache/
 
 # pilot outputs — committed so findings are readable from the repo,
 # regenerable with the scripts for anyone with the model cached.
@@ -14,11 +16,12 @@ __pycache__/
 data/local/hidden/
 
 # local envs
-.venv
+.venv/
 .env
 
 # run logs — ad-hoc tee'd output, not part of the experimental record
-logs/
+logs/**
+!logs/.gitkeep
 
 # editor cruft
 .DS_Store

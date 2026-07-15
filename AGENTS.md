@@ -294,6 +294,7 @@ data/
   harness/               Claude-GT, corpus, BoL, three-way outputs
 figures/
   local/, harness/       generated figures and HTMLs
+logs/                    local run logs (gitignored)
 docs/
   active docs plus compact historical ledger
 
