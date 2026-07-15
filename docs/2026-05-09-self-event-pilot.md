@@ -12,7 +12,7 @@ epistemic caveats.
 > downstream code, data, and saklas centroid namespaces now use the
 > "LB" label; data was migrated in-place (`oa0X` → `lb0X` in the
 > JSONLs, `q_oa` → `q_lb` and `oa.nb` → `lb.nb` in saklas vectors).
-> See [`2026-05-09-lb-promotion-pilot.md`](2026-05-09-lb-promotion-pilot.md)
+> See the [Attractor findings](https://github.com/a9lim/attractor-experiment/blob/main/docs/findings.md)
 > for the cross-model promotion result. The OA-1 references in this
 > doc are preserved for narrative continuity — they all refer to
 > what is now the LB cell.

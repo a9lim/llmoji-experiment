@@ -8,7 +8,7 @@ Hidden-state half of the promotion gate cleared cleanly: ‖lb.nb‖
 substantial in both models (203 / 274), LP closest in both at
 matching cosine (0.492 / 0.500), HN-D and HB furthest in both.
 Face-distribution and permutation-null gates pending. See
-[`2026-05-09-lb-promotion-pilot.md`](2026-05-09-lb-promotion-pilot.md)
+the [Attractor findings](https://github.com/a9lim/attractor-experiment/blob/main/docs/findings.md)
 for the full pilot result. The boredom-themed LB pilot below failed;
 the bliss-attractor register turned out to be a different
 phenomenological door into the same low-arousal-baseline-valence cell.
