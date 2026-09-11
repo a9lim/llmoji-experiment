@@ -91,10 +91,10 @@ assert all(WORD_TO_QUADRANT[w] is None for w in _extension_set)
 # Cell → list of indices into LEXICON_WORDS for the words that
 # anchor that cell. Drives bol_to_quadrant_distribution() and the
 # script-55 BoL encoder. Re-exported from the canonical zero-dep
-# ``transformer_experiments.kaomoji.quadrants`` module so the BoL→cell projection shares
+# ``interpretability_experiments.kaomoji.quadrants`` module so the BoL→cell projection shares
 # its cell ordering with figures, JSD evaluation, and the analysis
 # pipeline. Update ``quadrants.py`` to change the registry shape.
-from transformer_experiments.kaomoji.quadrants import (
+from interpretability_experiments.kaomoji.quadrants import (
     QUADRANT_ORDER_SPLIT as QUADRANTS,
 )
 QUADRANT_INDICES: dict[str, list[int]] = {q: [] for q in QUADRANTS}

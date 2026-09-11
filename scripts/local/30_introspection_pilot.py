@@ -33,7 +33,7 @@ from saklas import SaklasSession
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from transformer_experiments.kaomoji.capture import (
+from interpretability_experiments.kaomoji.capture import (
     install_prefix_cache,
     maybe_override_gpt_oss_chat_template,
     maybe_override_ministral_chat_template,
@@ -47,9 +47,9 @@ from llmoji_experiment.config import (
     PROBE_CATEGORIES,
     current_model,
 )
-from transformer_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS
+from interpretability_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS
 from transformer_experiments.hidden_state_io import SidecarWriter
-from transformer_experiments.kaomoji.prompts import Prompt
+from interpretability_experiments.kaomoji.prompts import Prompt
 
 
 # JSONL flush cadence — same rationale as 00_emit.py.

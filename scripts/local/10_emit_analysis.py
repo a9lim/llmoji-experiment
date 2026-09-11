@@ -26,7 +26,7 @@ from llmoji_experiment.emotional_analysis import (
     plot_within_kaomoji_consistency,
     summary_table,
 )
-from transformer_experiments.kaomoji.quadrants import QUADRANT_ORDER_SPLIT
+from interpretability_experiments.kaomoji.quadrants import QUADRANT_ORDER_SPLIT
 from llmoji.taxonomy import extract
 
 

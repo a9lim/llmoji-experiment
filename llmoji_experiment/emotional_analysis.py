@@ -35,15 +35,15 @@ from llmoji.taxonomy import is_kaomoji_candidate
 
 
 # Russell-quadrant palette + ordering — re-exported from the canonical
-# zero-dep ``transformer_experiments.kaomoji.quadrants`` module so figure code, JSD math,
+# zero-dep ``interpretability_experiments.kaomoji.quadrants`` module so figure code, JSD math,
 # BoL projection, and analysis scripts all share the same source of
 # truth. Update ``quadrants.py`` to change the registry shape.
-from transformer_experiments.kaomoji.analysis import (
+from interpretability_experiments.kaomoji.analysis import (
     apply_hn_split,
     apply_pad_split,
     pad_split_map as _pad_split_map,
 )
-from transformer_experiments.kaomoji.quadrants import (  # noqa: E402
+from interpretability_experiments.kaomoji.quadrants import (  # noqa: E402
     ALL_CELLS_ORDER as _ALL_CELLS_ORDER_TUPLE,
     LB_QUADRANT,
     QUADRANT_COLORS,

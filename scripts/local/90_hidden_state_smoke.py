@@ -27,7 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 import numpy as np
 from saklas import SaklasSession
 
-from transformer_experiments.kaomoji.capture import (
+from interpretability_experiments.kaomoji.capture import (
     maybe_override_gpt_oss_chat_template,
     maybe_override_ministral_chat_template,
     run_sample,
@@ -40,7 +40,7 @@ from llmoji_experiment.config import (
     STEERED_AXIS,
     current_model,
 )
-from transformer_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS
+from interpretability_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS
 from transformer_experiments.hidden_state_io import hidden_state_path, load_hidden_states
 
 
@@ -55,7 +55,7 @@ def _pick_smoke_prompts():
     one per cell. Aggregate (not split) so the smoke stays cheap;
     HP-D / HP-S / HN-D / HN-S separability is exercised by the main
     pipelines, not the smoke."""
-    from transformer_experiments.kaomoji.quadrants import QUADRANT_ORDER
+    from interpretability_experiments.kaomoji.quadrants import QUADRANT_ORDER
     by_quad: dict[str, list] = {q: [] for q in QUADRANT_ORDER}
     for p in EMOTIONAL_PROMPTS:
         q = p.id[:2].upper()

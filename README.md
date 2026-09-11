@@ -7,8 +7,9 @@
 > historical and are not maintained or qualified for that runtime. Do not install
 > or run it in Jobe's shared environment, or constrain that environment to keep
 > it working. This notice supersedes all active-status and Jobe execution
-> guidance below and in the linked documentation. Only `delta-feedback-experiment`
-> and `recurrent-lens-experiment` remain in the supported experiment scope.
+> guidance below and in the linked documentation. Only `recurrent-lens-experiment`
+> is maintained in this workspace; `delta-feedback-experiment` is maintained
+> separately in the companion `transformer-experiments` workspace.
 
 `llmoji-experiment` asks whether a language model's kaomoji choice tracks
 something about its internal state. The local side uses
@@ -48,7 +49,7 @@ Public writeup:
   `MR`. The currently published face-likelihood/JSD headline artifacts are a
   nine-affect-cell snapshot and exclude MR; they must not be described as a
   10-cell evaluation. The shared
-  `transformer_experiments.kaomoji.quadrants` module is the source of truth.
+  `interpretability_experiments.kaomoji.quadrants` module is the source of truth.
 
 ## Headline Findings
 
@@ -81,7 +82,7 @@ mapped in [`figures/README.md`](figures/README.md).
 
 ```bash
 python --version  # shared venv Python 3.12
-uv pip install -e ..
+uv pip install -e ../../transformer-experiments -e ..
 uv pip install -e .
 ```
 

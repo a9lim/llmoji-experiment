@@ -7,8 +7,9 @@
 > historical and are not maintained or qualified for that runtime. Do not install
 > or run it in Jobe's shared environment, or constrain that environment to keep
 > it working. This notice supersedes all active-status and Jobe execution
-> guidance below and in the linked documentation. Only `delta-feedback-experiment`
-> and `recurrent-lens-experiment` remain in the supported experiment scope.
+> guidance below and in the linked documentation. Only `recurrent-lens-experiment`
+> is maintained in this workspace; `delta-feedback-experiment` is maintained
+> separately in the companion `transformer-experiments` workspace.
 
 This is the research-side repo for `llmoji`. The companion package at
 `../../llmoji` owns taxonomy, canonicalization, hook templates, synthesis,
@@ -64,7 +65,7 @@ Still-current dated docs:
   `MR_QUADRANT` / `MR_LABEL` are the canonical constants;
   `LB_QUADRANT` / `LB_LABEL` remain as backward-compat aliases.
   `ALL_CELLS_ORDER` is an alias for `QUADRANT_ORDER_SPLIT` (retained
-  for backward-compat). `transformer_experiments/kaomoji/quadrants.py` is the source of
+  for backward-compat). `interpretability_experiments/kaomoji/quadrants.py` is the source of
   truth for ordering, colors, and split handling. `apply_pad_split`
   is the canonical split helper; `apply_hn_split` is a compatibility
   alias.
@@ -197,7 +198,7 @@ emotional states regardless of phenomenal-status uncertainty.
 
 ```bash
 python --version  # shared venv Python 3.12
-uv pip install -e ..
+uv pip install -e ../../transformer-experiments -e ..
 uv pip install -e .
 ```
 
@@ -311,8 +312,8 @@ logs/                    local run logs (gitignored)
 docs/
   active docs plus compact historical ledger
 
-../transformer_experiments/  shared registry, prompts, taxonomy, capture,
-                             and hidden-state sidecar infrastructure
+../interpretability_experiments/  prompts, taxonomy, generation, analysis
+transformer_experiments package  model registry and hidden-state sidecar I/O
 ```
 
 ## Conventions

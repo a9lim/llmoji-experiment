@@ -72,7 +72,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-from transformer_experiments.kaomoji.capture import (
+from interpretability_experiments.kaomoji.capture import (
     build_messages,
     maybe_override_gpt_oss_chat_template,
     maybe_override_ministral_chat_template,
@@ -85,13 +85,13 @@ from llmoji_experiment.config import (
     PROBE_CATEGORIES,
     resolve_model,
 )
-from transformer_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS, EmotionalPrompt
-from transformer_experiments.kaomoji.emotional_prompts_jp import EMOTIONAL_PROMPTS_JP
-from transformer_experiments.kaomoji.prompts import Prompt
-from transformer_experiments.kaomoji.quadrants import QUADRANT_ORDER_SPLIT
+from interpretability_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS, EmotionalPrompt
+from interpretability_experiments.kaomoji.emotional_prompts_jp import EMOTIONAL_PROMPTS_JP
+from interpretability_experiments.kaomoji.prompts import Prompt
+from interpretability_experiments.kaomoji.quadrants import QUADRANT_ORDER_SPLIT
 
 
-# v4 9-cell ordering, sourced from transformer_experiments.kaomoji.quadrants — single
+# v4 9-cell ordering, sourced from interpretability_experiments.kaomoji.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
 QUADRANT_ORDER = list(QUADRANT_ORDER_SPLIT)
 # Per-face evaluation batch size (faces stacked into a single forward

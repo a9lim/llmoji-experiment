@@ -67,8 +67,8 @@ from llmoji_experiment.config import (
     current_model,
 )
 from llmoji_experiment.emotional_analysis import _use_cjk_font
-from transformer_experiments.hidden_state_analysis import load_hidden_features_all_layers
-from transformer_experiments.kaomoji.quadrants import (
+from interpretability_experiments.hidden_state_analysis import load_hidden_features_all_layers
+from interpretability_experiments.kaomoji.quadrants import (
     LB_LABEL,
     LB_QUADRANT,
     QUADRANT_COLORS,

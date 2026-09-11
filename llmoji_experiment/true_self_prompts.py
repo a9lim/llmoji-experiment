@@ -157,7 +157,7 @@ negative-cell rows as welfare-cost-bearing and minimize re-runs.
 
 from __future__ import annotations
 
-from transformer_experiments.kaomoji.emotional_prompts import EmotionalPrompt
+from interpretability_experiments.kaomoji.emotional_prompts import EmotionalPrompt
 
 
 USER_PROMPT: str = (

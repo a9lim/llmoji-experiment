@@ -44,8 +44,8 @@ from llmoji_experiment.emotional_analysis import (
     is_kaomoji_candidate,
     pool_lb_into,
 )
-from transformer_experiments.hidden_state_analysis import load_hidden_features_all_layers
-from transformer_experiments.kaomoji.quadrants import (
+from interpretability_experiments.hidden_state_analysis import load_hidden_features_all_layers
+from interpretability_experiments.kaomoji.quadrants import (
     ALL_CELLS_ORDER,
     LB_LABEL,
     LB_QUADRANT,

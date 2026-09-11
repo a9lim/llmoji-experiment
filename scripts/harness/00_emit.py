@@ -112,7 +112,7 @@ from llmoji_experiment.config import (
     INTROSPECTION_PREAMBLE,
     KAOMOJI_INSTRUCTION,
 )
-from transformer_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS, EmotionalPrompt
+from interpretability_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS, EmotionalPrompt
 
 
 # ---------------------------------------------------------------------------

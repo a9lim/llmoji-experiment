@@ -145,7 +145,7 @@ def main() -> None:
         TEMPERATURE,
         current_model,
     )
-    from transformer_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS
+    from interpretability_experiments.kaomoji.emotional_prompts import EMOTIONAL_PROMPTS
     from transformer_experiments.hidden_capture import read_after_generate
     from transformer_experiments.hidden_state_io import (
         hidden_state_path,

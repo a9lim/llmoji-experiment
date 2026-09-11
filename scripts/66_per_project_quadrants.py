@@ -72,9 +72,9 @@ from llmoji_experiment.local_emissions import (
     iter_local_emissions,
 )
 from llmoji_experiment.per_project_charts import plot_per_project_quadrants
-from transformer_experiments.kaomoji.quadrants import QUADRANT_ORDER_SPLIT
+from interpretability_experiments.kaomoji.quadrants import QUADRANT_ORDER_SPLIT
 
-# v4 9-cell ordering, sourced from transformer_experiments.kaomoji.quadrants — single
+# v4 9-cell ordering, sourced from interpretability_experiments.kaomoji.quadrants — single
 # source of truth shared with figures, JSD math, and the BoL projection.
 QUADRANTS = list(QUADRANT_ORDER_SPLIT)
 HARNESS_DIR = DATA_DIR / "harness"

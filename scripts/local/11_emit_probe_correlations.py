@@ -35,7 +35,7 @@ from llmoji_experiment.emotional_analysis import (
     load_rows,
     plot_probe_correlation_matrix,
 )
-from transformer_experiments.kaomoji.quadrants import QUADRANT_ORDER
+from interpretability_experiments.kaomoji.quadrants import QUADRANT_ORDER
 
 
 # Affect trio for the headline correlation table. Order: valence,

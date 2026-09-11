@@ -21,13 +21,13 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable
 
-# Re-exported from the canonical zero-dep ``transformer_experiments.kaomoji.quadrants``
+# Re-exported from the canonical zero-dep ``interpretability_experiments.kaomoji.quadrants``
 # module so the JSD math layer shares ordering with figures /
 # classifiers / BoL projection. Update ``quadrants.py`` to change the
 # registry shape; this and ``emotional_analysis.py`` /  ``lexicon.py``
 # all pick it up. Aliased to ``QUADRANT_ORDER`` (the JSD layer's
 # stable public name — callers across scripts 50-56 import it here).
-from transformer_experiments.kaomoji.quadrants import (  # noqa: E402
+from interpretability_experiments.kaomoji.quadrants import (  # noqa: E402
     QUADRANT_ORDER_SPLIT as QUADRANT_ORDER,
 )
 LN2 = math.log(2.0)

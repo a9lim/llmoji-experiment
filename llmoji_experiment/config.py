@@ -7,7 +7,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-from transformer_experiments.kaomoji import settings as _shared_settings
+from interpretability_experiments.kaomoji import settings as _shared_settings
 from transformer_experiments.models import MODEL_REGISTRY as SHARED_MODEL_REGISTRY
 
 
