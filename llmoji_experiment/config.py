@@ -63,7 +63,7 @@ class ModelPaths:
     emotional_summary_path: Path
     experiment: str
     figures_dir: Path
-    use_saklas: bool = True
+    use_drowse: bool = True
     trust_remote_code: bool = False
     probe_calibrated: bool = True
 
@@ -77,7 +77,7 @@ def _paths(short: str) -> ModelPaths:
         emotional_summary_path=DATA_DIR / "local" / short / "emotional_summary.tsv",
         experiment=short,
         figures_dir=FIGURES_DIR / "local" / short,
-        use_saklas=spec.use_saklas,
+        use_drowse=spec.use_drowse,
         trust_remote_code=spec.trust_remote_code,
         probe_calibrated=spec.probe_calibrated,
     )

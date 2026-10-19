@@ -12,9 +12,23 @@ Two wrappers:
    segmented-control via shared-forms, and re-themes the active scene
    in-place using the site's CSS custom-property palette.
 
-Both wrappers re-paint plotly's grid/text/background colors from the
-parent document's `data-theme` attribute (with a MutationObserver), so
-the figures track the site's light/dark toggle live.
+All three re-paint plotly's grid/text/background colors from the parent
+document's `data-theme` attribute (with a MutationObserver), so the
+figures track the site's light/dark toggle live. Palette and type follow
+the a9l.im design system (AGENTS.md "Design system"): near-white / near-black
+grounds, hairline rules, a single oxblood accent, Newsreader throughout.
+The plotly palette is spelled out in the page script (``SITE_PALETTE``)
+rather than read from tokens.js, so a figure stays correct whatever state
+the shared layer is in; the fonts come from the site's ``/fonts/fonts.css``.
+
+The one data color that moves is slate (quadrant NB): the producers baked
+the pre-redesign ``QUADRANT_COLORS["NB"]`` into the raw HTMLs, so
+``_retint_slate`` re-tints it (and the per-face RGB blends that contain
+it) to the site's ``#8A8580`` at wrap time. A no-op once the producers
+emit that value themselves.
+
+Output goes to ``$BLOG_ASSETS_DIR`` if set, else the a9l.im checkout's
+``static/blog-assets/introspection-via-kaomoji/`` (``~/Work/a9lim.github.io``).
 
 Usage:
     python scripts/local/98_wrap_blog_3d_html.py
@@ -22,14 +36,17 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import re
 import sys
 from pathlib import Path
 
 STUDY_ROOT = Path(__file__).resolve().parent.parent.parent
-BLOG_ASSETS_DIR = (
-    STUDY_ROOT.parent / "a9lim.github.io" / "blog-assets" / "introspection-via-kaomoji"
-)
+BLOG_ASSETS_DIR = Path(os.environ.get("BLOG_ASSETS_DIR") or (
+    STUDY_ROOT.parent.parent / "a9lim.github.io" / "static"
+    / "blog-assets" / "introspection-via-kaomoji"
+))
 RAW_PROCRUSTES = STUDY_ROOT / "figures" / "local" / "fig_v3_quadrant_procrustes_3d.html"
 RAW_PER_FACE = STUDY_ROOT / "figures" / "local" / "fig_v3_per_face_pca_3d.html"
 RAW_WILD_FACES = STUDY_ROOT / "figures" / "harness" / "wild_faces_pca_3d.html"
@@ -37,6 +54,16 @@ OUT_PROCRUSTES = BLOG_ASSETS_DIR / "fig_v3_quadrant_procrustes_3d.html"
 OUT_PER_FACE = BLOG_ASSETS_DIR / "fig_v3_per_face_pca_3d.html"
 OUT_WILD_FACES = BLOG_ASSETS_DIR / "fig_wild_faces_pca_3d.html"
 
+
+from interpretability_experiments.kaomoji.quadrants import (  # noqa: E402
+    QUADRANT_COLORS,
+    QUADRANT_ORDER_SPLIT,
+)
+
+# Site slate (design system `extended.slate`). NB is the only quadrant whose
+# color moved in the redesign; everything else stays the shared palette.
+SITE_SLATE = "#8A8580"
+SITE_QUADRANT_COLORS = {**QUADRANT_COLORS, "NB": SITE_SLATE}
 
 # Active models, in order. The procrustes file currently emits 5 per-model
 # scenes (scene1..scene5) + 1 overlay (scene6).
@@ -51,26 +78,110 @@ MODEL_MARKERS = {
 }
 
 
+def _hex_to_rgb(h: str) -> tuple[int, int, int]:
+    h = h.lstrip("#")
+    return int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+
+
+def _nb_share(hover: str) -> float | None:
+    """NB's share of a point's quadrant blend, read back from its hover text.
+
+    Two formats exist: per-face PCA lists emission counts
+    (``HP-S=77, HP-D=45, NP=28, NB=4``; share = NB / sum), and wild-faces
+    PCA lists BoL shares (``BoL shares: NP 0.50, NB 0.45``; already shares,
+    but only the top three, so an unlisted NB counts as 0 — it is smaller
+    than every listed share, which bounds the error at a few RGB levels).
+    Returns None when the text carries neither.
+    """
+    plain = re.sub(r"<[^>]+>", "|", hover)
+    counts = re.findall(r"\b([A-Z]{2}(?:-[DS])?)=(\d+)\b", plain)
+    if counts:
+        total = sum(int(n) for _, n in counts)
+        nb = sum(int(n) for q, n in counts if q == "NB")
+        return nb / total if total else 0.0
+    m = re.search(r"shares:\s*([^|]+)", plain)
+    if m:
+        pairs = re.findall(r"\b([A-Z]{2}(?:-[DS])?)\s+(\d*\.?\d+)", m.group(1))
+        if pairs:
+            return sum(float(v) for q, v in pairs if q == "NB")
+    return None
+
+
+def _retint_slate(plotly_block: str) -> str:
+    """Move the baked-in NB slate to the site's slate.
+
+    The producers (26, 97, 67) paint markers with ``QUADRANT_COLORS`` as of
+    their last run. Solid NB traces map directly; per-face markers are an
+    RGB-linear blend of the quadrant colors weighted by share, so each moves
+    by ``share_NB * (new_slate - old_slate)``. No-op when the raw HTML
+    already carries the site slate.
+    """
+    old = QUADRANT_COLORS["NB"].lower()
+    new = SITE_SLATE.lower()
+    if old == new:
+        return plotly_block
+    d = tuple(n - o for n, o in zip(_hex_to_rgb(new), _hex_to_rgb(old)))
+
+    m = re.search(r'Plotly\.newPlot\(\s*"[^"]+",\s*', plotly_block)
+    if not m:
+        raise SystemExit("could not find the Plotly.newPlot call to re-tint")
+    data, end = json.JSONDecoder().raw_decode(plotly_block, m.end())
+
+    n_solid = n_blend = n_skipped = 0
+    for tr in data:
+        marker = tr.get("marker") or {}
+        col = marker.get("color")
+        if isinstance(col, str):
+            if col.lower() == old:
+                marker["color"] = SITE_SLATE
+                n_solid += 1
+        elif isinstance(col, list) and isinstance(tr.get("hovertext"), list):
+            out = []
+            for c0, hover in zip(col, tr["hovertext"]):
+                share = _nb_share(hover) if isinstance(hover, str) else None
+                if share is None or not (isinstance(c0, str) and c0.startswith("#")):
+                    out.append(c0)
+                    n_skipped += 1
+                    continue
+                rgb = _hex_to_rgb(c0)
+                out.append("#%02x%02x%02x" % tuple(
+                    max(0, min(255, round(v + share * dv))) for v, dv in zip(rgb, d)
+                ))
+                n_blend += 1
+            marker["color"] = out
+    print(f"    slate {old} -> {new}: {n_solid} solid traces, "
+          f"{n_blend} blended points, {n_skipped} left as-is")
+    return (plotly_block[:m.end()]
+            + json.dumps(data, separators=(",", ":"))
+            + plotly_block[end:])
+
+
 def _extract_plotly_block(raw: str) -> str:
     """Pull just the `<div>...plotly init...<script>...</script></div>` block
     out of a py-plotly-emitted full HTML file. Skips the surrounding
     `<html>`, `<head>`, `<body>` boilerplate so we can paste it inside our
-    own shell."""
+    own shell. Re-tints the NB slate on the way through."""
     m = re.search(r"<body>\s*(<div>.*</div>)\s*</body>", raw, re.DOTALL)
     if not m:
         raise SystemExit(f"could not find <body><div>...</div></body> block in raw plotly HTML")
-    return m.group(1)
+    return _retint_slate(m.group(1))
 
 
 # Common shared head — fonts, tokens, base CSS. Forms only needed for the
 # per-face wrapper but harmless on the procrustes one (it's a defer load).
+# /fonts/fonts.css declares Newsreader (and Shippori Mincho for Japanese);
+# the figure is served from the site origin, so the same-origin font-src
+# and the plotly CDN allowance in the CSP are all it needs.
 _SHARED_HEAD = """<head>
 <meta charset="utf-8" />
-<script src="/shared-tokens.js"></script>
+<script src="/shared/tokens.js"></script>
 <link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/shared-base.css">
-<script defer src="/shared-forms.js"></script>
+<link rel="stylesheet" href="/shared/base.css">
+<script defer src="/shared/forms.js"></script>
 """
+
+# Font stack for everything the figure draws (CSS and plotly alike).
+FONT_STACK = "'Newsreader', 'Shippori Mincho', 'Hiragino Mincho ProN', serif"
 
 # Common reset + plotly transparent-background overrides shared by both
 # wrappers. The `_THEME_JS_PRE` block runs in both — we factor it once.
@@ -84,17 +195,17 @@ _BASE_CSS = """  html, body {
   #caption-bar, #model-bar {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 14px 22px;
     padding: 10px 16px 4px;
     flex-wrap: wrap;
     background: transparent;
-    font-family: var(--font-mono);
-    font-size: var(--font-sm);
-    font-variation-settings: 'MONO' 1;
+    font-family: __FONT__;
+    font-size: 15.5px;
+    line-height: 1.3;
   }
   .legend-static {
     display: flex;
-    gap: 14px;
+    gap: 6px 20px;
     align-items: center;
     color: var(--text);
     flex-wrap: wrap;
@@ -102,9 +213,7 @@ _BASE_CSS = """  html, body {
   .legend-item {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    letter-spacing: 0.04em;
-    text-transform: lowercase;
+    gap: 7px;
     padding: 6px 0;
   }
   .legend-mark {
@@ -130,14 +239,14 @@ _BASE_CSS = """  html, body {
   .legend-mark.mark-x::after { transform: translate(-50%, -50%) rotate(-45deg); }
   .subtitle {
     color: var(--text-muted);
-    letter-spacing: 0.02em;
+    font-style: italic;
   }
   #model-bar .mode-btn {
-    font-family: var(--font-mono);
-    font-size: var(--font-sm);
-    font-variation-settings: 'MONO' 1;
-    letter-spacing: 0.04em;
-    text-transform: lowercase;
+    font-family: __FONT__;
+    font-size: 15.5px;
+    font-variation-settings: normal;
+    letter-spacing: normal;
+    text-transform: none;
     padding: 6px 14px;
     flex: 0 0 auto;
   }
@@ -146,11 +255,24 @@ _BASE_CSS = """  html, body {
     height: calc(100vh - 50px) !important;
     background: transparent !important;
   }
-  .plot-container, .svg-container, .main-svg { background: transparent !important; }"""
+  .plot-container, .svg-container, .main-svg { background: transparent !important; }""".replace("__FONT__", FONT_STACK)
 
 
-# Color helpers used by both wrappers.
-_THEME_JS_HELPERS = """  function readTheme() {
+# Color + layout helpers used by all three wrappers (emitted verbatim into
+# each page). `SITE_PALETTE` is the design system's light/dark table; the
+# rule color is text at 12% (light) / 13% (dark), pre-composited over the
+# canvas because plotly's WebGL scenes drop the alpha channel of grid colors.
+_THEME_JS_HELPERS = """  var FONT = "__FONT__";
+  var SITE_PALETTE = {
+    light: { canvas: '#FCFCFB', elevated: '#FFFFFF', text: '#161514',
+             secondary: '#42413F', muted: '#666463', accent: '#983432',
+             ruleAlpha: 0.12 },
+    dark:  { canvas: '#121111', elevated: '#1B1A1A', text: '#ECEBEA',
+             secondary: '#BEBDBC', muted: '#949392', accent: '#DC5960',
+             ruleAlpha: 0.13 }
+  };
+
+  function readTheme() {
     try {
       var t = window.parent && window.parent !== window
         ? window.parent.document.documentElement.dataset.theme
@@ -159,50 +281,98 @@ _THEME_JS_HELPERS = """  function readTheme() {
     } catch (e) { return 'light'; }
   }
 
-  // Pre-composite an 8-digit hex (#RRGGBBAA) over a known opaque background
-  // so plotly's 3D grid gets a flat opaque color (it strips the alpha
-  // channel off gridcolor in WebGL, which renders dark-mode grids as
-  // bright white).
-  function compositeOver(fgHex, bgHex) {
-    if (!fgHex || fgHex.length < 7) return bgHex;
-    var fg = fgHex.replace('#', '');
-    var bg = bgHex.replace('#', '');
-    var fr = parseInt(fg.slice(0, 2), 16);
-    var fgr = parseInt(fg.slice(2, 4), 16);
-    var fgb = parseInt(fg.slice(4, 6), 16);
-    var a = fg.length >= 8 ? parseInt(fg.slice(6, 8), 16) / 255 : 1;
-    var br = parseInt(bg.slice(0, 2), 16);
-    var bgg = parseInt(bg.slice(2, 4), 16);
-    var bbg = parseInt(bg.slice(4, 6), 16);
-    var rr = Math.round(fr * a + br * (1 - a));
-    var rg = Math.round(fgr * a + bgg * (1 - a));
-    var rb = Math.round(fgb * a + bbg * (1 - a));
-    var to2 = function (n) { return ('0' + n.toString(16)).slice(-2); };
-    return '#' + to2(rr) + to2(rg) + to2(rb);
+  // Pre-composite a 6-digit hex over an opaque background at alpha `a`.
+  function compositeOver(fgHex, bgHex, a) {
+    var fg = fgHex.replace('#', ''), bg = bgHex.replace('#', '');
+    var out = '#';
+    for (var i = 0; i < 6; i += 2) {
+      var f = parseInt(fg.slice(i, i + 2), 16);
+      var b = parseInt(bg.slice(i, i + 2), 16);
+      out += ('0' + Math.round(f * a + b * (1 - a)).toString(16)).slice(-2);
+    }
+    return out;
   }
 
   function readThemeColors() {
     var theme = readTheme();
     document.documentElement.dataset.theme = theme;
-    var styles = getComputedStyle(document.documentElement);
-    var canvas = styles.getPropertyValue('--bg-canvas').trim() || (theme === 'dark' ? '#06070B' : '#E6E8ED');
-    var bgHover = styles.getPropertyValue('--bg-hover').trim();
-    var muted = styles.getPropertyValue('--text-muted').trim();
+    var p = SITE_PALETTE[theme];
     return {
       theme: theme,
-      canvas:    canvas,
-      text:      styles.getPropertyValue('--text').trim(),
-      muted:     muted,
-      grid:      compositeOver(bgHover || muted, canvas),
-      // Drop-line color: composite text-muted at ~44% alpha onto the
-      // canvas so the line is theme-faithful but visually subordinate
-      // to the markers and slightly more present than the grid.
-      dropLine:  compositeOver(muted + '70', canvas),
-      lineMuted: muted,
-      elevated:  styles.getPropertyValue('--bg-elevated').trim(),
-      accent:    styles.getPropertyValue('--accent').trim(),
+      canvas:    p.canvas,
+      text:      p.text,
+      secondary: p.secondary,
+      muted:     p.muted,
+      elevated:  p.elevated,
+      accent:    p.accent,
+      // Hairline rule (gridlines, hover-label border) and the axis line,
+      // which sits a step above it so the box stays legible.
+      grid:      compositeOver(p.text, p.canvas, p.ruleAlpha),
+      axisLine:  compositeOver(p.text, p.canvas, 0.30),
+      // Drop-line color: text at ~44% over the canvas, subordinate to the
+      // markers and slightly more present than the grid.
+      dropLine:  compositeOver(p.text, p.canvas, 0.44),
     };
-  }"""
+  }
+
+  // Style a 3D scene in place: transparent ground, hairline grid and spikes,
+  // Newsreader ticks and titles, a fixed cube camera.
+  function styleScene(scene, c) {
+    scene.bgcolor = 'rgba(0,0,0,0)';
+    scene.domain = { x: [-0.08, 1.08], y: [-0.08, 1.08] };
+    scene.aspectmode = 'cube';
+    scene.camera = { eye: { x: 1.45, y: 1.45, z: 1.30 } };
+    ['xaxis', 'yaxis', 'zaxis'].forEach(function(ax) {
+      if (!scene[ax]) scene[ax] = {};
+      scene[ax].gridcolor = c.grid;
+      scene[ax].linecolor = c.axisLine;
+      scene[ax].zerolinecolor = c.axisLine;
+      scene[ax].color = c.text;
+      scene[ax].showbackground = false;
+      // Hover spikes: hairline in the muted text color (plotly's default is a
+      // heavy bright line).
+      scene[ax].spikecolor = c.muted;
+      scene[ax].spikethickness = 1;
+      scene[ax].tickfont = { color: c.muted, family: FONT, size: 12 };
+      if (typeof scene[ax].title === 'string') scene[ax].title = { text: scene[ax].title };
+      if (!scene[ax].title) scene[ax].title = {};
+      scene[ax].title.font = { color: c.secondary, family: FONT, size: 14 };
+    });
+    return scene;
+  }
+
+  function baseLayout(scene, c) {
+    return {
+      scene: scene,
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      margin: { l: 0, r: 0, t: 0, b: 0 },
+      showlegend: false,
+      autosize: true,
+      font: { color: c.text, family: FONT, size: 13 },
+      hoverlabel: {
+        bgcolor: c.elevated,
+        bordercolor: c.grid,
+        font: { family: FONT, color: c.text, size: 14 },
+        align: 'left',
+      },
+    };
+  }
+
+  // Plotly rasterizes 3D text on first draw, so wait for Newsreader to load
+  // (or give up after a beat and draw with the fallback).
+  function whenFontsReady(cb) {
+    var done = false;
+    function go() { if (!done) { done = true; cb(); } }
+    setTimeout(go, 2500);
+    try {
+      Promise.all([
+        document.fonts.load('400 13px "Newsreader"'),
+        document.fonts.load('600 13px "Newsreader"'),
+        document.fonts.load('italic 400 13px "Newsreader"'),
+      ]).then(go, go);
+    } catch (e) { go(); }
+  }""".replace("__FONT__", FONT_STACK.replace('"', '\\"'))
 
 
 def _legend_marker_html() -> str:
@@ -250,7 +420,7 @@ def wrap_procrustes(
   <div class="legend-static">
 {legend_html}
   </div>
-  <span class="subtitle">all five models overlaid on gemma</span>
+  <span class="subtitle">All five models overlaid on gemma</span>
 </div>
 {plotly_block}
 <script>
@@ -265,34 +435,8 @@ def wrap_procrustes(
 
   function buildLayout(c) {{
     var origScene = origLayout[OVERLAY_SCENE] || origLayout.scene || {{}};
-    var scene = JSON.parse(JSON.stringify(origScene));
-    scene.bgcolor = 'rgba(0,0,0,0)';
-    scene.domain = {{ x: [-0.08, 1.08], y: [-0.08, 1.08] }};
-    scene.aspectmode = 'cube';
-    scene.camera = {{ eye: {{ x: 1.45, y: 1.45, z: 1.30 }} }};
-    ['xaxis', 'yaxis', 'zaxis'].forEach(function(ax) {{
-      if (!scene[ax]) scene[ax] = {{}};
-      scene[ax].gridcolor = c.grid;
-      scene[ax].linecolor = c.lineMuted;
-      scene[ax].zerolinecolor = c.lineMuted;
-      scene[ax].color = c.text;
-      scene[ax].showbackground = false;
-      if (!scene[ax].tickfont) scene[ax].tickfont = {{}};
-      scene[ax].tickfont.color = c.muted;
-      if (typeof scene[ax].title === 'string') scene[ax].title = {{ text: scene[ax].title }};
-      if (!scene[ax].title) scene[ax].title = {{}};
-      if (!scene[ax].title.font) scene[ax].title.font = {{}};
-      scene[ax].title.font.color = c.text;
-    }});
-    return {{
-      scene: scene,
-      paper_bgcolor: 'rgba(0,0,0,0)',
-      plot_bgcolor: 'rgba(0,0,0,0)',
-      margin: {{ l: 0, r: 0, t: 0, b: 0 }},
-      showlegend: false,
-      autosize: true,
-      font: {{ color: c.text, family: 'Recursive, ui-monospace, monospace' }},
-    }};
+    var scene = styleScene(JSON.parse(JSON.stringify(origScene)), c);
+    return baseLayout(scene, c);
   }}
 
   function render() {{
@@ -309,12 +453,12 @@ def wrap_procrustes(
         var clone = JSON.parse(JSON.stringify(t));
         clone.scene = 'scene';
         if (clone.marker && clone.marker.line) {{
-          clone.marker.line.color = c.elevated;
+          clone.marker.line.color = c.canvas;
         }}
         // Drop-lines repaint per active theme — the baked rgba
         // mid-grey washes out to near-white when composited over
-        // the light canvas, so we override at render time using
-        // --text-muted over --bg-canvas instead.
+        // the light canvas, so we override at render time with the
+        // palette's text color over the canvas instead.
         if (clone.name === '_droplines' && clone.line) {{
           clone.line.color = c.dropLine;
         }}
@@ -342,7 +486,7 @@ def wrap_procrustes(
   }}
 
   document.documentElement.dataset.theme = readTheme();
-  window.addEventListener('load', function() {{ setTimeout(init, 100); }});
+  window.addEventListener('load', function() {{ whenFontsReady(function() {{ setTimeout(init, 50); }}); }});
 }})();
 </script>
 </body>
@@ -355,14 +499,13 @@ def wrap_procrustes(
 # Quadrant colors for the wild-faces legend bar. Sourced from the
 # canonical ``interpretability_experiments.kaomoji.quadrants`` module so the static legend
 # matches the per-face proportional-blend colors plotly draws.
-from interpretability_experiments.kaomoji.quadrants import QUADRANT_COLORS, QUADRANT_ORDER_SPLIT  # noqa: E402
 WILD_QUADRANTS = QUADRANT_ORDER_SPLIT
-WILD_QUADRANT_COLORS = {q: QUADRANT_COLORS[q] for q in WILD_QUADRANTS}
+WILD_QUADRANT_COLORS = {q: SITE_QUADRANT_COLORS[q] for q in WILD_QUADRANTS}
 # Surface marker shapes match the plotly markers script 67 emits:
 # circle = Claude Code journal only, diamond = any claude.ai export,
 # square = neither (HF corpus only, from another contributor).
 WILD_SURFACE_LEGEND = (
-    ("circle",  "claude code"),
+    ("circle",  "Claude Code"),
     ("diamond", "claude.ai"),
     ("square",  "other"),
 )
@@ -380,7 +523,7 @@ def _wild_legend_html() -> str:
         items.append(
             f'    <span class="legend-item">'
             f'<span class="legend-mark mark-circle" style="background: {color};"></span>'
-            f'{q.lower()}</span>'
+            f'{q}</span>'
         )
     for shape, label in WILD_SURFACE_LEGEND:
         items.append(
@@ -410,7 +553,7 @@ def wrap_wild_faces(raw_path: Path, out_path: Path) -> None:
   <div class="legend-static">
 {legend_html}
   </div>
-  <span class="subtitle">color blends per-face BoL shares · shape = deployment surface</span>
+  <span class="subtitle">Color blends per-face BoL shares · shape = deployment surface</span>
 </div>
 {plotly_block}
 <script>
@@ -423,34 +566,8 @@ def wrap_wild_faces(raw_path: Path, out_path: Path) -> None:
 
   function buildLayout(c) {{
     var origScene = origLayout.scene || {{}};
-    var scene = JSON.parse(JSON.stringify(origScene));
-    scene.bgcolor = 'rgba(0,0,0,0)';
-    scene.domain = {{ x: [-0.08, 1.08], y: [-0.08, 1.08] }};
-    scene.aspectmode = 'cube';
-    scene.camera = {{ eye: {{ x: 1.45, y: 1.45, z: 1.30 }} }};
-    ['xaxis', 'yaxis', 'zaxis'].forEach(function(ax) {{
-      if (!scene[ax]) scene[ax] = {{}};
-      scene[ax].gridcolor = c.grid;
-      scene[ax].linecolor = c.lineMuted;
-      scene[ax].zerolinecolor = c.lineMuted;
-      scene[ax].color = c.text;
-      scene[ax].showbackground = false;
-      if (!scene[ax].tickfont) scene[ax].tickfont = {{}};
-      scene[ax].tickfont.color = c.muted;
-      if (typeof scene[ax].title === 'string') scene[ax].title = {{ text: scene[ax].title }};
-      if (!scene[ax].title) scene[ax].title = {{}};
-      if (!scene[ax].title.font) scene[ax].title.font = {{}};
-      scene[ax].title.font.color = c.text;
-    }});
-    return {{
-      scene: scene,
-      paper_bgcolor: 'rgba(0,0,0,0)',
-      plot_bgcolor: 'rgba(0,0,0,0)',
-      margin: {{ l: 0, r: 0, t: 0, b: 0 }},
-      showlegend: false,
-      autosize: true,
-      font: {{ color: c.text, family: 'Recursive, ui-monospace, monospace' }},
-    }};
+    var scene = styleScene(JSON.parse(JSON.stringify(origScene)), c);
+    return baseLayout(scene, c);
   }}
 
   function render() {{
@@ -472,7 +589,7 @@ def wrap_wild_faces(raw_path: Path, out_path: Path) -> None:
         var clone = JSON.parse(JSON.stringify(t));
         clone.scene = 'scene';
         if (clone.marker && clone.marker.line) {{
-          clone.marker.line.color = c.elevated;
+          clone.marker.line.color = c.canvas;
         }}
         return clone;
       }});
@@ -498,7 +615,7 @@ def wrap_wild_faces(raw_path: Path, out_path: Path) -> None:
   }}
 
   document.documentElement.dataset.theme = readTheme();
-  window.addEventListener('load', function() {{ setTimeout(init, 100); }});
+  window.addEventListener('load', function() {{ whenFontsReady(function() {{ setTimeout(init, 50); }}); }});
 }})();
 </script>
 </body>
@@ -554,34 +671,8 @@ def wrap_per_face(raw_path: Path, out_path: Path, subtitles: list[str]) -> None:
   function buildLayout(idx, c) {{
     var sceneKey = SCENES[idx];
     var origScene = origLayout[sceneKey] || origLayout.scene || {{}};
-    var scene = JSON.parse(JSON.stringify(origScene));
-    scene.bgcolor = 'rgba(0,0,0,0)';
-    scene.domain = {{ x: [-0.08, 1.08], y: [-0.08, 1.08] }};
-    scene.aspectmode = 'cube';
-    scene.camera = {{ eye: {{ x: 1.45, y: 1.45, z: 1.30 }} }};
-    ['xaxis', 'yaxis', 'zaxis'].forEach(function(ax) {{
-      if (!scene[ax]) scene[ax] = {{}};
-      scene[ax].gridcolor = c.grid;
-      scene[ax].linecolor = c.lineMuted;
-      scene[ax].zerolinecolor = c.lineMuted;
-      scene[ax].color = c.text;
-      scene[ax].showbackground = false;
-      if (!scene[ax].tickfont) scene[ax].tickfont = {{}};
-      scene[ax].tickfont.color = c.muted;
-      if (typeof scene[ax].title === 'string') scene[ax].title = {{ text: scene[ax].title }};
-      if (!scene[ax].title) scene[ax].title = {{}};
-      if (!scene[ax].title.font) scene[ax].title.font = {{}};
-      scene[ax].title.font.color = c.text;
-    }});
-    return {{
-      scene: scene,
-      paper_bgcolor: 'rgba(0,0,0,0)',
-      plot_bgcolor: 'rgba(0,0,0,0)',
-      margin: {{ l: 0, r: 0, t: 0, b: 0 }},
-      showlegend: false,
-      autosize: true,
-      font: {{ color: c.text, family: 'Recursive, ui-monospace, monospace' }},
-    }};
+    var scene = styleScene(JSON.parse(JSON.stringify(origScene)), c);
+    return baseLayout(scene, c);
   }}
 
   function showModel(idx) {{
@@ -597,7 +688,7 @@ def wrap_per_face(raw_path: Path, out_path: Path, subtitles: list[str]) -> None:
         clone.scene = 'scene';
         if (!clone.marker) clone.marker = {{}};
         if (!clone.marker.line) clone.marker.line = {{}};
-        clone.marker.line.color = c.elevated;
+        clone.marker.line.color = c.canvas;
         clone.marker.line.width = 0.5;
         return clone;
       }});
@@ -627,7 +718,7 @@ def wrap_per_face(raw_path: Path, out_path: Path, subtitles: list[str]) -> None:
   }}
 
   document.documentElement.dataset.theme = readTheme();
-  window.addEventListener('load', function() {{ setTimeout(init, 100); }});
+  window.addEventListener('load', function() {{ whenFontsReady(function() {{ setTimeout(init, 50); }}); }});
 }})();
 </script>
 </body>

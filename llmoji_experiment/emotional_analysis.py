@@ -5,7 +5,7 @@ Hidden-state-first: the per-kaomoji cosine heatmap (Fig A), the
 within-kaomoji consistency plot (Fig B), the kaomoji × quadrant
 alignment (Fig C), the v3 PCA scatter, and the per-kaomoji summary
 table all operate on hidden-state features loaded from per-row .npz
-sidecars via ``llmoji.hidden_state_analysis.load_hidden_features``.
+sidecars via ``interpretability_experiments.hidden_state_analysis.load_hidden_features``.
 They pass (metadata DataFrame, hidden-state matrix) aligned row-wise.
 
 Kept as probe-specific (these answer questions about probe structure
@@ -138,9 +138,10 @@ def mix_quadrant_color(
     ``QUADRANT_COLORS`` hue; mixed input renders at the weighted RGB
     midpoint (50/50 HP+LP → muted olive, HN+LN → desaturated violet,
     etc.); zero-mass input falls back to ``fallback`` (default
-    ``QUADRANT_COLORS["NB"] = #808696`` slate, matching the website's
-    ``shared-tokens.js::_PALETTE.extended.slate`` and the convention
-    used by ``scripts/local/97_build_per_face_pca_3d.py``).
+    ``QUADRANT_COLORS["NB"] = #808696`` slate, the website's pre-redesign
+    ``extended.slate``; the site's is now ``#8A8580``, which the blog regen
+    overrides, and the convention used by
+    ``scripts/local/97_build_per_face_pca_3d.py``).
 
     ``weights`` may be:
 
@@ -312,7 +313,7 @@ def load_emotional_features(
                 f"LLMOJI_WHICH must be h_first|h_last|h_mean, got {env_which!r}"
             )
         which = env_which
-    from .hidden_state_analysis import load_hidden_features
+    from interpretability_experiments.hidden_state_analysis import load_hidden_features
     df, X = load_hidden_features(
         jsonl_path, data_dir, experiment,
         which=which, layer=layer,
@@ -362,7 +363,7 @@ def load_emotional_features_all_layers(
     auto-renames the cache so each aggregate gets its own file.
     """
     from .config import DATA_DIR, resolve_model
-    from .hidden_state_analysis import load_hidden_features_all_layers
+    from interpretability_experiments.hidden_state_analysis import load_hidden_features_all_layers
     from llmoji.taxonomy import canonicalize_kaomoji
 
     # ``resolve_model`` honors LLMOJI_OUT_SUFFIX iff ``short`` matches
@@ -444,7 +445,7 @@ def load_emotional_features_stack_at(
     For canonical v3 emission data, prefer `load_emotional_features_stack`
     (registry-keyed) — it benefits from the all-layers cache.
     """
-    from .hidden_state_analysis import load_hidden_features_all_layers
+    from interpretability_experiments.hidden_state_analysis import load_hidden_features_all_layers
     from llmoji.taxonomy import canonicalize_kaomoji
 
     df, X3, _ = load_hidden_features_all_layers(
@@ -512,7 +513,7 @@ def pool_lb_into(
     """
     from dataclasses import replace
     from .config import DATA_DIR, MODEL_REGISTRY
-    from .hidden_state_analysis import load_hidden_features_all_layers
+    from interpretability_experiments.hidden_state_analysis import load_hidden_features_all_layers
     from llmoji.taxonomy import canonicalize_kaomoji
 
     if ref_short not in MODEL_REGISTRY:
@@ -630,9 +631,26 @@ def load_emotional_features_stack(
 # ---------------------------------------------------------------------------
 
 
-def _use_cjk_font() -> None:
+def register_newsreader() -> bool:
+    """Register the static Newsreader instances in ``data/fonts/`` with
+    matplotlib (cut by ``scripts/make_newsreader_instances.py``). Returns
+    True when the regular face is available."""
+    import matplotlib.font_manager as fm
+    fonts_dir = Path(__file__).resolve().parent.parent / "data" / "fonts"
+    have = {f.fname for f in fm.fontManager.ttflist}
+    for ttf in sorted(fonts_dir.glob("Newsreader-*.ttf")):
+        if str(ttf) not in have:
+            fm.fontManager.addfont(str(ttf))
+    return "Newsreader" in {f.name for f in fm.fontManager.ttflist}
+
+
+def _use_cjk_font(primary: str | None = None) -> None:
     """Configure matplotlib font-family as a fallback *chain* covering
     the kaomoji character set — see CLAUDE.md font-fallback gotcha.
+
+    ``primary`` (e.g. ``"Newsreader"``) leads the chain when installed, so
+    the figure's own text sets in it and only glyphs it lacks (most of a
+    kaomoji) fall through to the CJK / symbol faces.
 
     Also registers the project-local `data/fonts/NotoEmoji-Regular.ttf`
     (monochrome) so SMP emoji glyphs that appear inside some
@@ -650,7 +668,9 @@ def _use_cjk_font() -> None:
             fm.fontManager.addfont(str(emoji_font))
         except Exception:
             pass
-    chain = [
+    if primary == "Newsreader":
+        register_newsreader()
+    chain = ([primary] if primary else []) + [
         "Noto Sans CJK JP",
         "Arial Unicode MS",
         "DejaVu Sans",
@@ -681,17 +701,25 @@ def plot_kaomoji_cosine_heatmap(
     *,
     min_count: int = 0,
     center: bool = True,
+    font_primary: str | None = None,
+    label_fontstyle: str = "normal",
+    colors: Mapping[str, str] | None = None,
 ) -> None:
     """Figure A: per-kaomoji mean hidden-state vector, pairwise cosine
     similarity with hierarchical-clustering row order. Row/column
-    labels coloured by dominant emission quadrant (HP/LP/HN/LN/NB)."""
+    labels coloured by dominant emission quadrant (HP/LP/HN/LN/NB).
+
+    Styling hooks for the blog regen: ``font_primary`` leads the font chain
+    (see :func:`_use_cjk_font`), ``label_fontstyle`` sets the colorbar label
+    and legend title, ``colors`` overrides the quadrant palette. Everything
+    else (text, spine, tick colors) comes from the active rcParams."""
     import matplotlib.pyplot as plt
     from matplotlib.patches import Patch
     from scipy.cluster.hierarchy import linkage, leaves_list
     from scipy.spatial.distance import squareform
-    from .hidden_state_analysis import cosine_similarity_matrix, group_mean_vectors
+    from interpretability_experiments.hidden_state_analysis import cosine_similarity_matrix, group_mean_vectors
 
-    _use_cjk_font()
+    _use_cjk_font(font_primary)
 
     if len(df) == 0:
         print("  [Fig A] no rows; skipping")
@@ -715,6 +743,8 @@ def plot_kaomoji_cosine_heatmap(
     label_counts = counts.iloc[order].to_numpy()
 
     order_qs, palette = _palette_for(df)
+    if colors is not None:
+        palette = {**palette, **colors}
     quadrant_for = per_face_dominant_quadrant(df)
     label_quadrants = [quadrant_for.get(str(k), "NB") for k in labels]
     row_colors = [palette.get(q, "#666") for q in label_quadrants]
@@ -731,17 +761,19 @@ def plot_kaomoji_cosine_heatmap(
         tick.set_color(color)
     for tick, color in zip(ax.get_yticklabels(), row_colors):
         tick.set_color(color)
-    cb = fig.colorbar(im, ax=ax, shrink=0.7, label="cosine similarity")
+    cb = fig.colorbar(im, ax=ax, shrink=0.7)
+    cb.set_label("cosine similarity", fontstyle=label_fontstyle)
     cb.ax.tick_params(labelsize=8)
 
     legend_handles = [
         Patch(color=palette[q], label=q) for q in order_qs if q in palette
     ]
-    ax.legend(
+    leg = ax.legend(
         handles=legend_handles,
         loc="lower left", bbox_to_anchor=(1.15, 0.0),
         frameon=False, fontsize=8, title="dominant quadrant",
     )
+    leg.get_title().set_fontstyle(label_fontstyle)
     fig.tight_layout()
     fig.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -766,7 +798,7 @@ def plot_within_kaomoji_consistency(
     with a shuffled-subset null band. Rows below the null are
     signatures tighter than random same-size subsets."""
     import matplotlib.pyplot as plt
-    from .hidden_state_analysis import cosine_to_mean
+    from interpretability_experiments.hidden_state_analysis import cosine_to_mean
 
     _use_cjk_font()
 
@@ -892,7 +924,7 @@ def plot_kaomoji_quadrant_alignment(
     from matplotlib.patches import Rectangle
     from scipy.cluster.hierarchy import linkage, leaves_list
     from scipy.spatial.distance import squareform
-    from .hidden_state_analysis import cosine_similarity_matrix, group_mean_vectors
+    from interpretability_experiments.hidden_state_analysis import cosine_similarity_matrix, group_mean_vectors
 
     _use_cjk_font()
 
@@ -1335,7 +1367,7 @@ def summary_table(
 
     The dominant_quadrant value matches whichever cell shape is in use.
     """
-    from .hidden_state_analysis import cosine_to_mean
+    from interpretability_experiments.hidden_state_analysis import cosine_to_mean
 
     order, _ = _palette_for(df)
     count_cols = [f"{q}_n" for q in order]

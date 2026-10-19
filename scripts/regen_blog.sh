@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # Regenerate every figure embedded in the introspection-via-kaomoji
 # blog post. Outputs land under
-# ../a9lim.github.io/blog-assets/introspection-via-kaomoji/.
+# ../../a9lim.github.io/static/blog-assets/introspection-via-kaomoji/
+# ($BLOG_ASSETS_DIR overrides).
 #
 # Two layers:
 #
 #   1. **Static PNGs** (12 files: 5-model kaomoji-cosine heatmap +
 #      1 layerwise emergence comparison, both in light/dark themes).
 #      Driven by scripts/local/99_regen_blog_figures.py — reads
-#      sidecars + h_first cache; no new model time. Auto-themed via
-#      a9l.im/shared-tokens.js light/dark surface vars.
+#      sidecars + h_first cache; no new model time. Styled to the a9l.im
+#      design system (Newsreader, hairline rules, per-theme palette).
 #
 #   2. **Interactive 3D HTMLs** (3 files: per-face PCA, quadrant
 #      procrustes, wild-faces PCA). Source HTMLs in figures/local/
@@ -125,5 +126,5 @@ echo ""
 echo "################################################################"
 echo "#  blog-figures regen complete"
 echo "#"
-echo "#  outputs: ../a9lim.github.io/blog-assets/introspection-via-kaomoji/"
+echo "#  outputs: ../../a9lim.github.io/static/blog-assets/introspection-via-kaomoji/"
 echo "################################################################"
