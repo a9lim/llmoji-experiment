@@ -11,8 +11,9 @@ relative to this experiment):
 
 Styling follows the a9l.im design system (its AGENTS.md "Design system"):
 near-white / near-black grounds, hairline rules at 12% (light) / 13% (dark)
-of the text color, Newsreader throughout (static instances cut by
-``scripts/make_newsreader_instances.py`` into ``data/fonts/``), the
+of the text color, Newsreader throughout with STIX Two for the Greek and
+operators inside kaomoji (static instances cut by
+``scripts/make_blog_font_instances.py`` into ``data/fonts/``), the
 per-theme oxblood accent where the brand red was used (gemma's line), and
 slate ``#8A8580`` for NB. Data hues are the shared extended palette,
 unchanged. The cosine heatmaps keep matplotlib's ``RdBu_r`` divergent
@@ -22,16 +23,19 @@ Run after re-running ``scripts/harness/10_emit_analysis.py`` and
 ``scripts/local/20_v3_layerwise_emergence.py`` for any model whose data has
 changed. The layerwise path reads the per-model ``v3_layerwise_emergence.tsv``
 that script 20 writes, and renders at the pixel size the post was laid out
-for. The heatmap path reads the hidden-state sidecars and h_first cache
-under ``data/local/hidden`` / ``data/local/cache``, which are gitignored and
-local-only; with them absent it skips the heatmaps, says so, and leaves any
-existing PNGs untouched.
+for. The heatmap path computes from the hidden-state sidecars and h_first
+cache under ``data/local/hidden`` / ``data/local/cache`` when they exist
+(gitignored, local-only). Without them it draws from
+``data/blog/fig_emo_a_recovered.json``, the published figures' matrices and
+labels recovered by ``scripts/local/97_recover_blog_heatmaps.py``; with
+neither it skips the heatmap and leaves the existing PNG untouched.
 
 Usage:
     python scripts/local/99_regen_blog_figures.py
 """
 from __future__ import annotations
 
+import json
 import os
 import sys
 from pathlib import Path
@@ -39,6 +43,7 @@ from pathlib import Path
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 STUDY_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -46,9 +51,11 @@ sys.path.insert(0, str(STUDY_ROOT))
 
 from llmoji_experiment.config import MODEL_REGISTRY  # noqa: E402
 from llmoji_experiment.emotional_analysis import (  # noqa: E402
+    _use_cjk_font,
+    draw_kaomoji_cosine_heatmap,
     load_emotional_features_stack,
     plot_kaomoji_cosine_heatmap,
-    register_newsreader,
+    register_blog_fonts,
 )
 from interpretability_experiments.kaomoji.quadrants import QUADRANT_COLORS  # noqa: E402
 
@@ -122,10 +129,10 @@ def _theme_params(theme: str) -> dict[str, object]:
 
 
 def with_theme(theme: str) -> None:
-    if not register_newsreader():
+    if not register_blog_fonts():
         raise SystemExit(
             "Newsreader instances missing from data/fonts/; run "
-            "scripts/make_newsreader_instances.py (see its docstring)"
+            "scripts/make_blog_font_instances.py (see its docstring)"
         )
     plt.rcdefaults()
     plt.rcParams.update(_theme_params(theme))
@@ -205,25 +212,41 @@ def plot_layerwise(theme: str) -> None:
     print(f"  wrote {out}")
 
 
+RECOVERED_HEATMAPS = STUDY_ROOT / "data" / "blog" / "fig_emo_a_recovered.json"
+
+
 def plot_heatmap(short: str, theme: str) -> bool:
-    """Returns False (and writes nothing) when the hidden-state data this
-    figure is computed from is not on this machine."""
+    """Computes the figure from hidden states when they are on this
+    machine, else draws it from the recovered published data. Returns False
+    (and writes nothing) when neither is available."""
     with_theme(theme)
-    df, X = load_emotional_features_stack(
-        short, which="h_first", split_hn=True,
-    )
-    if len(df) == 0:
-        print(f"  [heatmap] no hidden-state rows for {short} "
-              f"(data/local/hidden, data/local/cache missing) — skipped, "
-              f"existing PNG left in place")
-        return False
     out = BLOG_ASSETS_DIR / f"fig_emo_a_kaomoji_sim_{short}_{theme}.png"
-    plot_kaomoji_cosine_heatmap(
-        df, X, str(out), min_count=3,
-        font_primary="Newsreader", label_fontstyle="italic",
-        colors=BLOG_QUADRANT_COLORS,
+    try:
+        df, X = load_emotional_features_stack(
+            short, which="h_first", split_hn=True,
+        )
+    except FileNotFoundError:
+        df = pd.DataFrame()
+    if len(df):
+        plot_kaomoji_cosine_heatmap(
+            df, X, str(out), min_count=3,
+            font_primary="Newsreader", label_fontstyle="italic",
+            colors=BLOG_QUADRANT_COLORS,
+        )
+        print(f"  wrote {out} (from hidden states)")
+        return True
+    recovered = json.loads(RECOVERED_HEATMAPS.read_text()) if RECOVERED_HEATMAPS.exists() else {}
+    if short not in recovered:
+        print(f"  [heatmap] no hidden-state rows or recovered data for {short} — "
+              f"skipped, existing PNG left in place")
+        return False
+    r = recovered[short]
+    _use_cjk_font("Newsreader")
+    draw_kaomoji_cosine_heatmap(
+        np.asarray(r["sim"]), r["faces"], r["counts"], r["quadrants"], str(out),
+        label_fontstyle="italic", colors=BLOG_QUADRANT_COLORS,
     )
-    print(f"  wrote {out}")
+    print(f"  wrote {out} (from recovered published data)")
     return True
 
 
@@ -242,7 +265,7 @@ def main() -> None:
             if not plot_heatmap(short, theme):
                 skipped.append(f"{short}_{theme}")
     if skipped:
-        print(f"\nSKIPPED {len(skipped)} heatmaps (no hidden-state data): "
+        print(f"\nSKIPPED {len(skipped)} heatmaps (no hidden-state or recovered data): "
               + ", ".join(skipped))
 
 

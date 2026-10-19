@@ -364,7 +364,6 @@ def load_emotional_features_all_layers(
     """
     from .config import DATA_DIR, resolve_model
     from interpretability_experiments.hidden_state_analysis import load_hidden_features_all_layers
-    from llmoji.taxonomy import canonicalize_kaomoji
 
     # ``resolve_model`` honors LLMOJI_OUT_SUFFIX iff ``short`` matches
     # the active ``$LLMOJI_MODEL`` — cross-model loads stay on canonical
@@ -400,7 +399,24 @@ def load_emotional_features_all_layers(
     )
     if len(df) == 0:
         return df, X3, layer_idxs
+    df, X3 = _annotate_emotional_rows(
+        df, X3, short=short, kaomoji_filter=kaomoji_filter, split_hn=split_hn,
+    )
+    return df, X3, layer_idxs
 
+
+def _annotate_emotional_rows(
+    df: pd.DataFrame,
+    X: np.ndarray | None,
+    *,
+    short: str,
+    kaomoji_filter: bool,
+    split_hn: bool,
+) -> tuple[pd.DataFrame, np.ndarray | None]:
+    """The standard row pipeline shared by every v3 loader: quadrant from
+    ``prompt_id``, canonical ``first_word``, kaomoji-start filter, optional
+    HN split. ``X`` (any leading row axis) is filtered alongside, or None."""
+    from llmoji.taxonomy import canonicalize_kaomoji
     df = df.assign(
         quadrant=df["prompt_id"].str[:2].str.upper(),
         first_word_raw=df["first_word"],
@@ -408,24 +424,50 @@ def load_emotional_features_all_layers(
             lambda s: canonicalize_kaomoji(s) if isinstance(s, str) else s,
         ),
     )
-
     if kaomoji_filter:
         mask = np.asarray([
             isinstance(s, str) and is_kaomoji_candidate(s)
             for s in df["first_word"]
         ])
         df = df.loc[mask].reset_index(drop=True)
-        X3 = X3[mask]
-
+        if X is not None:
+            X = X[mask]
     if split_hn:
         n_before = len(df)
-        df, X3_split = apply_hn_split(df, X3)
-        assert X3_split is not None
-        X3 = X3_split
+        df, X = apply_hn_split(df, X)
         if len(df) < n_before:
             print(f"  [{short}] dropped {n_before - len(df)} HN-untagged rows for split-mode")
+    return df, X
 
-    return df, X3, layer_idxs
+
+def load_emotional_metadata(
+    short: str,
+    *,
+    kaomoji_filter: bool = True,
+    split_hn: bool = False,
+) -> pd.DataFrame:
+    """The rows :func:`load_emotional_features_all_layers` returns, without
+    their hidden states: the same JSONL, error and ``row_uuid`` filter, and
+    row pipeline. For analyses that need only faces and quadrants, and that
+    must run where the hidden-state sidecars are absent."""
+    import json
+    from .config import resolve_model
+    M = resolve_model(short)
+    rows = []
+    with M.emotional_data_path.open() as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            r = json.loads(line)
+            if "error" in r or not r.get("row_uuid"):
+                continue
+            rows.append(r)
+    df, _ = _annotate_emotional_rows(
+        pd.DataFrame(rows), None, short=short,
+        kaomoji_filter=kaomoji_filter, split_hn=split_hn,
+    )
+    return df
 
 
 def load_emotional_features_stack_at(
@@ -631,14 +673,16 @@ def load_emotional_features_stack(
 # ---------------------------------------------------------------------------
 
 
-def register_newsreader() -> bool:
-    """Register the static Newsreader instances in ``data/fonts/`` with
-    matplotlib (cut by ``scripts/make_newsreader_instances.py``). Returns
-    True when the regular face is available."""
+def register_blog_fonts() -> bool:
+    """Register the static Newsreader and STIX Two instances in
+    ``data/fonts/`` with matplotlib (cut by
+    ``scripts/make_blog_font_instances.py``). They set figure text the way
+    a9l.im does: Newsreader for Latin, STIX Two for Greek, operators and
+    scripts. Returns True when Newsreader's regular face is available."""
     import matplotlib.font_manager as fm
     fonts_dir = Path(__file__).resolve().parent.parent / "data" / "fonts"
     have = {f.fname for f in fm.fontManager.ttflist}
-    for ttf in sorted(fonts_dir.glob("Newsreader-*.ttf")):
+    for ttf in sorted([*fonts_dir.glob("Newsreader-*.ttf"), *fonts_dir.glob("STIXTwo*.ttf")]):
         if str(ttf) not in have:
             fm.fontManager.addfont(str(ttf))
     return "Newsreader" in {f.name for f in fm.fontManager.ttflist}
@@ -650,7 +694,9 @@ def _use_cjk_font(primary: str | None = None) -> None:
 
     ``primary`` (e.g. ``"Newsreader"``) leads the chain when installed, so
     the figure's own text sets in it and only glyphs it lacks (most of a
-    kaomoji) fall through to the CJK / symbol faces.
+    kaomoji) fall through to the CJK / symbol faces. With Newsreader, STIX
+    Two Text and Math follow it, as on a9l.im, so Greek letters and
+    operators inside a kaomoji stay serif.
 
     Also registers the project-local `data/fonts/NotoEmoji-Regular.ttf`
     (monochrome) so SMP emoji glyphs that appear inside some
@@ -669,14 +715,18 @@ def _use_cjk_font(primary: str | None = None) -> None:
         except Exception:
             pass
     if primary == "Newsreader":
-        register_newsreader()
-    chain = ([primary] if primary else []) + [
+        register_blog_fonts()
+        primary_chain = ["Newsreader", "STIX Two Text", "STIX Two Math"]
+    else:
+        primary_chain = [primary] if primary else []
+    chain = primary_chain + [
         "Noto Sans CJK JP",
         "Arial Unicode MS",
         "DejaVu Sans",
         "DejaVu Serif",
         "Tahoma",
         "Noto Sans Canadian Aboriginal",
+        "Euphemia UCAS",  # macOS's Canadian syllabics, for faces like (⁀ᗜ⁀)
         "Heiti TC",
         "Hiragino Sans",
         "Apple Symbols",
@@ -713,8 +763,6 @@ def plot_kaomoji_cosine_heatmap(
     (see :func:`_use_cjk_font`), ``label_fontstyle`` sets the colorbar label
     and legend title, ``colors`` overrides the quadrant palette. Everything
     else (text, spine, tick colors) comes from the active rcParams."""
-    import matplotlib.pyplot as plt
-    from matplotlib.patches import Patch
     from scipy.cluster.hierarchy import linkage, leaves_list
     from scipy.spatial.distance import squareform
     from interpretability_experiments.hidden_state_analysis import cosine_similarity_matrix, group_mean_vectors
@@ -742,20 +790,46 @@ def plot_kaomoji_cosine_heatmap(
     labels = keys_df["first_word"].iloc[order].to_numpy()
     label_counts = counts.iloc[order].to_numpy()
 
-    order_qs, palette = _palette_for(df)
+    quadrant_for = per_face_dominant_quadrant(df)
+    draw_kaomoji_cosine_heatmap(
+        ordered_sim, labels.tolist(), label_counts.tolist(),
+        [quadrant_for.get(str(k), "NB") for k in labels], out_path,
+        label_fontstyle=label_fontstyle, colors=colors,
+    )
+
+
+def draw_kaomoji_cosine_heatmap(
+    ordered_sim: np.ndarray,
+    labels: list[str],
+    counts: list[int],
+    quadrants: list[str],
+    out_path: str,
+    *,
+    label_fontstyle: str = "normal",
+    colors: Mapping[str, str] | None = None,
+) -> None:
+    """Draw Figure A from an already-ordered similarity matrix and its row
+    labels (face, count, dominant quadrant). The one drawing path for both
+    the computed figure (:func:`plot_kaomoji_cosine_heatmap`) and the blog's
+    recovered data. Fonts come from the caller's :func:`_use_cjk_font`."""
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
+
+    order_qs, palette = _palette_for(pd.DataFrame({"quadrant": quadrants}))
     if colors is not None:
         palette = {**palette, **colors}
-    quadrant_for = per_face_dominant_quadrant(df)
-    label_quadrants = [quadrant_for.get(str(k), "NB") for k in labels]
-    row_colors = [palette.get(q, "#666") for q in label_quadrants]
+    row_colors = [palette.get(q, "#666") for q in quadrants]
+    # Left-to-right override: Matplotlib's bidi layout would otherwise
+    # reorder a face holding an RTL letter, e.g. (˘ڡ˘), around its count.
+    ltr = lambda t: f"\u202d{t}\u202c"
 
     n = len(labels)
     fig, ax = plt.subplots(figsize=(max(7, 0.28 * n + 4), max(7, 0.28 * n + 3)))
     im = ax.imshow(ordered_sim, cmap="RdBu_r", vmin=-1, vmax=1, aspect="equal")
     ax.set_xticks(range(n))
     ax.set_yticks(range(n))
-    y_labels = [f"{k}  n={c}" for k, c in zip(labels, label_counts)]
-    ax.set_xticklabels(labels.tolist(), rotation=45, ha="right", fontsize=7)
+    y_labels = [ltr(f"{k}  n={c}") for k, c in zip(labels, counts)]
+    ax.set_xticklabels([ltr(str(k)) for k in labels], rotation=45, ha="right", fontsize=7)
     ax.set_yticklabels(y_labels, fontsize=7)
     for tick, color in zip(ax.get_xticklabels(), row_colors):
         tick.set_color(color)
