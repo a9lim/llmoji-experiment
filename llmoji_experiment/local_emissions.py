@@ -5,20 +5,12 @@ Pulls a9's own emissions from two surfaces:
   - **claude_code**: ``~/.claude/kaomoji-journal.jsonl`` — the Stop-hook
     journal written by every Claude Code instance on this machine.
     Carries ``cwd``, so the per-project bucket is recoverable.
-  - **claude_ai**: one or more claude.ai conversation exports. Two
-    formats coexist:
-      * legacy: a directory containing ``conversations.json`` (a single
-        list of conversation objects, no per-row model). Read by
-        :func:`llmoji.sources.claude_export.iter_claude_export`.
-      * alt (post-2026-05): a directory containing one
-        ``<title>.json`` per conversation plus an ``export_summary.json``
-        sibling. Carries ``model`` per-conversation. Read by
-        :func:`llmoji.sources.claude_export_alt.iter_claude_export_alt`.
-    The format is auto-detected per directory via
-    :func:`detect_claude_export_format`. Both formats union by
-    conversation UUID with the richer copy winning, within their own
-    reader; we don't cross-format dedup because the same conversation
-    rarely lives in both shapes for one user.
+  - **claude_ai**: one or more claude.ai conversation exports, in
+    either shape (a single ``conversations.json``, or one
+    ``<title>.json`` per conversation beside ``export_summary.json``).
+    :func:`llmoji.sources.claude_export.iter_claude_export` (llmoji
+    >= 3.0) tells them apart per directory and unions conversations by
+    UUID, the richer copy winning.
 
 Used by:
   - ``scripts/66_per_project_quadrants.py`` for per-project + global
@@ -26,9 +18,9 @@ Used by:
   - ``scripts/67_wild_residual.py`` for marker-by-deployment-surface
     on the BoL PCA chart.
 
-Shared module rather than copy-pasted helpers because the format
-dispatch + DEFAULT_CLAUDE_EXPORTS list want to stay in lockstep across
-both consumers.
+Shared module rather than copy-pasted helpers because the
+DEFAULT_CLAUDE_EXPORTS list wants to stay in lockstep across both
+consumers.
 """
 
 from __future__ import annotations
@@ -70,25 +62,6 @@ DEFAULT_CLAUDE_EXPORTS: list[Path] = [
 # so categorical logic in 66/67 can key off them safely.
 SOURCE_CLAUDE_CODE = "claude_code"
 SOURCE_CLAUDE_AI = "claude_ai"
-
-
-# ---------------------------------------------------------------- format
-def detect_claude_export_format(directory: Path) -> str:
-    """Return 'legacy', 'alt', or 'unknown' for the given directory.
-
-    'legacy' iff a single ``conversations.json`` is present.
-    'alt' iff an ``export_summary.json`` sibling is present, or
-    no ``conversations.json`` but multiple ``.json`` files (the
-    likely shape for an alt-format export missing its summary).
-    """
-    if (directory / "conversations.json").is_file():
-        return "legacy"
-    if (directory / "export_summary.json").is_file():
-        return "alt"
-    json_files = [p for p in directory.glob("*.json") if p.is_file()]
-    if len(json_files) >= 2:
-        return "alt"
-    return "unknown"
 
 
 # ---------------------------------------------------------------- readers
@@ -137,57 +110,27 @@ def iter_local_emissions(
     elif not quiet:
         print(f"  skip {journal_path} (missing)")
 
-    # Claude.ai exports — auto-dispatch by format
-    legacy_dirs: list[Path] = []
-    alt_dirs: list[Path] = []
+    # Claude.ai exports, either shape
+    export_dirs: list[Path] = []
     for path in claude_export_paths:
         if not path.exists():
             if not quiet:
                 print(f"  skip {path} (missing)")
             continue
-        directory = path.parent if path.is_file() else path
-        fmt = detect_claude_export_format(directory)
-        if fmt == "legacy":
-            legacy_dirs.append(directory)
-        elif fmt == "alt":
-            alt_dirs.append(directory)
-        elif not quiet:
-            print(f"  skip {directory} (no recognized export format)")
+        export_dirs.append(path.parent if path.is_file() else path)
 
-    if legacy_dirs or alt_dirs:
-        try:
-            from llmoji.sources.claude_export import iter_claude_export
-            from llmoji.sources.claude_export_alt import iter_claude_export_alt
-        except ImportError:
-            if not quiet:
-                print("  skip claude.ai export (llmoji.sources.* not available)")
-            return
-        n_legacy = 0
-        for sr in iter_claude_export(legacy_dirs):
-            face = (sr.first_word or "").strip()
-            if not face:
-                continue
-            canon = canonicalize_kaomoji(face)
+    if export_dirs:
+        from llmoji.sources.claude_export import iter_claude_export
+
+        n_export = 0
+        for sr in iter_claude_export(export_dirs):
+            canon = canonicalize_kaomoji((sr.first_word or "").strip())
             if not canon:
                 continue
             yield (canon, SOURCE_CLAUDE_AI, "claude.ai")
-            n_legacy += 1
-        n_alt = 0
-        for sr in iter_claude_export_alt(alt_dirs):
-            face = (sr.first_word or "").strip()
-            if not face:
-                continue
-            canon = canonicalize_kaomoji(face)
-            if not canon:
-                continue
-            yield (canon, SOURCE_CLAUDE_AI, "claude.ai")
-            n_alt += 1
+            n_export += 1
         if not quiet:
-            print(
-                f"  claude.ai: {n_legacy + n_alt} emissions  "
-                f"(legacy: {n_legacy} from {len(legacy_dirs)} export(s); "
-                f"alt: {n_alt} from {len(alt_dirs)} export(s))"
-            )
+            print(f"  claude.ai: {n_export} emissions from {len(export_dirs)} export(s)")
 
 
 def _project_from_cwd(cwd: str | None) -> str:
@@ -228,7 +171,6 @@ __all__ = [
     "DEFAULT_CLAUDE_JOURNAL",
     "SOURCE_CLAUDE_AI",
     "SOURCE_CLAUDE_CODE",
-    "detect_claude_export_format",
     "iter_local_emissions",
     "load_face_source_counts",
 ]
